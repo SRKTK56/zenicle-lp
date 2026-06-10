@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>お問い合わせ | ゼニくる - 次世代応援プラットフォーム</title>
+  <meta name="description" content="ゼニくるへのお問い合わせはこちらから。サービスに関するご質問・プロジェクト掲載のご相談・取材依頼などお気軽にご連絡ください。">
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    *{font-family:'Noto Sans JP',sans-serif}
+
+    /* ── Gold text ── */
+    .gold-text{background:linear-gradient(135deg,#f59e0b,#fbbf24,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+    /* ── Section label ── */
+    .s-label{font-size:.68rem;font-weight:700;letter-spacing:.2em;color:#f59e0b;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:.6rem}
+    .s-label::before,.s-label::after{content:'';display:block;width:2.2rem;height:1px;background:#f59e0b;opacity:.45}
+
+    .dark-card{background:rgba(15,12,30,.92);border:1px solid rgba(245,158,11,.18);border-radius:1.25rem}
+
+    /* ── Form ── */
+    .form-label{display:block;font-size:.8rem;font-weight:700;margin-bottom:.5rem;color:rgba(255,255,255,.7)}
+    .form-label .req{font-size:.65rem;font-weight:700;color:#f59e0b;margin-left:.4rem}
+    .form-input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:.75rem;padding:.85rem 1rem;font-size:.9rem;color:#f1f5f9;transition:border-color .2s ease,background .2s ease}
+    .form-input:focus{outline:none;border-color:rgba(245,158,11,.55);background:rgba(255,255,255,.07)}
+    .form-input::placeholder{color:rgba(255,255,255,.25)}
+    select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23f59e0b' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center}
+    select.form-input option{background:#15122a;color:#f1f5f9}
+  </style>
+</head>
+<body style="background:#0a0812;color:#f1f5f9">
+
+<!-- ========== NAV ========== -->
+<nav class="fixed top-0 inset-x-0 z-50 backdrop-blur-md" style="background:rgba(8,6,16,.92);border-bottom:1px solid rgba(245,158,11,.08)">
+  <div class="max-w-7xl mx-auto px-5 py-3.5 flex items-center justify-between">
+    <a href="./index.html" class="flex items-center gap-2.5 text-xl font-black gold-text tracking-tight">
+      <img src="favicon.png" alt="ゼニくる" class="w-8 h-8 object-contain">
+      ゼニくる
+    </a>
+    <div class="hidden md:flex items-center gap-7 text-sm font-medium" style="color:rgba(255,255,255,.55)">
+      <a href="./index.html#support"  class="hover:text-amber-400 transition-colors">応援実績</a>
+      <a href="./index.html#projects" class="hover:text-amber-400 transition-colors">プロジェクト</a>
+      <a href="./index.html#howto"    class="hover:text-amber-400 transition-colors">仕組み</a>
+      <a href="./index.html#faq"      class="hover:text-amber-400 transition-colors">FAQ</a>
+    </div>
+    <a href="https://app.zenicle.jp"
+       class="text-sm font-bold px-5 py-2.5 rounded-full transition-all hover:scale-105 transform"
+       style="background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#0a0812;box-shadow:0 4px 18px rgba(245,158,11,.32)">
+      今すぐ始める
+    </a>
+  </div>
+</nav>
+
+<!-- ========== CONTACT ========== -->
+<section class="px-5" style="padding-top:8.5rem;padding-bottom:6rem">
+  <div class="max-w-2xl mx-auto">
+    <div class="text-center mb-10">
+      <div class="s-label mb-5">CONTACT</div>
+      <h1 class="text-3xl md:text-4xl font-black mb-4">お問い合わせ</h1>
+      <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.45)">
+        サービスに関するご質問、プロジェクト掲載のご相談、取材・提携のご依頼など、<br class="hidden md:inline">お気軽にご連絡ください。通常2〜3営業日以内にご返信いたします。
+      </p>
+    </div>
+
+    <!-- 送信完了メッセージ（?sent=1 のとき表示） -->
+    <div id="sent-message" class="hidden mb-8 p-5 rounded-2xl text-center" style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.35)">
+      <p class="font-bold mb-1" style="color:#fbbf24">送信が完了しました</p>
+      <p class="text-sm" style="color:rgba(255,255,255,.6)">お問い合わせありがとうございます。内容を確認のうえ、担当者よりご連絡いたします。</p>
+    </div>
+
+    <form action="https://formsubmit.co/zenicle@dao-inc.org" method="POST" class="dark-card p-6 md:p-10">
+      <!-- FormSubmit 設定 -->
+      <input type="hidden" name="_subject" value="【ゼニくる】お問い合わせフォームより">
+      <input type="hidden" name="_template" value="table">
+      <input type="hidden" name="_captcha" value="false">
+      <input type="hidden" name="_next" value="https://zenicle.jp/contact.html?sent=1">
+      <input type="text" name="_honey" style="display:none">
+
+      <div class="space-y-6">
+        <div>
+          <label for="name" class="form-label">お名前<span class="req">必須</span></label>
+          <input type="text" id="name" name="お名前" required class="form-input" placeholder="山田 太郎" autocomplete="name">
+        </div>
+        <div>
+          <label for="email" class="form-label">メールアドレス<span class="req">必須</span></label>
+          <input type="email" id="email" name="email" required class="form-input" placeholder="example@email.com" autocomplete="email">
+        </div>
+        <div>
+          <label for="category" class="form-label">お問い合わせ種別<span class="req">必須</span></label>
+          <select id="category" name="お問い合わせ種別" required class="form-input">
+            <option value="" disabled selected>選択してください</option>
+            <option>サービスについて</option>
+            <option>応援（エール）について</option>
+            <option>プロジェクト掲載について</option>
+            <option>取材・提携について</option>
+            <option>その他</option>
+          </select>
+        </div>
+        <div>
+          <label for="message" class="form-label">お問い合わせ内容<span class="req">必須</span></label>
+          <textarea id="message" name="お問い合わせ内容" required rows="7" class="form-input" placeholder="お問い合わせ内容をご記入ください"></textarea>
+        </div>
+        <button type="submit"
+                class="w-full font-black text-base px-8 py-4 rounded-full transition-all hover:scale-[1.02] transform"
+                style="background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#0a0812;box-shadow:0 10px 34px rgba(245,158,11,.28)">
+          送信する
+        </button>
+        <p class="text-xs text-center leading-relaxed" style="color:rgba(255,255,255,.3)">
+          送信いただいた内容は <a href="https://app.zenicle.jp/legal/privacy" class="underline hover:text-amber-400 transition-colors">プライバシーポリシー</a> に基づき取り扱います。
+        </p>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- ========== FOOTER ========== -->
+<footer style="background:#060410;border-top:1px solid rgba(245,158,11,.07)" class="py-14">
+  <div class="max-w-6xl mx-auto px-5">
+    <div class="grid md:grid-cols-4 gap-10 mb-10">
+      <div class="md:col-span-2">
+        <div class="mb-3 flex items-center gap-2.5">
+          <img src="favicon.png" alt="ゼニくる" class="w-8 h-8 object-contain">
+          <span class="text-xl font-black gold-text">ゼニくる</span>
+        </div>
+        <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.32)">すべての挑戦を、みんなで応援する。<br>想いを、今すぐカタチに。</p>
+      </div>
+      <div>
+        <p class="text-sm font-semibold mb-4" style="color:rgba(255,255,255,.6)">サービス</p>
+        <ul class="space-y-2 text-sm" style="color:rgba(255,255,255,.32)">
+          <li><a href="./index.html#support"  class="hover:text-amber-400 transition-colors">応援実績</a></li>
+          <li><a href="./index.html#projects" class="hover:text-amber-400 transition-colors">公開プロジェクト</a></li>
+          <li><a href="./index.html#howto"    class="hover:text-amber-400 transition-colors">仕組み</a></li>
+          <li><a href="./index.html#faq"      class="hover:text-amber-400 transition-colors">よくある質問</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="text-sm font-semibold mb-4" style="color:rgba(255,255,255,.6)">法的情報</p>
+        <ul class="space-y-2 text-sm" style="color:rgba(255,255,255,.32)">
+          <li><a href="https://app.zenicle.jp/legal/terms"   class="hover:text-amber-400 transition-colors">利用規約</a></li>
+          <li><a href="https://app.zenicle.jp/legal/privacy" class="hover:text-amber-400 transition-colors">プライバシーポリシー</a></li>
+          <li><a href="https://app.zenicle.jp/legal/tokusho" class="hover:text-amber-400 transition-colors">特定商取引法に基づく表記</a></li>
+          <li><a href="./contact.html"                       class="hover:text-amber-400 transition-colors">お問い合わせ</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="pt-8 text-center text-xs" style="border-top:1px solid rgba(255,255,255,.06);color:rgba(255,255,255,.18)">
+      © 2025 ゼニくる All rights reserved.
+    </div>
+  </div>
+</footer>
+
+<script>
+  // 送信完了後（FormSubmitの _next リダイレクト先）にメッセージを表示
+  if (new URLSearchParams(location.search).get('sent') === '1') {
+    document.getElementById('sent-message').classList.remove('hidden');
+    document.querySelector('form').reset();
+  }
+</script>
+
+</body>
+</html>
