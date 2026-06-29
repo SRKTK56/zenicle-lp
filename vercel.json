@@ -3,5 +3,11 @@
     "api/photos.js": {
       "includeFiles": "photos/**"
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/post-cheers",
+      "schedule": "0 0 * * *"
+    }
+  ]
 }

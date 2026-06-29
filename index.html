@@ -697,29 +697,33 @@
       const firstProject = items[0];
 
       const fmt = n => `¥${n.toLocaleString('ja-JP')}`;
+      // 要素が存在しなくても例外で止まらないようにする（null安全）
+      const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
 
-      if (totalAmount > 0)    document.getElementById('stat-amount').textContent     = fmt(totalAmount);
-      if (supporterPulse > 0) document.getElementById('stat-supporters').textContent = `${supporterPulse}人`;
-      if (projectCount > 0)   document.getElementById('stat-projects').textContent   = `${projectCount}件`;
+      if (totalAmount > 0)    setText('stat-amount', fmt(totalAmount));
+      if (supporterPulse > 0) setText('stat-supporters', `${supporterPulse}人`);
+      if (projectCount > 0)   setText('stat-projects', `${projectCount}件`);
 
       // teamCount: program-pickups に値があればそれを優先、なければ live-donations で補完
       const teamCountFromPickups = items.reduce((s, i) => s + (i.teamCount ?? 0), 0);
       const KNOWN_TEAM_COUNT = 15;
       if (teamCountFromPickups > 0) {
-        document.getElementById('stat-teams').textContent = `${Math.max(teamCountFromPickups, KNOWN_TEAM_COUNT)}チーム`;
+        setText('stat-teams', `${Math.max(teamCountFromPickups, KNOWN_TEAM_COUNT)}チーム`);
       } else {
         const liveRes = await fetch(`${API}/public/live-donations?limit=50`).then(r => r.json());
         const teamIds = new Set((liveRes?.data?.items ?? []).map(d => d.teamId).filter(Boolean));
-        document.getElementById('stat-teams').textContent = `${Math.max(teamIds.size, KNOWN_TEAM_COUNT)}チーム`;
+        setText('stat-teams', `${Math.max(teamIds.size, KNOWN_TEAM_COUNT)}チーム`);
       }
+
+      // REGIONLINK（現在応援できるプロジェクト）カードを最新値で更新
       if (firstProject) {
         const cover = document.getElementById('project-cover');
         if (firstProject.coverImageUrl && cover) cover.src = firstProject.coverImageUrl;
-        document.getElementById('project-name').textContent = firstProject.programName;
-        document.getElementById('project-description').textContent = firstProject.descriptionPreview;
-        document.getElementById('project-season').textContent = firstProject.primarySeasonName || '公開中';
-        document.getElementById('project-amount').textContent = fmt(firstProject.totalAmount ?? 0);
-        document.getElementById('project-supporters').textContent = `${firstProject.supporterPulse ?? 0}人`;
+        if (firstProject.programName)        setText('project-name', firstProject.programName);
+        if (firstProject.descriptionPreview) setText('project-description', firstProject.descriptionPreview);
+        setText('project-season', firstProject.primarySeasonName || '公開中');
+        setText('project-amount', fmt(firstProject.totalAmount ?? 0));
+        setText('project-supporters', `${firstProject.supporterPulse ?? 0}人`);
       }
     } catch (_) {}
   })();
