@@ -239,17 +239,20 @@ async function kvSet(key, value) {
 async function notifyDiscord(text) {
   const url = process.env.DISCORD_WEBHOOK_URL;
   if (!url) return;
+  const threadId = process.env.DISCORD_THREAD_ID; // 既存スレッドへ追記する場合に指定
   const jstFull = new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
   const jstDate = new Date().toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo' });
+  const content = `🤖 [ゼニくる自動投稿] ${jstFull}\n${text}`;
+  // thread_id 指定時はその既存スレッドへ追記。未指定時はフォーラム必須の thread_name で日付別に作成
+  const endpoint = threadId ? `${url}?thread_id=${encodeURIComponent(threadId)}` : url;
+  const payload = threadId
+    ? { content }
+    : { content, thread_name: `ゼニくる自動投稿 ${jstDate}` };
   try {
-    await fetch(url, {
+    await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      // thread_name はフォーラムチャンネル宛Webhookで必須。日付ごとに1スレッドへまとめる
-      body: JSON.stringify({
-        content: `🤖 [ゼニくる自動投稿] ${jstFull}\n${text}`,
-        thread_name: `ゼニくる自動投稿 ${jstDate}`,
-      }),
+      body: JSON.stringify(payload),
     });
   } catch (e) {
     console.error('[post-cheers] discord notify failed:', String(e && e.message || e));
