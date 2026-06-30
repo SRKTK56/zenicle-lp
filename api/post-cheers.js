@@ -239,12 +239,17 @@ async function kvSet(key, value) {
 async function notifyDiscord(text) {
   const url = process.env.DISCORD_WEBHOOK_URL;
   if (!url) return;
-  const jst = new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
+  const jstFull = new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
+  const jstDate = new Date().toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo' });
   try {
     await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: `🤖 [ゼニくる自動投稿] ${jst}\n${text}` }),
+      // thread_name はフォーラムチャンネル宛Webhookで必須。日付ごとに1スレッドへまとめる
+      body: JSON.stringify({
+        content: `🤖 [ゼニくる自動投稿] ${jstFull}\n${text}`,
+        thread_name: `ゼニくる自動投稿 ${jstDate}`,
+      }),
     });
   } catch (e) {
     console.error('[post-cheers] discord notify failed:', String(e && e.message || e));
