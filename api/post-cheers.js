@@ -16,7 +16,7 @@ const crypto = require('crypto');
 
 const API = 'https://api.zenicle.jp';
 const APP_URL = 'https://app.zenicle.jp';
-const FETCH_LIMIT = 100;         // 1回の取得件数（APIの上限。日次の新着を取りこぼさない）
+const FETCH_LIMIT = 50;          // 1回の取得件数。live-donations APIの上限は50（51以上は400）
 const MAX_POSTS_PER_RUN = 100;   // 安全上限のみ。通常は新着を全件投稿する（繰り越しは基本発生しない）
 const CURSOR_KEY = 'zenicle:last_posted_donation_id';
 const WINDOW_HOURS = 24;         // KV未設定時のみ使用。日次Cronの実行間隔に合わせる
@@ -33,9 +33,12 @@ module.exports = async (req, res) => {
     }
   }
 
+  console.log('[post-cheers] run start', new Date().toISOString());
+
   try {
     const xCreds = getXCreds();
     if (!xCreds) {
+      console.error('[post-cheers] result: ABORT (X API credentials not configured)');
       return res.status(500).json({ error: 'X API credentials are not configured' });
     }
 
@@ -43,6 +46,7 @@ module.exports = async (req, res) => {
     const json = await fetchJson(`${API}/public/live-donations?limit=${FETCH_LIMIT}`);
     const items = json?.data?.items || [];
     if (items.length === 0) {
+      console.log('[post-cheers] result: posted=0 (APIに応援データが0件)');
       return res.status(200).json({ posted: 0, reason: 'no items' });
     }
 
@@ -56,6 +60,7 @@ module.exports = async (req, res) => {
       // 初回はバックログ一斉投稿を避け、最新IDだけ記録して終了
       if (!lastId) {
         await kvSet(CURSOR_KEY, items[0].id);
+        console.log('[post-cheers] result: posted=0 (カーソル初期化のみ・初回)');
         return res.status(200).json({ posted: 0, reason: 'initialized cursor', cursor: items[0].id });
       }
       fresh = [];
@@ -74,6 +79,7 @@ module.exports = async (req, res) => {
     }
 
     if (!fresh || fresh.length === 0) {
+      console.log(`[post-cheers] result: posted=0 (${items.length}件取得・新着の応援なし／mode=${kvEnabled ? 'cursor' : 'time-window'})`);
       return res.status(200).json({ posted: 0, reason: 'no new cheers' });
     }
 
@@ -94,14 +100,17 @@ module.exports = async (req, res) => {
       await kvSet(CURSOR_KEY, newestPostedId);
     }
 
+    const okCount = results.filter(r => r.ok).length;
+    const failCount = results.length - okCount;
+    console.log(`[post-cheers] result: posted=${okCount} failed=${failCount} (新着${fresh.length}件／mode=${kvEnabled ? 'cursor' : 'time-window'})`);
     return res.status(200).json({
       mode: kvEnabled ? 'cursor' : 'time-window',
-      posted: results.filter(r => r.ok).length,
+      posted: okCount,
       skipped: fresh.length - toPost.length,
       results,
     });
   } catch (err) {
-    console.error('[post-cheers] error:', err);
+    console.error('[post-cheers] result: ERROR', String(err && err.message || err));
     return res.status(500).json({ error: String(err && err.message || err) });
   }
 };
