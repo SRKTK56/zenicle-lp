@@ -10,6 +10,7 @@
  *   X_API_KEY, X_API_SECRET, X_ACCESS_TOKEN, X_ACCESS_SECRET  … X API v2 投稿用
  *   KV_REST_API_URL, KV_REST_API_TOKEN                        … 状態保存（任意・推奨）
  *   CRON_SECRET                                               … Cron以外からの実行を拒否（任意・推奨）
+ *   DISCORD_WEBHOOK_URL                                       … 毎回の実行結果を通知（任意・監視用）
  */
 
 const crypto = require('crypto');
@@ -39,6 +40,7 @@ module.exports = async (req, res) => {
     const xCreds = getXCreds();
     if (!xCreds) {
       console.error('[post-cheers] result: ABORT (X API credentials not configured)');
+      await notifyDiscord('⚠️ 中断: X APIの認証情報が未設定です');
       return res.status(500).json({ error: 'X API credentials are not configured' });
     }
 
@@ -47,6 +49,7 @@ module.exports = async (req, res) => {
     const items = json?.data?.items || [];
     if (items.length === 0) {
       console.log('[post-cheers] result: posted=0 (APIに応援データが0件)');
+      await notifyDiscord('✅ 実行OK / 投稿0件（APIに応援データが0件）');
       return res.status(200).json({ posted: 0, reason: 'no items' });
     }
 
@@ -61,6 +64,7 @@ module.exports = async (req, res) => {
       if (!lastId) {
         await kvSet(CURSOR_KEY, items[0].id);
         console.log('[post-cheers] result: posted=0 (カーソル初期化のみ・初回)');
+        await notifyDiscord('✅ 実行OK / 投稿0件（カーソル初期化のみ・初回）');
         return res.status(200).json({ posted: 0, reason: 'initialized cursor', cursor: items[0].id });
       }
       fresh = [];
@@ -80,6 +84,7 @@ module.exports = async (req, res) => {
 
     if (!fresh || fresh.length === 0) {
       console.log(`[post-cheers] result: posted=0 (${items.length}件取得・新着の応援なし／mode=${kvEnabled ? 'cursor' : 'time-window'})`);
+      await notifyDiscord(`✅ 実行OK / 投稿0件（直近に新着の応援なし・${items.length}件確認）`);
       return res.status(200).json({ posted: 0, reason: 'no new cheers' });
     }
 
@@ -103,6 +108,11 @@ module.exports = async (req, res) => {
     const okCount = results.filter(r => r.ok).length;
     const failCount = results.length - okCount;
     console.log(`[post-cheers] result: posted=${okCount} failed=${failCount} (新着${fresh.length}件／mode=${kvEnabled ? 'cursor' : 'time-window'})`);
+    await notifyDiscord(
+      failCount > 0
+        ? `⚠️ 投稿${okCount}件成功 / ${failCount}件失敗（新着${fresh.length}件）`
+        : `🎉 ${okCount}件のエールを投稿しました（新着${fresh.length}件）`
+    );
     return res.status(200).json({
       mode: kvEnabled ? 'cursor' : 'time-window',
       posted: okCount,
@@ -111,6 +121,7 @@ module.exports = async (req, res) => {
     });
   } catch (err) {
     console.error('[post-cheers] result: ERROR', String(err && err.message || err));
+    await notifyDiscord(`❌ エラーで失敗: ${String(err && err.message || err)}`);
     return res.status(500).json({ error: String(err && err.message || err) });
   }
 };
@@ -222,4 +233,20 @@ async function kvSet(key, value) {
     { headers: { Authorization: `Bearer ${KV_TOKEN}` } }
   );
   return r.ok;
+}
+
+// ---- 監視通知: Discord Webhook。未設定なら no-op。失敗しても本処理は止めない ----
+async function notifyDiscord(text) {
+  const url = process.env.DISCORD_WEBHOOK_URL;
+  if (!url) return;
+  const jst = new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
+  try {
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: `🤖 [ゼニくる自動投稿] ${jst}\n${text}` }),
+    });
+  } catch (e) {
+    console.error('[post-cheers] discord notify failed:', String(e && e.message || e));
+  }
 }
