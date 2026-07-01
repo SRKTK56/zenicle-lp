@@ -152,15 +152,15 @@
     </div>
     <div class="grid grid-cols-3 gap-4 text-center">
       <div class="reveal">
-        <div id="stat-amount" class="text-2xl md:text-3xl font-black gold-text">¥155,500</div>
+        <div id="stat-amount" class="text-2xl md:text-3xl font-black gold-text">¥850,400</div>
         <div class="text-xs mt-1 tracking-wider" style="color:rgba(255,255,255,.4)">累計エール総額</div>
       </div>
       <div class="reveal" style="transition-delay:.05s">
-        <div id="stat-supporters" class="text-2xl md:text-3xl font-black gold-text">30人</div>
+        <div id="stat-supporters" class="text-2xl md:text-3xl font-black gold-text">32人</div>
         <div class="text-xs mt-1 tracking-wider" style="color:rgba(255,255,255,.4)">支援者数</div>
       </div>
       <div class="reveal" style="transition-delay:.1s">
-        <div id="stat-teams" class="text-2xl md:text-3xl font-black gold-text">15チーム</div>
+        <div id="stat-teams" class="text-2xl md:text-3xl font-black gold-text">16チーム</div>
         <div class="text-xs mt-1 tracking-wider" style="color:rgba(255,255,255,.4)">参加チーム数</div>
       </div>
     </div>
@@ -683,39 +683,26 @@
   // Stats fetch
   (async function loadStats() {
     const API = 'https://api.zenicle.jp';
+    const fmt = n => `¥${n.toLocaleString('ja-JP')}`;
+    // 要素が存在しなくても例外で止まらないようにする（null安全）
+    const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+
+    // 「これまでの応援」統計バー: 集計API（/public/stats）から取得
+    try {
+      const stats = await fetch(`${API}/public/stats`).then(r => r.json());
+      if (stats?.totalDonationAmount > 0) setText('stat-amount', fmt(stats.totalDonationAmount));
+      if (stats?.supporterCount > 0)      setText('stat-supporters', `${stats.supporterCount}人`);
+      if (stats?.teamCount > 0)           setText('stat-teams', `${stats.teamCount}チーム`);
+    } catch (_) {}
+
+    // 「現在応援できるプロジェクト」カード: 個別データが必要なため program-pickups から取得
     try {
       const seedRes = await fetch(`${API}/seed-info`).then(r => r.json());
       const tenantId = seedRes?.tenantId;
       const pickupRes = tenantId
         ? await fetch(`${API}/public/program-pickups?tenantId=${tenantId}`).then(r => r.json())
         : null;
-
-      const items = pickupRes?.data?.items ?? [];
-      const totalAmount = items.reduce((s, i) => s + (i.totalAmount ?? 0), 0);
-      const supporterPulse = items.reduce((s, i) => s + (i.supporterPulse ?? 0), 0);
-      const projectCount = items.length;
-      const firstProject = items[0];
-
-      const fmt = n => `¥${n.toLocaleString('ja-JP')}`;
-      // 要素が存在しなくても例外で止まらないようにする（null安全）
-      const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
-
-      if (totalAmount > 0)    setText('stat-amount', fmt(totalAmount));
-      if (supporterPulse > 0) setText('stat-supporters', `${supporterPulse}人`);
-      if (projectCount > 0)   setText('stat-projects', `${projectCount}件`);
-
-      // teamCount: program-pickups に値があればそれを優先、なければ live-donations で補完
-      const teamCountFromPickups = items.reduce((s, i) => s + (i.teamCount ?? 0), 0);
-      const KNOWN_TEAM_COUNT = 15;
-      if (teamCountFromPickups > 0) {
-        setText('stat-teams', `${Math.max(teamCountFromPickups, KNOWN_TEAM_COUNT)}チーム`);
-      } else {
-        const liveRes = await fetch(`${API}/public/live-donations?limit=50`).then(r => r.json());
-        const teamIds = new Set((liveRes?.data?.items ?? []).map(d => d.teamId).filter(Boolean));
-        setText('stat-teams', `${Math.max(teamIds.size, KNOWN_TEAM_COUNT)}チーム`);
-      }
-
-      // REGIONLINK（現在応援できるプロジェクト）カードを最新値で更新
+      const firstProject = (pickupRes?.data?.items ?? [])[0];
       if (firstProject) {
         const cover = document.getElementById('project-cover');
         if (firstProject.coverImageUrl && cover) cover.src = firstProject.coverImageUrl;
