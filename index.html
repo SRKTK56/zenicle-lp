@@ -121,7 +121,7 @@
     <div class="reveal">
       <p class="text-xs font-bold tracking-[.28em] mb-4" style="color:#f59e0b">次世代応援プラットフォーム『ゼニくる』</p>
       <h1 class="text-4xl md:text-5xl lg:text-6xl font-black leading-tight mb-5">
-        エールが、<br><span class="gold-text">挑戦を前に進める。</span>
+        エールが、<br><span class="gold-text">挑戦者に直接届く。</span>
       </h1>
       <p class="text-base leading-relaxed max-w-xl muted-line mb-7">
         ゼニくるは、応援資金（エール）を事業原資へ直接還流させる「ダイレクト・エコノミー」を実装した次世代応援プラットフォームです。500円からエールを送り、挑戦者の一歩を支えられます。
@@ -195,6 +195,7 @@
           アプリで詳しく見る
         </a>
       </div>
+      <div id="project-cards" class="space-y-6">
       <article class="dark-card overflow-hidden reveal" style="transition-delay:.08s">
         <img id="project-cover" src="https://assets.zenicle.jp/v1/migrated/programs/cmmwd0pbp0001qn8f2byhzo70/cover/0d1da234-ba5e-43ad-a021-76f571e2e443.jpg" alt="REGIONLINK #003" class="project-image">
         <div class="p-6 md:p-8">
@@ -208,22 +209,23 @@
           <p id="project-description" class="text-sm leading-relaxed mb-6" style="color:rgba(255,255,255,.56)">
             全国の中高生や大学生が、地元の資源を使って本気で商売を立ち上げる挑戦の場です。
           </p>
-          <div class="grid grid-cols-3 gap-3">
-            <div class="trust-panel p-4">
+          <div class="grid grid-cols-1 gap-3">
+            <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
+              <div class="text-sm" style="color:rgba(255,255,255,.5)">エール総額</div>
               <div id="project-amount" class="text-lg md:text-xl font-black gold-text">¥155,500</div>
-              <div class="text-[11px] mt-1" style="color:rgba(255,255,255,.4)">エール総額</div>
             </div>
-            <div class="trust-panel p-4">
+            <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
+              <div class="text-sm" style="color:rgba(255,255,255,.5)">応援者数</div>
               <div id="project-supporters" class="text-lg md:text-xl font-black gold-text">30人</div>
-              <div class="text-[11px] mt-1" style="color:rgba(255,255,255,.4)">応援者数</div>
             </div>
-            <div class="trust-panel p-4">
+            <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
+              <div class="text-sm" style="color:rgba(255,255,255,.5)">応援金額</div>
               <div class="text-lg md:text-xl font-black gold-text">500円〜</div>
-              <div class="text-[11px] mt-1" style="color:rgba(255,255,255,.4)">応援金額</div>
             </div>
           </div>
         </div>
       </article>
+      </div>
     </div>
   </div>
 </section>
@@ -702,22 +704,48 @@
       if (stats?.teamCount > 0)           setText('stat-teams', `${stats.teamCount}チーム`);
     } catch (_) {}
 
-    // 「現在応援できるプロジェクト」カード: 個別データが必要なため program-pickups から取得
+    // 「現在応援できるプロジェクト」カード: 全テナント横断の公開プログラムを取得し動的にカード生成
+    // （tenantId を省略すると REGIONLINK と ゼニくるCUP 等、公開中の全プログラムが返る）
     try {
-      const seedRes = await fetch(`${API}/seed-info`).then(r => r.json());
-      const tenantId = seedRes?.tenantId;
-      const pickupRes = tenantId
-        ? await fetch(`${API}/public/program-pickups?tenantId=${tenantId}`).then(r => r.json())
-        : null;
-      const firstProject = (pickupRes?.data?.items ?? [])[0];
-      if (firstProject) {
-        const cover = document.getElementById('project-cover');
-        if (firstProject.coverImageUrl && cover) cover.src = firstProject.coverImageUrl;
-        if (firstProject.programName)        setText('project-name', firstProject.programName);
-        if (firstProject.descriptionPreview) setText('project-description', firstProject.descriptionPreview);
-        setText('project-season', firstProject.primarySeasonName || '公開中');
-        setText('project-amount', fmt(firstProject.totalAmount ?? 0));
-        setText('project-supporters', `${firstProject.supporterPulse ?? 0}人`);
+      const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+      const buildProjectCard = (p) => {
+        const cover = p.coverImageUrl ? `<img src="${esc(p.coverImageUrl)}" alt="${esc(p.programName)}" class="project-image">` : '';
+        const desc = p.descriptionPreview ? `<p class="text-sm leading-relaxed mb-6" style="color:rgba(255,255,255,.56)">${esc(p.descriptionPreview)}</p>` : '';
+        const seasonBadge = p.primarySeasonName
+          ? `<span class="text-xs font-bold px-3 py-1 rounded-full" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.7)">${esc(p.primarySeasonName)}</span>`
+          : '';
+        return `
+        <article class="dark-card overflow-hidden">
+          ${cover}
+          <div class="p-6 md:p-8">
+            <div class="flex flex-wrap gap-2 mb-4">
+              <span class="text-xs font-bold px-3 py-1 rounded-full" style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.24);color:#f59e0b">公開中</span>
+              ${seasonBadge}
+            </div>
+            <h3 class="text-2xl md:text-3xl font-black leading-tight mb-4">${esc(p.programName)}</h3>
+            ${desc}
+            <div class="grid grid-cols-1 gap-3">
+              <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
+                <div class="text-sm" style="color:rgba(255,255,255,.5)">エール総額</div>
+                <div class="text-lg md:text-xl font-black gold-text">${fmt(p.totalAmount ?? 0)}</div>
+              </div>
+              <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
+                <div class="text-sm" style="color:rgba(255,255,255,.5)">応援者数</div>
+                <div class="text-lg md:text-xl font-black gold-text">${p.supporterPulse ?? 0}人</div>
+              </div>
+              <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
+                <div class="text-sm" style="color:rgba(255,255,255,.5)">応援金額</div>
+                <div class="text-lg md:text-xl font-black gold-text">500円〜</div>
+              </div>
+            </div>
+          </div>
+        </article>`;
+      };
+      const pickupRes = await fetch(`${API}/public/program-pickups`).then(r => r.json());
+      const items = (pickupRes?.data?.items ?? []);
+      const container = document.getElementById('project-cards');
+      if (container && items.length) {
+        container.innerHTML = items.slice(0, 4).map(buildProjectCard).join('');
       }
     } catch (_) {}
   })();
