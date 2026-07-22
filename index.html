@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,46 +8,116 @@
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="favicon.png">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    /* カラーテーマ選択: 既定は light。?theme=classic で旧ダークテーマ（アーカイブ）を表示し、localStorageに保持。
+       ?theme=light で既定へ戻せる。切替UIは非表示（将来トグル追加も容易）。 */
+    (function () {
+      try {
+        var q = new URLSearchParams(location.search).get('theme');
+        if (q === 'classic' || q === 'light') localStorage.setItem('zenicle-theme', q);
+        var t = localStorage.getItem('zenicle-theme');
+        if (t === 'classic' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
     *{font-family:'Noto Sans JP',sans-serif}
+
+    /* ===================== THEME TOKENS ===================== */
+    /* default = light（ポスター準拠のライト＆カラフル） */
+    :root, [data-theme="light"]{
+      --bg:#F7F9FC; --bg-band:#FFFFFF; --bg-band-2:#EEF3FB; --bg-hero:#EAF2FF;
+      --surface:#FFFFFF; --surface-soft:#F4F7FC;
+      --text:#14213D; --heading:#14213D; --text-muted:#5B6473; --text-subtle:#8A93A3;
+      --brand:#FF8A00; --brand-ink:#FFFFFF; --pink:#FF4D8D; --blue:#2563EB;
+      --yellow:#FFD23F; --green:#7CC576; --purple:#A78BFA; --lightblue:#E6F2FF;
+      --border:rgba(20,33,61,.10); --border-strong:rgba(20,33,61,.14);
+      --brand-grad:linear-gradient(135deg,#FFA726,#FF8A00);
+      --pink-grad:linear-gradient(135deg,#FF7BA8,#FF4D8D);
+      --brand-text-grad:linear-gradient(135deg,#FF8A00,#FF4D8D);
+      --card-shadow:0 10px 30px rgba(20,33,61,.08);
+      --card-shadow-hover:0 18px 44px rgba(20,33,61,.14);
+      --nav-bg:rgba(255,255,255,.72); --nav-bg-scrolled:rgba(255,255,255,.96);
+      --nav-border:rgba(20,33,61,.08); --nav-shadow:0 2px 20px rgba(20,33,61,.10);
+      --ticker-bg:rgba(255,255,255,.92); --ticker-border:rgba(255,138,0,.22); --ticker-text:rgba(20,33,61,.6);
+      --footer-bg:#14213D; --footer-text:rgba(255,255,255,.62); --footer-subtle:rgba(255,255,255,.4); --footer-border:rgba(255,255,255,.12);
+      --divider:linear-gradient(to right,transparent,rgba(255,138,0,.45),transparent);
+      color-scheme:light;
+    }
+    /* archive = classic（旧ダークテーマ。?theme=classic で表示可） */
+    [data-theme="classic"]{
+      --bg:#0a0812; --bg-band:#0d0b1c; --bg-band-2:#0b1018; --bg-hero:#000;
+      --surface:rgba(15,12,30,.92); --surface-soft:rgba(255,255,255,.045);
+      --text:#f1f5f9; --heading:#ffffff; --text-muted:rgba(255,255,255,.56); --text-subtle:rgba(255,255,255,.4);
+      --brand:#f59e0b; --brand-ink:#0a0812; --pink:#FF4D8D; --blue:#2563EB;
+      --yellow:#FFD23F; --green:#7CC576; --purple:#A78BFA; --lightblue:#E6F2FF;
+      --border:rgba(255,255,255,.09); --border-strong:rgba(245,158,11,.18);
+      --brand-grad:var(--brand-grad);
+      --pink-grad:linear-gradient(135deg,#FF7BA8,#FF4D8D);
+      --brand-text-grad:linear-gradient(135deg,#f59e0b,#fbbf24,#f97316);
+      --card-shadow:0 20px 48px rgba(0,0,0,.5);
+      --card-shadow-hover:0 0 30px rgba(245,158,11,.12),0 20px 48px rgba(0,0,0,.5);
+      --nav-bg:rgba(8,6,16,.5); --nav-bg-scrolled:rgba(8,6,16,.96);
+      --nav-border:rgba(245,158,11,.08); --nav-shadow:0 2px 20px rgba(0,0,0,.7);
+      --ticker-bg:rgba(6,4,14,.92); --ticker-border:rgba(245,158,11,.14); --ticker-text:rgba(255,255,255,.62);
+      --footer-bg:#060410; --footer-text:rgba(255,255,255,.32); --footer-subtle:rgba(255,255,255,.18); --footer-border:rgba(255,255,255,.06);
+      --divider:linear-gradient(to right,transparent,rgba(245,158,11,.4),transparent);
+      color-scheme:dark;
+    }
+
+    body{background:var(--bg);color:var(--text);transition:background .3s ease,color .3s ease}
+    h1,h2,h3{color:var(--heading)}
 
     /* ── Animations ── */
     @keyframes fadeInUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
     .reveal{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
     .reveal.visible{opacity:1;transform:translateY(0)}
 
-    /* ── Gold text ── */
-    .gold-text{background:linear-gradient(135deg,#f59e0b,#fbbf24,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-    .gold-text-sm{background:linear-gradient(135deg,#f59e0b,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    /* ── Brand gradient text（クラス名は据え置き） ── */
+    .gold-text{background:var(--brand-text-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .gold-text-sm{background:var(--brand-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .pink-text{background:var(--pink-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .brand-underline{background-image:linear-gradient(var(--pink),var(--pink));background-repeat:no-repeat;background-position:0 92%;background-size:100% .18em;padding-bottom:.06em}
 
-    /* ── Cards ── */
-    .dark-card{background:rgba(15,12,30,.92);border:1px solid rgba(245,158,11,.18);border-radius:1.25rem;transition:transform .3s ease,border-color .3s ease,box-shadow .3s ease}
-    .dark-card:hover{transform:translateY(-4px);border-color:rgba(245,158,11,.42);box-shadow:0 0 30px rgba(245,158,11,.12),0 20px 48px rgba(0,0,0,.5)}
+    /* ── Cards（クラス名は据え置き） ── */
+    .dark-card{background:var(--surface);border:1px solid var(--border);border-radius:1.25rem;box-shadow:var(--card-shadow);transition:transform .3s ease,border-color .3s ease,box-shadow .3s ease}
+    .dark-card:hover{transform:translateY(-4px);border-color:var(--brand);box-shadow:var(--card-shadow-hover)}
 
     /* ── Section label ── */
-    .s-label{font-size:.68rem;font-weight:700;letter-spacing:.2em;color:#f59e0b;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:.6rem}
-    .s-label::before,.s-label::after{content:'';display:block;width:2.2rem;height:1px;background:#f59e0b;opacity:.45}
+    .s-label{font-size:.68rem;font-weight:700;letter-spacing:.2em;color:var(--brand);text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:.6rem}
+    .s-label::before,.s-label::after{content:'';display:block;width:2.2rem;height:1px;background:var(--brand);opacity:.5}
+
+    /* ── Buttons ── */
+    .btn-primary{background:var(--brand-grad);color:var(--brand-ink);box-shadow:0 10px 30px rgba(255,138,0,.28)}
+    .btn-pink{background:var(--pink-grad);color:#fff;box-shadow:0 10px 30px rgba(255,77,141,.28)}
+    .btn-ghost{border:1px solid var(--border-strong);color:var(--text);background:var(--surface)}
 
     /* ── Nav ── */
-    #nav{transition:background .3s ease,box-shadow .3s ease}
-    #nav.scrolled{background:rgba(8,6,16,.96)!important;box-shadow:0 2px 20px rgba(0,0,0,.7),0 1px 0 rgba(245,158,11,.12)}
+    #nav{background:var(--nav-bg);border-bottom:1px solid var(--nav-border);transition:background .3s ease,box-shadow .3s ease}
+    #nav.scrolled{background:var(--nav-bg-scrolled)!important;box-shadow:var(--nav-shadow)}
+    .navlink{color:var(--text-muted);transition:color .2s ease}
+    .navlink:hover{color:var(--brand)}
 
     /* ── FAQ ── */
-    .faq-icon{transition:transform .2s ease}
+    .faq-icon{transition:transform .2s ease;color:var(--brand)}
     .faq-icon.open{transform:rotate(45deg)}
 
     /* ── Divider ── */
-    .gold-divider{height:1px;background:linear-gradient(to right,transparent,rgba(245,158,11,.4),transparent)}
+    .gold-divider{height:1px;background:var(--divider)}
 
-    .trust-panel{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);border-radius:1rem}
-    .muted-line{color:rgba(255,255,255,.56)}
-    .soft-band{background:#0b1018}
+    .trust-panel{background:var(--surface-soft);border:1px solid var(--border);border-radius:1rem}
+    .muted-line{color:var(--text-muted)}
+    .soft-band{background:var(--bg-band-2)}
+    .band{background:var(--bg-band)}
     .project-image{aspect-ratio:21/9;object-fit:cover;width:100%;height:auto;display:block}
-    .editorial-list{border-top:1px solid rgba(255,255,255,.12);border-bottom:1px solid rgba(255,255,255,.12)}
-    .editorial-list>*+*{border-top:1px solid rgba(255,255,255,.1)}
+    .editorial-list{border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+    .editorial-list>*+*{border-top:1px solid var(--border)}
 
-    /* ── Hero mobile ── */
+    /* ── Hero ── */
+    #heroSection{background:var(--bg-hero)}
+    .hero-photo{border-radius:1.5rem;overflow:hidden;box-shadow:var(--card-shadow-hover);border:4px solid var(--surface)}
+    .cup-ribbon{background:var(--pink-grad);color:#fff;box-shadow:0 8px 24px rgba(255,77,141,.32)}
     /* スマホでは横顔画像を上部バナーとして通常フローに出し、その下にテキストを配置（重なり回避） */
     @media(max-width:767px){
       #heroSection{min-height:auto!important;padding:6.5rem 1.25rem 3.5rem!important}
@@ -60,12 +130,12 @@
     }
 
     /* ── Team Ticker ── */
-    #team-ticker{position:fixed;top:3.75rem;inset-x:0;z-index:48;height:2rem;display:flex;align-items:center;background:rgba(6,4,14,.92);border-bottom:1px solid rgba(245,158,11,.14);backdrop-filter:blur(8px)}
-    .ticker-label{flex-shrink:0;font-size:.6rem;font-weight:700;letter-spacing:.18em;color:#f59e0b;padding:0 .85rem 0 1rem;border-right:1px solid rgba(245,158,11,.22);white-space:nowrap;height:100%;display:flex;align-items:center}
+    #team-ticker{position:fixed;top:3.75rem;inset-x:0;z-index:48;height:2rem;display:flex;align-items:center;background:var(--ticker-bg);border-bottom:1px solid var(--ticker-border);backdrop-filter:blur(8px)}
+    .ticker-label{flex-shrink:0;font-size:.6rem;font-weight:700;letter-spacing:.18em;color:var(--brand);padding:0 .85rem 0 1rem;border-right:1px solid var(--ticker-border);white-space:nowrap;height:100%;display:flex;align-items:center}
     .ticker-viewport{overflow:hidden;flex:1;height:100%;display:flex;align-items:center}
     .ticker-track{display:flex;align-items:center;gap:0;white-space:nowrap;will-change:transform}
-    .ticker-track span{font-size:.65rem;font-weight:600;color:rgba(255,255,255,.62);letter-spacing:.04em}
-    .ticker-track .sep{color:rgba(245,158,11,.4);margin:0 .85rem;font-size:.5rem}
+    .ticker-track span{font-size:.65rem;font-weight:600;color:var(--ticker-text);letter-spacing:.04em}
+    .ticker-track .sep{color:var(--brand);opacity:.55;margin:0 .85rem;font-size:.5rem}
     @keyframes ticker-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
     .ticker-anim{animation:ticker-scroll 55s linear infinite}
     .ticker-anim:hover{animation-play-state:paused}
@@ -73,16 +143,26 @@
     /* ── Activity Marquee ── */
     .marquee-viewport{overflow:hidden;width:100%}
     .marquee-track{display:flex;gap:.75rem;width:max-content}
-    .marquee-track img{height:9rem;width:auto;border-radius:.75rem;object-fit:cover;flex-shrink:0;border:1px solid rgba(255,255,255,.1)}
+    .marquee-track img{height:9rem;width:auto;border-radius:.75rem;object-fit:cover;flex-shrink:0;border:1px solid var(--border)}
     @media(min-width:768px){.marquee-track img{height:11rem}}
     @keyframes marquee-left{from{transform:translateX(0)}to{transform:translateX(-50%)}}
     @keyframes marquee-right{from{transform:translateX(-50%)}to{transform:translateX(0)}}
     .marquee-left{animation:marquee-left 32s linear infinite}
     .marquee-right{animation:marquee-right 38s linear infinite}
     .marquee-viewport:hover .marquee-track{animation-play-state:paused}
+
+    /* ── Footer（両テーマともダーク地） ── */
+    footer{background:var(--footer-bg)}
+    .foot-tag{color:var(--footer-text)}
+    .foot-head{color:var(--footer-text)}
+    .foot-link{color:var(--footer-subtle);transition:color .2s ease}
+    .foot-link:hover{color:var(--brand)}
+    .foot-copy{color:var(--footer-subtle);border-top:1px solid var(--footer-border)}
+    .foot-social{border:1px solid var(--footer-border);color:var(--footer-text);transition:color .2s ease,border-color .2s ease}
+    .foot-social:hover{color:var(--brand);border-color:var(--brand)}
   </style>
 </head>
-<body style="background:#0a0812;color:#f1f5f9">
+<body>
 
 <!-- ========== TEAM TICKER ========== -->
 <div id="team-ticker">
@@ -93,21 +173,20 @@
 </div>
 
 <!-- ========== NAV ========== -->
-<nav id="nav" class="fixed top-0 inset-x-0 z-50 backdrop-blur-md" style="background:rgba(8,6,16,.5);border-bottom:1px solid rgba(245,158,11,.08)">
+<nav id="nav" class="fixed top-0 inset-x-0 z-50 backdrop-blur-md">
   <div class="max-w-7xl mx-auto px-5 py-3.5 flex items-center justify-between">
     <a href="#" class="flex items-center gap-2.5 text-xl font-black gold-text tracking-tight">
       <img src="favicon.png" alt="ゼニくる" class="w-8 h-8 object-contain">
       ゼニくる
     </a>
-    <div class="hidden md:flex items-center gap-7 text-sm font-medium" style="color:rgba(255,255,255,.55)">
-      <a href="#support"  class="hover:text-amber-400 transition-colors">応援実績</a>
-      <a href="#projects" class="hover:text-amber-400 transition-colors">プロジェクト</a>
-      <a href="#howto"    class="hover:text-amber-400 transition-colors">仕組み</a>
-      <a href="#faq"      class="hover:text-amber-400 transition-colors">FAQ</a>
+    <div class="hidden md:flex items-center gap-7 text-sm font-medium">
+      <a href="#support"  class="navlink">応援実績</a>
+      <a href="#projects" class="navlink">プロジェクト</a>
+      <a href="#howto"    class="navlink">仕組み</a>
+      <a href="#faq"      class="navlink">FAQ</a>
     </div>
     <a href="https://app.zenicle.jp"
-       class="text-sm font-bold px-5 py-2.5 rounded-full transition-all hover:scale-105 transform"
-       style="background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#0a0812;box-shadow:0 4px 18px rgba(245,158,11,.32)">
+       class="btn-primary text-sm font-bold px-5 py-2.5 rounded-full transition-all hover:scale-105 transform">
       今すぐ始める
     </a>
   </div>
@@ -115,35 +194,46 @@
 
 
 <!-- ========== HERO ========== -->
-<section id="heroSection" class="relative overflow-hidden" style="padding:10.5rem 1.25rem 5rem;background:#000">
-  <div id="heroBg" class="absolute inset-0 pointer-events-none" style="background:url('./photos/hero-bg.png') right center/auto 100% no-repeat"></div>
-  <div class="max-w-7xl mx-auto relative">
-    <div class="reveal">
-      <p class="text-xs font-bold tracking-[.28em] mb-4" style="color:#f59e0b">次世代応援プラットフォーム『ゼニくる』</p>
+<section id="heroSection" class="relative overflow-hidden" style="padding:8.5rem 1.25rem 4.5rem">
+  <!-- decorative color blobs -->
+  <div class="absolute -top-16 -right-10 w-72 h-72 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(255,138,0,.16),transparent 70%)"></div>
+  <div class="absolute top-40 -left-16 w-72 h-72 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(37,99,235,.12),transparent 70%)"></div>
+  <div class="max-w-7xl mx-auto relative grid md:grid-cols-2 gap-10 md:gap-14 items-center">
+    <!-- TEXT -->
+    <div class="reveal order-2 md:order-1">
+      <p class="text-xs font-bold tracking-[.28em] mb-4" style="color:var(--brand)">次世代応援プラットフォーム『ゼニくる』</p>
       <h1 class="text-4xl md:text-5xl lg:text-6xl font-black leading-tight mb-5">
-        エールが、<br><span class="gold-text">挑戦者に直接届く。</span>
+        <span class="gold-text">エール（応援金）</span>が、<br>挑戦者に<span class="brand-underline">直接届く</span>。
       </h1>
       <p class="text-base leading-relaxed max-w-xl muted-line mb-7">
-        ゼニくるは、応援資金（エール）を事業原資へ直接還流させる「ダイレクト・エコノミー」を実装した次世代応援プラットフォームです。500円からエールを送り、挑戦者の一歩を支えられます。
+        応援したい人と挑戦したい人を、ダイレクトにつなぐ新しい応援のかたち。想いがそのまま届き、未来を動かす力になる。500円からエールを送り、挑戦者の一歩を支えられます。
       </p>
       <div class="flex flex-col sm:flex-row gap-3">
         <a href="https://app.zenicle.jp"
-           class="inline-flex items-center justify-center font-black px-8 py-4 rounded-full transition-all hover:scale-105 transform"
-           style="background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#0a0812;box-shadow:0 10px 34px rgba(245,158,11,.28)">
+           class="btn-primary inline-flex items-center justify-center font-black px-8 py-4 rounded-full transition-all hover:scale-105 transform">
           応援できるプロジェクトを見る
         </a>
         <a href="#projects"
-           class="inline-flex items-center justify-center font-bold px-8 py-4 rounded-full transition-colors"
-           style="border:1px solid rgba(255,255,255,.16);color:rgba(255,255,255,.86);background:rgba(255,255,255,.04)">
+           class="btn-ghost inline-flex items-center justify-center font-bold px-8 py-4 rounded-full transition-colors">
           現在の取り組み
         </a>
       </div>
+    </div>
+    <!-- PHOTO -->
+    <div class="reveal order-1 md:order-2 relative">
+      <div class="hero-photo">
+        <img src="./photos/hero-bg.png" alt="未来を見つめる挑戦者" class="block w-full" style="aspect-ratio:4/5;object-fit:cover;object-position:62% 42%">
+      </div>
+      <a href="https://app.zenicle.jp/p/cmrc2ni970003guzg497lyspo"
+         class="cup-ribbon absolute bottom-4 left-4 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-black transition-transform hover:scale-105">
+        🎉 第1回 ゼニくるCUP 開催中
+      </a>
     </div>
   </div>
 </section>
 
 <!-- ========== ACTIVITY PHOTO MARQUEE ========== -->
-<section id="activity" style="background:#08060f;padding:2.25rem 0 2.5rem;overflow:hidden">
+<section id="activity" style="background:var(--bg-band-2);padding:2.25rem 0 2.5rem;overflow:hidden">
   <div class="marquee-viewport" id="marquee-row1"></div>
 </section>
 
@@ -151,7 +241,7 @@
 
 
 <!-- ========== STATS BAR ========== -->
-<section id="support" style="background:#0a0812;padding:1.75rem 1.25rem 2.25rem">
+<section id="support" style="background:var(--bg);padding:1.75rem 1.25rem 2.25rem">
   <div class="max-w-3xl mx-auto text-center">
     <div class="reveal mb-6">
       <div class="s-label mb-4">SUPPORT</div>
@@ -160,15 +250,15 @@
     <div class="grid grid-cols-3 gap-4 text-center">
       <div class="reveal">
         <div id="stat-amount" class="text-2xl md:text-3xl font-black gold-text">¥850,400</div>
-        <div class="text-xs mt-1 tracking-wider" style="color:rgba(255,255,255,.4)">累計エール総額</div>
+        <div class="text-xs mt-1 tracking-wider" style="color:var(--text-subtle)">累計エール総額</div>
       </div>
       <div class="reveal" style="transition-delay:.05s">
         <div id="stat-supporters" class="text-2xl md:text-3xl font-black gold-text">32人</div>
-        <div class="text-xs mt-1 tracking-wider" style="color:rgba(255,255,255,.4)">支援者数</div>
+        <div class="text-xs mt-1 tracking-wider" style="color:var(--text-subtle)">支援者数</div>
       </div>
       <div class="reveal" style="transition-delay:.1s">
         <div id="stat-teams" class="text-2xl md:text-3xl font-black gold-text">16チーム</div>
-        <div class="text-xs mt-1 tracking-wider" style="color:rgba(255,255,255,.4)">参加チーム数</div>
+        <div class="text-xs mt-1 tracking-wider" style="color:var(--text-subtle)">参加チーム数</div>
       </div>
     </div>
   </div>
@@ -191,7 +281,7 @@
         </p>
         <a href="https://app.zenicle.jp"
            class="inline-flex items-center justify-center font-bold px-7 py-3.5 rounded-full transition-all hover:scale-105 transform"
-           style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.28);color:#fbbf24">
+           style="background:rgba(255,138,0,.12);border:1px solid rgba(255,138,0,.28);color:var(--brand)">
           アプリで詳しく見る
         </a>
       </div>
@@ -200,26 +290,26 @@
         <img id="project-cover" src="https://assets.zenicle.jp/v1/migrated/programs/cmmwd0pbp0001qn8f2byhzo70/cover/0d1da234-ba5e-43ad-a021-76f571e2e443.jpg" alt="REGIONLINK #003" class="project-image">
         <div class="p-6 md:p-8">
           <div class="flex flex-wrap gap-2 mb-4">
-            <span class="text-xs font-bold px-3 py-1 rounded-full" style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.24);color:#f59e0b">公開中</span>
-            <span id="project-season" class="text-xs font-bold px-3 py-1 rounded-full" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.7)">ROUND1</span>
+            <span class="text-xs font-bold px-3 py-1 rounded-full" style="background:rgba(255,138,0,.12);border:1px solid rgba(255,138,0,.28);color:var(--brand)">公開中</span>
+            <span id="project-season" class="text-xs font-bold px-3 py-1 rounded-full" style="background:var(--surface-soft);border:1px solid var(--border);color:var(--text-muted)">ROUND1</span>
           </div>
           <h3 id="project-name" class="text-2xl md:text-3xl font-black leading-tight mb-4">
             REGIONLINK #003：地域ビジネスのプロを目指す若者のサバイバル
           </h3>
-          <p id="project-description" class="text-sm leading-relaxed mb-6" style="color:rgba(255,255,255,.56)">
+          <p id="project-description" class="text-sm leading-relaxed mb-6" style="color:var(--text-muted)">
             全国の中高生や大学生が、地元の資源を使って本気で商売を立ち上げる挑戦の場です。
           </p>
           <div class="grid grid-cols-1 gap-3">
             <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
-              <div class="text-sm" style="color:rgba(255,255,255,.5)">エール総額</div>
+              <div class="text-sm" style="color:var(--text-muted)">エール総額</div>
               <div id="project-amount" class="text-lg md:text-xl font-black gold-text">¥155,500</div>
             </div>
             <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
-              <div class="text-sm" style="color:rgba(255,255,255,.5)">応援者数</div>
+              <div class="text-sm" style="color:var(--text-muted)">応援者数</div>
               <div id="project-supporters" class="text-lg md:text-xl font-black gold-text">30人</div>
             </div>
             <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
-              <div class="text-sm" style="color:rgba(255,255,255,.5)">応援金額</div>
+              <div class="text-sm" style="color:var(--text-muted)">応援金額</div>
               <div class="text-lg md:text-xl font-black gold-text">500円〜</div>
             </div>
           </div>
@@ -234,7 +324,7 @@
 
 
 <!-- ========== ABOUT ========== -->
-<section id="about" class="py-24 relative" style="background:#0d0b1c">
+<section id="about" class="py-24 relative" style="background:var(--bg-band)">
   <div class="max-w-5xl mx-auto px-5">
 
     <div class="text-center mb-14 reveal">
@@ -252,9 +342,9 @@
              alt="PURE SUPPORT"
              class="w-44 h-44 rounded-full object-cover mb-5"
              style="border:1.5px solid rgba(245,158,11,.2);box-shadow:0 4px 24px rgba(0,0,0,.3)">
-        <p class="text-xs font-bold tracking-widest mb-2" style="color:#f59e0b">PURE SUPPORT</p>
+        <p class="text-xs font-bold tracking-widest mb-2" style="color:var(--brand)">PURE SUPPORT</p>
         <h3 class="text-lg font-bold mb-2">返礼品ではなく、活動を応援する</h3>
-        <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.5)">返礼品の準備や発送に追われず、挑戦者が本来の活動に時間を使えるようにします。</p>
+        <p class="text-sm leading-relaxed" style="color:var(--text-muted)">返礼品の準備や発送に追われず、挑戦者が本来の活動に時間を使えるようにします。</p>
       </div>
 
       <!-- Arrow -->
@@ -268,9 +358,9 @@
              alt="OPEN"
              class="w-44 h-44 rounded-full object-cover mb-5"
              style="border:1.5px solid rgba(245,158,11,.2);box-shadow:0 4px 24px rgba(0,0,0,.3)">
-        <p class="text-xs font-bold tracking-widest mb-2" style="color:#f59e0b">OPEN</p>
+        <p class="text-xs font-bold tracking-widest mb-2" style="color:var(--brand)">OPEN</p>
         <h3 class="text-lg font-bold mb-2">誰でも応援に参加できる</h3>
-        <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.5)">地域や年齢に関係なく、気になる取り組みに500円から関われます。</p>
+        <p class="text-sm leading-relaxed" style="color:var(--text-muted)">地域や年齢に関係なく、気になる取り組みに500円から関われます。</p>
       </div>
 
       <!-- Arrow -->
@@ -284,9 +374,9 @@
              alt="VISIBLE"
              class="w-44 h-44 rounded-full object-cover mb-5"
              style="border:1.5px solid rgba(245,158,11,.2);box-shadow:0 4px 24px rgba(0,0,0,.3)">
-        <p class="text-xs font-bold tracking-widest mb-2" style="color:#f59e0b">VISIBLE</p>
+        <p class="text-xs font-bold tracking-widest mb-2" style="color:var(--brand)">VISIBLE</p>
         <h3 class="text-lg font-bold mb-2">応援の履歴を見える形で残す</h3>
-        <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.5)">支援額や支援者数を公開し、サービスが実際に動いていることを伝えます。</p>
+        <p class="text-sm leading-relaxed" style="color:var(--text-muted)">支援額や支援者数を公開し、サービスが実際に動いていることを伝えます。</p>
       </div>
 
     </div>
@@ -297,14 +387,14 @@
 
 
 <!-- ========== DIRECT ECONOMY ========== -->
-<section id="direct-economy" class="py-24" style="background:#0a0812">
+<section id="direct-economy" class="py-24" style="background:var(--bg)">
   <div class="max-w-5xl mx-auto px-5">
     <div class="text-center mb-14 reveal">
       <div class="s-label mb-5">DIRECT ECONOMY</div>
       <h2 class="text-3xl md:text-4xl lg:text-5xl font-black leading-tight mb-6">
         エールは、<br><span class="gold-text">事業原資へ直接還流する。</span>
       </h2>
-      <p class="text-base leading-relaxed max-w-2xl mx-auto" style="color:rgba(255,255,255,.52)">
+      <p class="text-base leading-relaxed max-w-2xl mx-auto" style="color:var(--text-muted)">
         ゼニくるが実装する「ダイレクト・エコノミー」とは、応援資金（エール）を中間コストなしで挑戦者の事業原資へ直接組み込む仕組みです。寄付で終わらず、活動を前進させる燃料になります。
       </p>
     </div>
@@ -312,16 +402,16 @@
       <img src="./photos/direct-economy-diagram.png"
            alt="ダイレクト・エコノミーの仕組み図：従来の寄付・支援との比較"
            class="w-full rounded-2xl"
-           style="border:1px solid rgba(255,255,255,.08);max-width:860px;display:block;margin:0 auto">
+           style="border:1px solid var(--border);max-width:860px;display:block;margin:0 auto">
     </div>
 
     <div class="mt-12 reveal" style="transition-delay:.18s">
-      <div class="trust-panel p-7 md:p-10 text-center" style="border-color:rgba(245,158,11,.2)">
-        <p class="text-xs font-bold tracking-widest mb-3" style="color:#f59e0b">KEY CONCEPT</p>
+      <div class="trust-panel p-7 md:p-10 text-center" style="border-color:var(--brand)">
+        <p class="text-xs font-bold tracking-widest mb-3" style="color:var(--brand)">KEY CONCEPT</p>
         <p class="text-xl md:text-2xl font-black leading-snug mb-4">
           「応援」を<span class="gold-text">経済の循環</span>に変える。
         </p>
-        <p class="text-sm leading-relaxed max-w-xl mx-auto" style="color:rgba(255,255,255,.5)">
+        <p class="text-sm leading-relaxed max-w-xl mx-auto" style="color:var(--text-muted)">
           ダイレクト・エコノミーは、応援者の熱量を実際の事業成長に直結させる新しい経済モデルです。挑戦者が成長すれば、応援者の次の挑戦への関わりも深まります。
         </p>
       </div>
@@ -333,7 +423,7 @@
 
 
 <!-- ========== PROBLEM ========== -->
-<section class="py-24" style="background:#0a0812">
+<section class="py-24" style="background:var(--bg)">
   <div class="max-w-5xl mx-auto px-5">
     <div class="grid md:grid-cols-[.78fr_1.22fr] gap-12 md:gap-16 items-start">
       <div class="reveal">
@@ -341,31 +431,31 @@
         <h2 class="text-3xl md:text-4xl font-black leading-tight mb-5">
           挑戦は、<br><span class="gold-text">始める前に止まりやすい。</span>
         </h2>
-        <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.52)">
+        <p class="text-sm leading-relaxed" style="color:var(--text-muted)">
           やりたいことがあっても、相談先・検証機会・活動資金のどれかが欠けるだけで、最初の一歩は重くなります。
         </p>
       </div>
       <div class="reveal" style="transition-delay:.08s">
         <div class="editorial-list">
           <div class="grid sm:grid-cols-[4rem_1fr] gap-5 py-7">
-            <p class="text-sm font-bold tracking-widest" style="color:rgba(245,158,11,.72)">01</p>
+            <p class="text-sm font-bold tracking-widest" style="color:var(--brand)">01</p>
             <div>
               <h3 class="text-lg md:text-xl font-bold mb-2">進め方を相談できる相手が少ない</h3>
-              <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.5)">アイデアはあっても、何から始めるか、誰に聞けばいいかが見えず、一人で止まってしまう。</p>
+              <p class="text-sm leading-relaxed" style="color:var(--text-muted)">アイデアはあっても、何から始めるか、誰に聞けばいいかが見えず、一人で止まってしまう。</p>
             </div>
           </div>
           <div class="grid sm:grid-cols-[4rem_1fr] gap-5 py-7">
-            <p class="text-sm font-bold tracking-widest" style="color:rgba(245,158,11,.72)">02</p>
+            <p class="text-sm font-bold tracking-widest" style="color:var(--brand)">02</p>
             <div>
               <h3 class="text-lg md:text-xl font-bold mb-2">小さく試す機会が足りない</h3>
-              <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.5)">反応をもらう場所がないと、活動の価値や伝え方を磨く前に熱量が下がってしまう。</p>
+              <p class="text-sm leading-relaxed" style="color:var(--text-muted)">反応をもらう場所がないと、活動の価値や伝え方を磨く前に熱量が下がってしまう。</p>
             </div>
           </div>
           <div class="grid sm:grid-cols-[4rem_1fr] gap-5 py-7">
-            <p class="text-sm font-bold tracking-widest" style="color:rgba(245,158,11,.72)">03</p>
+            <p class="text-sm font-bold tracking-widest" style="color:var(--brand)">03</p>
             <div>
               <h3 class="text-lg md:text-xl font-bold mb-2">必要な資金を集める導線がない</h3>
-              <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.5)">大きな資金調達ではなくても、交通費・材料費・出店費など、最初の活動費が壁になる。</p>
+              <p class="text-sm leading-relaxed" style="color:var(--text-muted)">大きな資金調達ではなくても、交通費・材料費・出店費など、最初の活動費が壁になる。</p>
             </div>
           </div>
         </div>
@@ -378,7 +468,7 @@
 
 
 <!-- ========== FEATURES ========== -->
-<section id="features" class="py-24" style="background:#0d0b1c">
+<section id="features" class="py-24" style="background:var(--bg-band)">
   <div class="max-w-5xl mx-auto px-5">
     <div class="grid md:grid-cols-[.78fr_1.22fr] gap-12 md:gap-16 items-start">
       <div class="reveal">
@@ -386,37 +476,37 @@
         <h2 class="text-3xl md:text-4xl font-black leading-tight mb-5">
           応援を、<br><span class="gold-text">小さく始めやすく。</span>
         </h2>
-        <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.52)">
+        <p class="text-sm leading-relaxed" style="color:var(--text-muted)">
           派手な仕掛けよりも、支援する人と受け取る人の距離を短くすることを重視しています。
         </p>
       </div>
       <div class="editorial-list reveal" style="transition-delay:.08s">
         <div class="grid sm:grid-cols-[8.5rem_1fr] gap-5 py-6">
-          <p class="text-xs font-bold tracking-widest" style="color:rgba(245,158,11,.72)">500 YEN</p>
+          <p class="text-xs font-bold tracking-widest" style="color:var(--brand)">500 YEN</p>
           <div>
             <h3 class="text-lg font-bold mb-2">500円から応援できる</h3>
-            <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.5)">大きな支援ではなくても、活動の初期費用や次の一歩を支える力になります。</p>
+            <p class="text-sm leading-relaxed" style="color:var(--text-muted)">大きな支援ではなくても、活動の初期費用や次の一歩を支える力になります。</p>
           </div>
         </div>
         <div class="grid sm:grid-cols-[8.5rem_1fr] gap-5 py-6">
-          <p class="text-xs font-bold tracking-widest" style="color:rgba(245,158,11,.72)">PAYMENT</p>
+          <p class="text-xs font-bold tracking-widest" style="color:var(--brand)">PAYMENT</p>
           <div>
             <h3 class="text-lg font-bold mb-2">クレジットカードで支援できる</h3>
-            <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.5)">応援したいと思ったタイミングで、すぐに支援できる導線を用意しています。</p>
+            <p class="text-sm leading-relaxed" style="color:var(--text-muted)">応援したいと思ったタイミングで、すぐに支援できる導線を用意しています。</p>
           </div>
         </div>
         <div class="grid sm:grid-cols-[8.5rem_1fr] gap-5 py-6">
-          <p class="text-xs font-bold tracking-widest" style="color:rgba(245,158,11,.72)">RECORD</p>
+          <p class="text-xs font-bold tracking-widest" style="color:var(--brand)">RECORD</p>
           <div>
             <h3 class="text-lg font-bold mb-2">支援の履歴が残る</h3>
-            <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.5)">誰が、どの挑戦を応援したかが見えることで、挑戦者にとっても継続の励みになります。</p>
+            <p class="text-sm leading-relaxed" style="color:var(--text-muted)">誰が、どの挑戦を応援したかが見えることで、挑戦者にとっても継続の励みになります。</p>
           </div>
         </div>
         <div class="grid sm:grid-cols-[8.5rem_1fr] gap-5 py-6">
-          <p class="text-xs font-bold tracking-widest" style="color:rgba(245,158,11,.72)">JPYC</p>
+          <p class="text-xs font-bold tracking-widest" style="color:var(--brand)">JPYC</p>
           <div>
             <h3 class="text-lg font-bold mb-2">JPYC決済にも対応予定</h3>
-            <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.5)">法定通貨での支援に加えて、デジタル通貨で応援できる選択肢も準備しています。</p>
+            <p class="text-sm leading-relaxed" style="color:var(--text-muted)">法定通貨での支援に加えて、デジタル通貨で応援できる選択肢も準備しています。</p>
           </div>
         </div>
       </div>
@@ -428,7 +518,7 @@
 
 
 <!-- ========== HOW IT WORKS ========== -->
-<section id="howto" class="py-24" style="background:#0d0b1c">
+<section id="howto" class="py-24" style="background:var(--bg-band)">
   <div class="max-w-5xl mx-auto px-5">
     <div class="grid md:grid-cols-[.78fr_1.22fr] gap-12 md:gap-16 items-start">
       <div class="reveal">
@@ -436,28 +526,28 @@
         <h2 class="text-3xl md:text-4xl font-black leading-tight mb-5">
           応援までの流れは、<br><span class="gold-text">シンプルです。</span>
         </h2>
-        <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.52)">プロジェクトを選び、金額を決めて、支援する。余計な手続きはできるだけ減らしています。</p>
+        <p class="text-sm leading-relaxed" style="color:var(--text-muted)">プロジェクトを選び、金額を決めて、支援する。余計な手続きはできるだけ減らしています。</p>
       </div>
       <div class="editorial-list reveal" style="transition-delay:.08s">
         <div class="grid sm:grid-cols-[4rem_1fr] gap-5 py-7">
-          <p class="text-sm font-bold tracking-widest" style="color:rgba(245,158,11,.72)">01</p>
+          <p class="text-sm font-bold tracking-widest" style="color:var(--brand)">01</p>
           <div>
             <h3 class="text-lg md:text-xl font-bold mb-2">プロジェクトを見る</h3>
-            <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.5)">活動内容、支援状況、挑戦者の想いを確認します。</p>
+            <p class="text-sm leading-relaxed" style="color:var(--text-muted)">活動内容、支援状況、挑戦者の想いを確認します。</p>
           </div>
         </div>
         <div class="grid sm:grid-cols-[4rem_1fr] gap-5 py-7">
-          <p class="text-sm font-bold tracking-widest" style="color:rgba(245,158,11,.72)">02</p>
+          <p class="text-sm font-bold tracking-widest" style="color:var(--brand)">02</p>
           <div>
             <h3 class="text-lg md:text-xl font-bold mb-2">支援金額を選ぶ</h3>
-            <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.5)">500円から、応援したい気持ちに合わせて金額を決められます。</p>
+            <p class="text-sm leading-relaxed" style="color:var(--text-muted)">500円から、応援したい気持ちに合わせて金額を決められます。</p>
           </div>
         </div>
         <div class="grid sm:grid-cols-[4rem_1fr] gap-5 py-7">
-          <p class="text-sm font-bold tracking-widest" style="color:rgba(245,158,11,.72)">03</p>
+          <p class="text-sm font-bold tracking-widest" style="color:var(--brand)">03</p>
           <div>
             <h3 class="text-lg md:text-xl font-bold mb-2">決済して応援する</h3>
-            <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.5)">クレジットカードで支援できます。JPYCでの支援にも対応予定です。</p>
+            <p class="text-sm leading-relaxed" style="color:var(--text-muted)">クレジットカードで支援できます。JPYCでの支援にも対応予定です。</p>
           </div>
         </div>
       </div>
@@ -469,33 +559,33 @@
 
 
 <!-- ========== FOR CHALLENGERS ========== -->
-<section class="py-24" style="background:#0a0812">
+<section class="py-24" style="background:var(--bg)">
   <div class="max-w-5xl mx-auto px-5">
     <div class="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
       <div class="reveal">
-        <img src="./photos/photo2.jpg" alt="地域で活動する若者たち" class="w-full rounded-2xl object-cover" style="aspect-ratio:4/3;border:1px solid rgba(255,255,255,.12)">
+        <img src="./photos/photo2.jpg" alt="地域で活動する若者たち" class="w-full rounded-2xl object-cover" style="aspect-ratio:4/3;border:1px solid var(--border)">
       </div>
       <div class="reveal" style="transition-delay:.08s">
         <div class="s-label mb-5 justify-start">FOR CHALLENGERS</div>
         <h2 class="text-3xl md:text-4xl font-black leading-tight mb-5">
           小さな挑戦にも、<br><span class="gold-text">応援が届くように。</span>
         </h2>
-        <p class="leading-relaxed mb-7 text-sm" style="color:rgba(255,255,255,.58)">年齢や職業に関係なく、取り組みを公開し、応援を受け取れる場所です。まずは現在の活動や想いを、ひとつのプロジェクトとして届けられます。</p>
+        <p class="leading-relaxed mb-7 text-sm" style="color:var(--text-muted)">年齢や職業に関係なく、取り組みを公開し、応援を受け取れる場所です。まずは現在の活動や想いを、ひとつのプロジェクトとして届けられます。</p>
         <div class="editorial-list mb-8">
           <div class="py-4">
             <p class="text-sm font-bold mb-1">プロジェクトを公開する</p>
-            <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.48)">活動内容、必要な支援、今後の予定を整理して掲載できます。</p>
+            <p class="text-sm leading-relaxed" style="color:var(--text-muted)">活動内容、必要な支援、今後の予定を整理して掲載できます。</p>
           </div>
           <div class="py-4">
             <p class="text-sm font-bold mb-1">返礼品なしで始められる</p>
-            <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.48)">物品の準備よりも、活動そのものに集中できます。</p>
+            <p class="text-sm leading-relaxed" style="color:var(--text-muted)">物品の準備よりも、活動そのものに集中できます。</p>
           </div>
           <div class="py-4">
             <p class="text-sm font-bold mb-1">支援状況が見える</p>
-            <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.48)">支援総額や支援者数が可視化され、活動の継続につながります。</p>
+            <p class="text-sm leading-relaxed" style="color:var(--text-muted)">支援総額や支援者数が可視化され、活動の継続につながります。</p>
           </div>
         </div>
-        <a href="https://app.zenicle.jp" class="inline-block font-bold px-8 py-3.5 rounded-full transition-all hover:scale-105 transform" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#0a0812;box-shadow:0 6px 24px rgba(245,158,11,.28)">
+        <a href="https://app.zenicle.jp" class="inline-block font-bold px-8 py-3.5 rounded-full transition-all hover:scale-105 transform" style="background:var(--brand-grad);color:var(--brand-ink);box-shadow:0 6px 24px rgba(245,158,11,.28)">
           チャレンジャーとして登録する
         </a>
       </div>
@@ -507,7 +597,7 @@
 
 
 <!-- ========== FAQ ========== -->
-<section id="faq" class="py-24" style="background:#0d0b1c">
+<section id="faq" class="py-24" style="background:var(--bg-band)">
   <div class="max-w-3xl mx-auto px-5">
     <div class="text-center mb-14 reveal">
       <div class="s-label mb-4">FAQ</div>
@@ -517,46 +607,46 @@
       <div>
         <button class="faq-btn w-full text-left py-5 flex items-center justify-between transition-colors">
           <span class="font-semibold text-sm pr-4">リワードなしとはどういう意味ですか？</span>
-          <span class="faq-icon text-2xl leading-none shrink-0" style="color:#f59e0b">+</span>
+          <span class="faq-icon text-2xl leading-none shrink-0" style="color:var(--brand)">+</span>
         </button>
         <div class="faq-body hidden pb-5">
-          <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.5)">「お礼の品」「限定グッズ」などの返礼物を設定せず、純粋に応援のみを目的とした投げ銭です。チャレンジャー側の負担を減らし、気軽にプロジェクトを公開できるようにするための設計です。</p>
+          <p class="text-sm leading-relaxed" style="color:var(--text-muted)">「お礼の品」「限定グッズ」などの返礼物を設定せず、純粋に応援のみを目的とした投げ銭です。チャレンジャー側の負担を減らし、気軽にプロジェクトを公開できるようにするための設計です。</p>
         </div>
       </div>
       <div>
         <button class="faq-btn w-full text-left py-5 flex items-center justify-between transition-colors">
           <span class="font-semibold text-sm pr-4">誰でも利用できますか？</span>
-          <span class="faq-icon text-2xl leading-none shrink-0" style="color:#f59e0b">+</span>
+          <span class="faq-icon text-2xl leading-none shrink-0" style="color:var(--brand)">+</span>
         </button>
         <div class="faq-body hidden pb-5">
-          <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.5)">はい。応援を受ける側（チャレンジャー）も、応援する側も、年齢・職業・地域を問わず誰でも利用できます。挑戦したいことがあれば、どなたでも歓迎です。</p>
+          <p class="text-sm leading-relaxed" style="color:var(--text-muted)">はい。応援を受ける側（チャレンジャー）も、応援する側も、年齢・職業・地域を問わず誰でも利用できます。挑戦したいことがあれば、どなたでも歓迎です。</p>
         </div>
       </div>
       <div>
         <button class="faq-btn w-full text-left py-5 flex items-center justify-between transition-colors">
           <span class="font-semibold text-sm pr-4">JPYCとは何ですか？</span>
-          <span class="faq-icon text-2xl leading-none shrink-0" style="color:#f59e0b">+</span>
+          <span class="faq-icon text-2xl leading-none shrink-0" style="color:var(--brand)">+</span>
         </button>
         <div class="faq-body hidden pb-5">
-          <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.5)">JPYCは日本円と1:1で連動するステーブルコイン（デジタル通貨）です。仮想通貨ウォレットから素早く送金できます。通常の法定通貨（クレカ・銀行振込）に加えた選択肢として対応予定です。</p>
+          <p class="text-sm leading-relaxed" style="color:var(--text-muted)">JPYCは日本円と1:1で連動するステーブルコイン（デジタル通貨）です。仮想通貨ウォレットから素早く送金できます。通常の法定通貨（クレカ・銀行振込）に加えた選択肢として対応予定です。</p>
         </div>
       </div>
       <div>
         <button class="faq-btn w-full text-left py-5 flex items-center justify-between transition-colors">
           <span class="font-semibold text-sm pr-4">手数料はかかりますか？</span>
-          <span class="faq-icon text-2xl leading-none shrink-0" style="color:#f59e0b">+</span>
+          <span class="faq-icon text-2xl leading-none shrink-0" style="color:var(--brand)">+</span>
         </button>
         <div class="faq-body hidden pb-5">
-          <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.5)">プラットフォーム手数料は正式リリース時に公開予定です。挑戦者の手元に最大限届けることを最優先に、できる限り低い手数料設計を目指しています。</p>
+          <p class="text-sm leading-relaxed" style="color:var(--text-muted)">プラットフォーム手数料は正式リリース時に公開予定です。挑戦者の手元に最大限届けることを最優先に、できる限り低い手数料設計を目指しています。</p>
         </div>
       </div>
       <div>
         <button class="faq-btn w-full text-left py-5 flex items-center justify-between transition-colors">
           <span class="font-semibold text-sm pr-4">地方でなくても登録できますか？</span>
-          <span class="faq-icon text-2xl leading-none shrink-0" style="color:#f59e0b">+</span>
+          <span class="faq-icon text-2xl leading-none shrink-0" style="color:var(--brand)">+</span>
         </button>
         <div class="faq-body hidden pb-5">
-          <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.5)">応援する側・受ける側ともに、全国・世界どこからでも参加できます。居住地や属性を問わず誰でもチャレンジャーとして登録できます。</p>
+          <p class="text-sm leading-relaxed" style="color:var(--text-muted)">応援する側・受ける側ともに、全国・世界どこからでも参加できます。居住地や属性を問わず誰でもチャレンジャーとして登録できます。</p>
         </div>
       </div>
     </div>
@@ -567,26 +657,26 @@
 
 
 <!-- ========== CTA ========== -->
-<section id="cta" class="py-28" style="background:#0b1018">
+<section id="cta" class="py-28" style="background:var(--bg-band-2)">
   <div class="max-w-4xl mx-auto px-5 text-center">
     <div class="s-label mb-6">MISSION</div>
     <h2 class="text-3xl md:text-5xl font-black mb-6 leading-tight">
       挑戦を、<span class="gold-text">ひとりにしない。</span><br>
-      <span style="font-size:.7em;color:rgba(255,255,255,.65)">あなたの応援が、次の一歩を支えます。</span>
+      <span style="font-size:.7em;color:var(--text-muted)">あなたの応援が、次の一歩を支えます。</span>
     </h2>
-    <p class="text-base leading-relaxed mb-10" style="color:rgba(255,255,255,.45)">公開中のプロジェクトを見て、気になる挑戦を応援できます。</p>
+    <p class="text-base leading-relaxed mb-10" style="color:var(--text-subtle)">公開中のプロジェクトを見て、気になる挑戦を応援できます。</p>
     <a href="https://app.zenicle.jp"
        class="inline-block font-black text-lg px-14 py-5 rounded-full transition-all hover:scale-105 transform"
-       style="background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#0a0812;box-shadow:0 14px 50px rgba(245,158,11,.45)">
+       style="background:var(--brand-grad);color:var(--brand-ink);box-shadow:0 14px 50px rgba(245,158,11,.45)">
       サービスを見てみる
     </a>
-    <p class="text-xs mt-5" style="color:rgba(255,255,255,.22)">登録無料</p>
+    <p class="text-xs mt-5" style="color:var(--text-subtle)">登録無料</p>
   </div>
 </section>
 
 
 <!-- ========== FOOTER ========== -->
-<footer style="background:#060410;border-top:1px solid rgba(245,158,11,.07)" class="py-14">
+<footer class="py-14">
   <div class="max-w-6xl mx-auto px-5">
     <div class="grid md:grid-cols-4 gap-10 mb-10">
       <div class="md:col-span-2">
@@ -594,32 +684,32 @@
           <img src="favicon.png" alt="ゼニくる" class="w-8 h-8 object-contain">
           <span class="text-xl font-black gold-text">ゼニくる</span>
         </div>
-        <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,.32)">すべての挑戦を、みんなで応援する。<br>想いを、今すぐカタチに。</p>
-        <a href="https://x.com/zenicle_jp" target="_blank" rel="noopener noreferrer" aria-label="ゼニくる公式X" class="mt-5 inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors" style="border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6)" onmouseover="this.style.color='#fbbf24';this.style.borderColor='rgba(251,191,36,.5)'" onmouseout="this.style.color='rgba(255,255,255,.6)';this.style.borderColor='rgba(255,255,255,.12)'">
+        <p class="text-sm leading-relaxed foot-tag">すべての挑戦を、みんなで応援する。<br>想いを、今すぐカタチに。</p>
+        <a href="https://x.com/zenicle_jp" target="_blank" rel="noopener noreferrer" aria-label="ゼニくる公式X" class="foot-social mt-5 inline-flex items-center justify-center w-9 h-9 rounded-full">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.655l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77Z"/></svg>
         </a>
       </div>
       <div>
-        <p class="text-sm font-semibold mb-4" style="color:rgba(255,255,255,.6)">サービス</p>
-        <ul class="space-y-2 text-sm" style="color:rgba(255,255,255,.32)">
-          <li><a href="#support"  class="hover:text-amber-400 transition-colors">応援実績</a></li>
-          <li><a href="#projects" class="hover:text-amber-400 transition-colors">公開プロジェクト</a></li>
-          <li><a href="#howto"    class="hover:text-amber-400 transition-colors">仕組み</a></li>
-          <li><a href="#faq"      class="hover:text-amber-400 transition-colors">よくある質問</a></li>
+        <p class="text-sm font-semibold mb-4 foot-head">サービス</p>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#support"  class="foot-link">応援実績</a></li>
+          <li><a href="#projects" class="foot-link">公開プロジェクト</a></li>
+          <li><a href="#howto"    class="foot-link">仕組み</a></li>
+          <li><a href="#faq"      class="foot-link">よくある質問</a></li>
         </ul>
       </div>
       <div>
-        <p class="text-sm font-semibold mb-4" style="color:rgba(255,255,255,.6)">法的情報</p>
-        <ul class="space-y-2 text-sm" style="color:rgba(255,255,255,.32)">
-          <li><a href="https://app.zenicle.jp/legal/terms"   class="hover:text-amber-400 transition-colors">利用規約</a></li>
-          <li><a href="https://app.zenicle.jp/legal/privacy" class="hover:text-amber-400 transition-colors">プライバシーポリシー</a></li>
-          <li><a href="https://app.zenicle.jp/legal/tokusho" class="hover:text-amber-400 transition-colors">特定商取引法に基づく表記</a></li>
-          <li><a href="./contact.html"                   class="hover:text-amber-400 transition-colors">お問い合わせ</a></li>
-          <li><a href="https://dao-inc.org/" target="_blank" rel="noopener noreferrer" class="hover:text-amber-400 transition-colors">運営会社</a></li>
+        <p class="text-sm font-semibold mb-4 foot-head">法的情報</p>
+        <ul class="space-y-2 text-sm">
+          <li><a href="https://app.zenicle.jp/legal/terms"   class="foot-link">利用規約</a></li>
+          <li><a href="https://app.zenicle.jp/legal/privacy" class="foot-link">プライバシーポリシー</a></li>
+          <li><a href="https://app.zenicle.jp/legal/tokusho" class="foot-link">特定商取引法に基づく表記</a></li>
+          <li><a href="./contact.html"                   class="foot-link">お問い合わせ</a></li>
+          <li><a href="https://dao-inc.org/" target="_blank" rel="noopener noreferrer" class="foot-link">運営会社</a></li>
         </ul>
       </div>
     </div>
-    <div class="pt-8 text-center text-xs" style="border-top:1px solid rgba(255,255,255,.06);color:rgba(255,255,255,.18)">
+    <div class="pt-8 text-center text-xs foot-copy">
       © 2025 ゼニくる All rights reserved.
     </div>
   </div>
@@ -710,31 +800,31 @@
       const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
       const buildProjectCard = (p) => {
         const cover = p.coverImageUrl ? `<img src="${esc(p.coverImageUrl)}" alt="${esc(p.programName)}" class="project-image">` : '';
-        const desc = p.descriptionPreview ? `<p class="text-sm leading-relaxed mb-6" style="color:rgba(255,255,255,.56)">${esc(p.descriptionPreview)}</p>` : '';
+        const desc = p.descriptionPreview ? `<p class="text-sm leading-relaxed mb-6" style="color:var(--text-muted)">${esc(p.descriptionPreview)}</p>` : '';
         const seasonBadge = p.primarySeasonName
-          ? `<span class="text-xs font-bold px-3 py-1 rounded-full" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.7)">${esc(p.primarySeasonName)}</span>`
+          ? `<span class="text-xs font-bold px-3 py-1 rounded-full" style="background:var(--surface-soft);border:1px solid var(--border);color:var(--text-muted)">${esc(p.primarySeasonName)}</span>`
           : '';
         return `
         <article class="dark-card overflow-hidden">
           ${cover}
           <div class="p-6 md:p-8">
             <div class="flex flex-wrap gap-2 mb-4">
-              <span class="text-xs font-bold px-3 py-1 rounded-full" style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.24);color:#f59e0b">公開中</span>
+              <span class="text-xs font-bold px-3 py-1 rounded-full" style="background:rgba(255,138,0,.12);border:1px solid rgba(255,138,0,.28);color:var(--brand)">公開中</span>
               ${seasonBadge}
             </div>
             <h3 class="text-2xl md:text-3xl font-black leading-tight mb-4">${esc(p.programName)}</h3>
             ${desc}
             <div class="grid grid-cols-1 gap-3">
               <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
-                <div class="text-sm" style="color:rgba(255,255,255,.5)">エール総額</div>
+                <div class="text-sm" style="color:var(--text-muted)">エール総額</div>
                 <div class="text-lg md:text-xl font-black gold-text">${fmt(p.totalAmount ?? 0)}</div>
               </div>
               <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
-                <div class="text-sm" style="color:rgba(255,255,255,.5)">応援者数</div>
+                <div class="text-sm" style="color:var(--text-muted)">応援者数</div>
                 <div class="text-lg md:text-xl font-black gold-text">${p.supporterPulse ?? 0}人</div>
               </div>
               <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
-                <div class="text-sm" style="color:rgba(255,255,255,.5)">応援金額</div>
+                <div class="text-sm" style="color:var(--text-muted)">応援金額</div>
                 <div class="text-lg md:text-xl font-black gold-text">500円〜</div>
               </div>
             </div>
