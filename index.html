@@ -28,6 +28,7 @@
     /* default = light（ポスター準拠のライト＆カラフル） */
     :root, [data-theme="light"]{
       --bg:#F7F9FC; --bg-band:#FFFFFF; --bg-band-2:#EEF3FB; --bg-hero:#EAF2FF;
+      --hero-scrim:linear-gradient(100deg, rgba(247,249,252,.95) 0%, rgba(247,249,252,.86) 28%, rgba(247,249,252,.42) 50%, rgba(247,249,252,0) 66%);
       --surface:#FFFFFF; --surface-soft:#F4F7FC;
       --text:#14213D; --heading:#14213D; --text-muted:#5B6473; --text-subtle:#8A93A3;
       --brand:#FF8A00; --brand-ink:#FFFFFF; --pink:#FF4D8D; --blue:#2563EB;
@@ -48,6 +49,7 @@
     /* archive = classic（旧ダークテーマ。?theme=classic で表示可） */
     [data-theme="classic"]{
       --bg:#0a0812; --bg-band:#0d0b1c; --bg-band-2:#0b1018; --bg-hero:#000;
+      --hero-scrim:linear-gradient(100deg, rgba(10,8,18,.94) 0%, rgba(10,8,18,.72) 32%, rgba(10,8,18,.3) 54%, rgba(10,8,18,0) 70%);
       --surface:rgba(15,12,30,.92); --surface-soft:rgba(255,255,255,.045);
       --text:#f1f5f9; --heading:#ffffff; --text-muted:rgba(255,255,255,.56); --text-subtle:rgba(255,255,255,.4);
       --brand:#f59e0b; --brand-ink:#0a0812; --pink:#FF4D8D; --blue:#2563EB;
@@ -116,15 +118,16 @@
 
     /* ── Hero ── */
     #heroSection{background:var(--bg-hero)}
-    .hero-photo{border-radius:1.5rem;overflow:hidden;box-shadow:var(--card-shadow-hover);border:4px solid var(--surface)}
+    #heroScrim{position:absolute;inset:0;background:var(--hero-scrim);pointer-events:none}
     .cup-ribbon{background:var(--pink-grad);color:#fff;box-shadow:0 8px 24px rgba(255,77,141,.32)}
-    /* スマホでは横顔画像を上部バナーとして通常フローに出し、その下にテキストを配置（重なり回避） */
+    /* スマホでは背景画像を上部バナーとして通常フローに出し、その下にテキストを配置（重なり回避） */
     @media(max-width:767px){
-      #heroSection{min-height:auto!important;padding:6.5rem 1.25rem 3.5rem!important}
+      #heroSection{display:block!important;min-height:auto!important;padding:6.5rem 1.25rem 3.5rem!important}
+      #heroScrim{display:none!important}
       #heroBg{
         position:relative!important;inset:auto!important;
-        width:100%!important;height:53vw!important;max-height:220px!important;
-        background-position:center!important;background-size:cover!important;
+        width:100%!important;height:58vw!important;max-height:260px!important;
+        background-position:62% 38%!important;background-size:cover!important;
         border-radius:1rem!important;margin-bottom:1.75rem!important;
       }
     }
@@ -194,19 +197,17 @@
 
 
 <!-- ========== HERO ========== -->
-<section id="heroSection" class="relative overflow-hidden" style="padding:8.5rem 1.25rem 4.5rem">
-  <!-- decorative color blobs -->
-  <div class="absolute -top-16 -right-10 w-72 h-72 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(255,138,0,.16),transparent 70%)"></div>
-  <div class="absolute top-40 -left-16 w-72 h-72 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(37,99,235,.12),transparent 70%)"></div>
-  <div class="max-w-7xl mx-auto relative grid md:grid-cols-2 gap-10 md:gap-14 items-center">
-    <!-- TEXT -->
-    <div class="reveal order-2 md:order-1">
+<section id="heroSection" class="relative overflow-hidden" style="min-height:88vh;padding:8.5rem 1.25rem 4rem;display:flex;align-items:center">
+  <div id="heroBg" class="absolute inset-0 pointer-events-none" style="background:url('./photos/hero-woman.png') 72% 40%/cover no-repeat"></div>
+  <div id="heroScrim"></div>
+  <div class="max-w-7xl mx-auto relative w-full">
+    <div class="reveal max-w-2xl">
       <p class="text-xs font-bold tracking-[.28em] mb-4" style="color:var(--brand)">次世代応援プラットフォーム『ゼニくる』</p>
       <h1 class="text-4xl md:text-5xl lg:text-6xl font-black leading-tight mb-5">
         <span class="gold-text">エール（応援金）</span>が、<br>挑戦者に<span class="brand-underline">直接届く</span>。
       </h1>
-      <p class="text-base leading-relaxed max-w-xl muted-line mb-7">
-        応援したい人と挑戦したい人を、ダイレクトにつなぐ新しい応援のかたち。想いがそのまま届き、未来を動かす力になる。500円からエールを送り、挑戦者の一歩を支えられます。
+      <p class="text-base leading-relaxed max-w-md muted-line mb-7">
+        応援したい人と挑戦したい人を、ダイレクトにつなぐ新しい応援のかたち。500円からエールを送り、挑戦者の一歩を支えられます。
       </p>
       <div class="flex flex-col sm:flex-row gap-3">
         <a href="https://app.zenicle.jp"
@@ -218,14 +219,8 @@
           現在の取り組み
         </a>
       </div>
-    </div>
-    <!-- PHOTO -->
-    <div class="reveal order-1 md:order-2 relative">
-      <div class="hero-photo">
-        <img src="./photos/hero-bg.png" alt="未来を見つめる挑戦者" class="block w-full" style="aspect-ratio:4/5;object-fit:cover;object-position:62% 42%">
-      </div>
       <a href="https://app.zenicle.jp/p/cmrc2ni970003guzg497lyspo"
-         class="cup-ribbon absolute bottom-4 left-4 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-black transition-transform hover:scale-105">
+         class="cup-ribbon inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-black transition-transform hover:scale-105 mt-6">
         🎉 第1回 ゼニくるCUP 開催中
       </a>
     </div>
