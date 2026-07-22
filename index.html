@@ -48,8 +48,15 @@
     .editorial-list>*+*{border-top:1px solid rgba(255,255,255,.1)}
 
     /* ── Hero mobile ── */
+    /* スマホでは横顔画像を上部バナーとして通常フローに出し、その下にテキストを配置（重なり回避） */
     @media(max-width:767px){
-      #heroSection{min-height:auto!important;padding-top:8.25rem!important;padding-bottom:3.5rem!important}
+      #heroSection{min-height:auto!important;padding:6.5rem 1.25rem 3.5rem!important}
+      #heroBg{
+        position:relative!important;inset:auto!important;
+        width:100%!important;height:53vw!important;max-height:220px!important;
+        background-position:center!important;background-size:cover!important;
+        border-radius:1rem!important;margin-bottom:1.75rem!important;
+      }
     }
 
     /* ── Team Ticker ── */
@@ -109,7 +116,7 @@
 
 <!-- ========== HERO ========== -->
 <section id="heroSection" class="relative overflow-hidden" style="padding:10.5rem 1.25rem 5rem;background:#000">
-  <div class="absolute inset-0 pointer-events-none" style="background:url('./photos/hero-bg.png') right center/auto 100% no-repeat"></div>
+  <div id="heroBg" class="absolute inset-0 pointer-events-none" style="background:url('./photos/hero-bg.png') right center/auto 100% no-repeat"></div>
   <div class="max-w-7xl mx-auto relative">
     <div class="reveal">
       <p class="text-xs font-bold tracking-[.28em] mb-4" style="color:#f59e0b">次世代応援プラットフォーム『ゼニくる』</p>
