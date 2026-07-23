@@ -324,16 +324,16 @@
           </p>
           <div class="grid grid-cols-1 gap-3">
             <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
-              <div class="text-sm" style="color:var(--text-muted)">エール総額</div>
-              <div id="project-amount" class="text-lg md:text-xl font-black gold-text">¥155,500</div>
+              <div class="text-sm" style="color:var(--text-muted)">累計</div>
+              <div id="project-amount" class="text-lg md:text-xl font-black gold-text">¥855,400</div>
             </div>
             <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
               <div class="text-sm" style="color:var(--text-muted)">応援者数</div>
-              <div id="project-supporters" class="text-lg md:text-xl font-black gold-text">30人</div>
+              <div id="project-supporters" class="text-lg md:text-xl font-black gold-text">34人</div>
             </div>
             <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
-              <div class="text-sm" style="color:var(--text-muted)">応援金額</div>
-              <div class="text-lg md:text-xl font-black gold-text">500円〜</div>
+              <div class="text-sm" style="color:var(--text-muted)">サポーター</div>
+              <div class="text-lg md:text-xl font-black gold-text">2,207人</div>
             </div>
           </div>
         </div>
@@ -788,16 +788,16 @@
             ${desc}
             <div class="grid grid-cols-1 gap-3">
               <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
-                <div class="text-sm" style="color:var(--text-muted)">エール総額</div>
+                <div class="text-sm" style="color:var(--text-muted)">累計</div>
                 <div class="text-lg md:text-xl font-black gold-text">${fmt(p.totalAmount ?? 0)}</div>
               </div>
               <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
                 <div class="text-sm" style="color:var(--text-muted)">応援者数</div>
-                <div class="text-lg md:text-xl font-black gold-text">${p.supporterPulse ?? 0}人</div>
+                <div class="text-lg md:text-xl font-black gold-text">${Number(p.supporterUserCount ?? 0).toLocaleString('ja-JP')}人</div>
               </div>
               <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
-                <div class="text-sm" style="color:var(--text-muted)">応援金額</div>
-                <div class="text-lg md:text-xl font-black gold-text">500円〜</div>
+                <div class="text-sm" style="color:var(--text-muted)">サポーター</div>
+                <div class="text-lg md:text-xl font-black gold-text">${Number(p.discordSupporterCount ?? 0).toLocaleString('ja-JP')}人</div>
               </div>
             </div>
           </div>
