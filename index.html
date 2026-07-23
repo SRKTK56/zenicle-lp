@@ -331,6 +331,10 @@
               <div class="text-sm" style="color:var(--text-muted)">応援者数</div>
               <div id="project-supporters" class="text-lg md:text-xl font-black gold-text">34人</div>
             </div>
+            <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
+              <div class="text-sm" style="color:var(--text-muted)">エントリーチーム数</div>
+              <div class="text-lg md:text-xl font-black gold-text">12チーム</div>
+            </div>
           </div>
         </div>
       </article>
@@ -839,6 +843,10 @@
               <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
                 <div class="text-sm" style="color:var(--text-muted)">応援者数</div>
                 <div class="text-lg md:text-xl font-black gold-text">${Number(p.supporterUserCount ?? 0).toLocaleString('ja-JP')}人</div>
+              </div>
+              <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
+                <div class="text-sm" style="color:var(--text-muted)">エントリーチーム数</div>
+                <div class="text-lg md:text-xl font-black gold-text">${Number(p.teamCount ?? 0).toLocaleString('ja-JP')}チーム</div>
               </div>
             </div>
             ${buildSeasonsSection(seasons, p.coverImageUrl)}
