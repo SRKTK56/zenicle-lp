@@ -292,22 +292,23 @@
 <!-- ========== PROJECTS ========== -->
 <section id="projects" class="py-24 soft-band">
   <div class="max-w-6xl mx-auto px-5">
-    <div class="grid lg:grid-cols-[.8fr_1.2fr] gap-12 items-start">
-      <div class="reveal">
-        <div class="s-label mb-5 justify-start">CURRENT PROJECT</div>
-        <h2 class="text-3xl md:text-4xl font-black leading-tight mb-5">
-          現在応援できる<br><span class="gold-text">プロジェクト</span>
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 mb-10 reveal">
+      <div>
+        <div class="s-label mb-4 justify-start">CURRENT PROJECT</div>
+        <h2 class="text-3xl md:text-4xl font-black leading-tight">
+          現在応援できる<span class="gold-text">プロジェクト</span>
         </h2>
-        <p class="text-sm leading-relaxed muted-line mb-7">
+        <p class="text-sm leading-relaxed muted-line mt-4 max-w-2xl">
           抽象的な説明だけではなく、いま実際に動いている挑戦を掲載します。支援総額・支援者数も公開データに基づいて更新されます。
         </p>
-        <a href="https://app.zenicle.jp"
-           class="inline-flex items-center justify-center font-bold px-7 py-3.5 rounded-full transition-all hover:scale-105 transform"
-           style="background:rgba(255,138,0,.12);border:1px solid rgba(255,138,0,.28);color:var(--brand)">
-          今すぐ応援する
-        </a>
       </div>
-      <div id="project-cards" class="space-y-6">
+      <a href="https://app.zenicle.jp"
+         class="shrink-0 inline-flex items-center justify-center font-bold px-7 py-3.5 rounded-full transition-all hover:scale-105 transform"
+         style="background:rgba(255,138,0,.12);border:1px solid rgba(255,138,0,.28);color:var(--brand)">
+        今すぐ応援する
+      </a>
+    </div>
+      <div id="project-cards" class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
       <article class="dark-card overflow-hidden reveal" style="transition-delay:.08s">
         <img id="project-cover" src="https://assets.zenicle.jp/v1/migrated/programs/cmmwd0pbp0001qn8f2byhzo70/cover/0d1da234-ba5e-43ad-a021-76f571e2e443.jpg" alt="REGIONLINK #003" class="project-image">
         <div class="p-6 md:p-8">
@@ -338,7 +339,6 @@
         </div>
       </article>
       </div>
-    </div>
   </div>
 </section>
 
