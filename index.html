@@ -113,6 +113,14 @@
     .soft-band{background:var(--bg-band-2)}
     .band{background:var(--bg-band)}
     .project-image{aspect-ratio:21/9;object-fit:cover;width:100%;height:auto;display:block}
+
+    /* ── プログラムカード内「開催中のシーズン」アコーディオン ── */
+    .season-acc{margin-top:1.5rem;padding-top:.5rem;border-top:1px solid var(--border)}
+    .season-acc>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.75rem 0;font-size:.875rem;font-weight:700;transition:color .2s ease}
+    .season-acc>summary::-webkit-details-marker{display:none}
+    .season-acc>summary:hover{color:var(--brand)}
+    .season-acc .season-icon{flex-shrink:0;font-size:1.5rem;line-height:1;color:var(--brand);transition:transform .2s ease}
+    .season-acc[open] .season-icon{transform:rotate(45deg)}
     .editorial-list{border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
     .editorial-list>*+*{border-top:1px solid var(--border)}
 
@@ -348,15 +356,15 @@
         今すぐ応援する
       </a>
     </div>
-      <div id="project-cards" class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+      <div id="project-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
       <article class="dark-card overflow-hidden reveal" style="transition-delay:.08s">
         <img id="project-cover" src="https://assets.zenicle.jp/v1/migrated/programs/cmmwd0pbp0001qn8f2byhzo70/cover/0d1da234-ba5e-43ad-a021-76f571e2e443.jpg" alt="REGIONLINK #003" class="project-image">
-        <div class="p-6 md:p-8">
+        <div class="p-6 md:p-8 lg:p-6">
           <div class="flex flex-wrap gap-2 mb-4">
             <span class="text-xs font-bold px-3 py-1 rounded-full" style="background:rgba(255,138,0,.12);border:1px solid rgba(255,138,0,.28);color:var(--brand)">公開中</span>
             <span id="project-season" class="text-xs font-bold px-3 py-1 rounded-full" style="background:var(--surface-soft);border:1px solid var(--border);color:var(--text-muted)">ROUND1</span>
           </div>
-          <h3 id="project-name" class="text-2xl md:text-3xl font-black leading-tight mb-4">
+          <h3 id="project-name" class="text-2xl md:text-3xl lg:text-2xl font-black leading-tight mb-4">
             REGIONLINK #003：地域ビジネスのプロを目指す若者のサバイバル
           </h3>
           <p id="project-description" class="text-sm leading-relaxed mb-6" style="color:var(--text-muted)">
@@ -365,15 +373,15 @@
           <div class="grid grid-cols-1 gap-3">
             <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
               <div class="text-sm" style="color:var(--text-muted)">累計</div>
-              <div id="project-amount" class="text-lg md:text-xl font-black gold-text">¥855,400</div>
+              <div id="project-amount" class="text-lg md:text-xl lg:text-lg font-black gold-text">¥855,400</div>
             </div>
             <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
               <div class="text-sm" style="color:var(--text-muted)">応援者数</div>
-              <div id="project-supporters" class="text-lg md:text-xl font-black gold-text">34人</div>
+              <div id="project-supporters" class="text-lg md:text-xl lg:text-lg font-black gold-text">34人</div>
             </div>
             <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
               <div class="text-sm" style="color:var(--text-muted)">エントリーチーム数</div>
-              <div class="text-lg md:text-xl font-black gold-text">12チーム</div>
+              <div class="text-lg md:text-xl lg:text-lg font-black gold-text">12チーム</div>
             </div>
           </div>
         </div>
@@ -824,12 +832,17 @@
 
       // 参加チーム1行（ランキング順）
       const buildTeamRow = (t) => `
-            <div class="flex items-center gap-2.5 py-2.5" style="border-top:1px solid var(--border)">
-              <span class="text-xs font-bold tabular-nums w-4 shrink-0" style="color:var(--brand)">${t.rank}</span>
-              <span class="text-sm flex-1 min-w-0 truncate">${esc(t.teamName)}</span>
-              <span class="text-sm font-semibold tabular-nums shrink-0">${yen(t.totalAmount)}</span>
-              <span class="text-xs tabular-nums shrink-0" style="color:var(--text-subtle)">${Number(t.supportersCount ?? 0)}件</span>
-              <a href="https://app.zenicle.jp/t/${esc(t.teamId)}" class="btn-primary text-xs font-bold px-3 py-1.5 rounded-full shrink-0 transition-transform hover:scale-105 whitespace-nowrap">エールを送る</a>
+            <div class="py-2.5" style="border-top:1px solid var(--border)">
+              <div class="flex items-center gap-2.5">
+                <span class="text-xs font-bold tabular-nums w-4 shrink-0" style="color:var(--brand)">${t.rank}</span>
+                <span class="text-sm flex-1 min-w-0 truncate">${esc(t.teamName)}</span>
+              </div>
+              <div class="flex items-center justify-between gap-2 mt-1.5" style="padding-left:1.625rem">
+                <span class="text-xs tabular-nums" style="color:var(--text-subtle)">
+                  <span class="text-sm font-semibold" style="color:var(--text)">${yen(t.totalAmount)}</span>　${Number(t.supportersCount ?? 0)}件
+                </span>
+                <a href="https://app.zenicle.jp/t/${esc(t.teamId)}" class="btn-primary text-xs font-bold px-3 py-1.5 rounded-full shrink-0 transition-transform hover:scale-105 whitespace-nowrap">エールを送る</a>
+              </div>
             </div>`;
 
       // 開催中のシーズン1ブロック（シーズン名・終了予定・集計・参加チーム）
@@ -858,11 +871,17 @@
           </div>`;
       };
 
+      // 縦に長くなりすぎるため、既定は折りたたみ（クリックで展開）
       const buildSeasonsSection = (seasons, programCover) => (!seasons || !seasons.length) ? '' : `
-            <div class="mt-6 pt-6" style="border-top:1px solid var(--border)">
-              <p class="text-sm font-bold mb-3">開催中のシーズン（${seasons.length}）</p>
-              ${seasons.map((s) => buildSeasonBlock(s, programCover)).join('')}
-            </div>`;
+            <details class="season-acc">
+              <summary>
+                <span>開催中のシーズン（${seasons.length}）</span>
+                <span class="season-icon" aria-hidden="true">+</span>
+              </summary>
+              <div class="pt-3">
+                ${seasons.map((s) => buildSeasonBlock(s, programCover)).join('')}
+              </div>
+            </details>`;
 
       const buildEntryButton = (p) => p.acceptingEntries
         ? `<a href="https://app.zenicle.jp/p/${esc(p.programId)}/entry" class="btn-primary block text-center font-black px-8 py-4 rounded-full transition-all hover:scale-105 transform mt-6">このプログラムにエントリーする</a>`
@@ -877,25 +896,25 @@
         return `
         <article class="dark-card overflow-hidden">
           ${cover}
-          <div class="p-6 md:p-8">
+          <div class="p-6 md:p-8 lg:p-6">
             <div class="flex flex-wrap gap-2 mb-4">
               <span class="text-xs font-bold px-3 py-1 rounded-full" style="background:rgba(255,138,0,.12);border:1px solid rgba(255,138,0,.28);color:var(--brand)">公開中</span>
               ${seasonBadge}
             </div>
-            <h3 class="text-2xl md:text-3xl font-black leading-tight mb-4">${esc(p.programName)}</h3>
+            <h3 class="text-2xl md:text-3xl lg:text-2xl font-black leading-tight mb-4">${esc(p.programName)}</h3>
             ${desc}
             <div class="grid grid-cols-1 gap-3">
               <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
                 <div class="text-sm" style="color:var(--text-muted)">累計</div>
-                <div class="text-lg md:text-xl font-black gold-text">${fmt(p.totalAmount ?? 0)}</div>
+                <div class="text-lg md:text-xl lg:text-lg font-black gold-text">${fmt(p.totalAmount ?? 0)}</div>
               </div>
               <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
                 <div class="text-sm" style="color:var(--text-muted)">応援者数</div>
-                <div class="text-lg md:text-xl font-black gold-text">${Number(p.supporterUserCount ?? 0).toLocaleString('ja-JP')}人</div>
+                <div class="text-lg md:text-xl lg:text-lg font-black gold-text">${Number(p.supporterUserCount ?? 0).toLocaleString('ja-JP')}人</div>
               </div>
               <div class="trust-panel p-4 flex items-baseline justify-between gap-3">
                 <div class="text-sm" style="color:var(--text-muted)">エントリーチーム数</div>
-                <div class="text-lg md:text-xl font-black gold-text">${Number(p.teamCount ?? 0).toLocaleString('ja-JP')}チーム</div>
+                <div class="text-lg md:text-xl lg:text-lg font-black gold-text">${Number(p.teamCount ?? 0).toLocaleString('ja-JP')}チーム</div>
               </div>
             </div>
             ${buildSeasonsSection(seasons, p.coverImageUrl)}
