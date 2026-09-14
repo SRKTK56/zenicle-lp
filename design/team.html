@@ -164,7 +164,7 @@
         <div class="card p-6 md:p-8">
           <p id="description" class="text-[15px] leading-[1.9] whitespace-pre-wrap"></p>
           <p class="mt-5 text-xs subtle">
-            <span class="todo">要確認</span> 「チームからのメッセージ（thanksMessage）」は現在シーズン単位で保存され、公開APIの teams/:id には含まれない。ここに出すなら API へ追加が必要。
+            <span class="todo">#47</span> 「チームからのメッセージ（thanksMessage）」は teams/:id に解決済みの値が追加され次第、ここに表示する。
           </p>
         </div>
       </section>
@@ -203,7 +203,7 @@
           <a class="edit-chip" href="#" data-console="活動レポート（投稿）">✎ 投稿する → コンソール「活動レポート（投稿）」</a>
         </div>
         <div class="card p-6" id="posts"></div>
-        <p class="mt-3 text-xs subtle"><span class="todo">要確認</span> 支援者限定レポート（/teams/:id/reports）はログイン必須。公開ページでは「支援者限定 ○件」と件数だけ見せる案。</p>
+        <p class="mt-3 text-xs subtle"><span class="todo">#47</span> 支援者限定レポートは件数だけ teams/:id に追加され次第、「支援者限定 ○件」と表示する（タイトル・日付は出さない）。</p>
       </section>
     </div>
 
@@ -320,7 +320,8 @@
   // 応援レール（PC右・スマホは動画直後）
   const amount = Number(explore.totalAmount ?? 0);
   const goal = Number(explore.goalAmount ?? 0);
-  const pct = goal > 0 ? Math.min(100, Math.round(amount / goal * 100)) : null;
+  // totalAmount は順位表を公開しているプログラム分のみの合算。0 のときは達成率を出さない（0% と誤解させない）
+  const pct = goal > 0 && amount > 0 ? Math.min(100, Math.round(amount / goal * 100)) : null;
   const ends = team.nearestSeason?.endsAt ? new Date(team.nearestSeason.endsAt) : null;
   const days = ends ? Math.max(0, Math.ceil((ends - Date.now()) / 86400000)) : null;
   const yellHref = team.nearestSeason?.seasonTeamId ? `https://app.zenicle.jp/yell?seasonTeamId=${encodeURIComponent(team.nearestSeason.seasonTeamId)}` : pageUrl;
@@ -329,7 +330,7 @@
     const n = document.getElementById('rail-tpl').content.cloneNode(true);
     const f = (k) => n.querySelector(`[data-f="${k}"]`);
     f('amount').textContent = yen(amount);
-    f('goal-line').innerHTML = goal > 0 ? `目標 <b>${yen(goal)}</b>　達成率 <b style="color:var(--pink)">${pct}%</b>` : `<span class="subtle">目標額は未設定</span>`;
+    f('goal-line').innerHTML = pct !== null ? `目標 <b>${yen(goal)}</b>　達成率 <b style="color:var(--pink)">${pct}%</b>` : (goal > 0 ? `目標 <b>${yen(goal)}</b>` : `<span class="subtle">目標額は未設定</span>`);
     if (pct !== null) { f('prog-wrap').hidden = false; f('prog').style.width = `${pct}%`; }
     f('supporters').textContent = Number(explore.supporterCount ?? team.supportersCount ?? 0).toLocaleString('ja-JP');
     if (days !== null) { f('days').textContent = `あと${days}日`; f('days-label').textContent = `${team.nearestSeason.seasonName} 受付期限`; }
@@ -345,7 +346,7 @@
   mountRail(document.getElementById('rail-desktop'));
   mountRail(document.getElementById('rail-mobile'));
   document.getElementById('bar-name').textContent = team.name;
-  document.getElementById('bar-amount').textContent = yen(amount) + (goal > 0 ? ` / ${yen(goal)}` : '');
+  document.getElementById('bar-amount').textContent = yen(amount) + (pct !== null ? ` / ${yen(goal)}` : '');
   document.getElementById('bar-cta').href = yellHref;
 
   // 03 活動紹介
