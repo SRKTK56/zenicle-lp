@@ -986,11 +986,12 @@
     } catch (_) {}
   })();
 
-  // ── いま、応援したい挑戦（チームカード） ──
-  // データ源:
-  //   - /public/team-explore … チーム名・説明・アイコン・応援可否（サーバー側で「応援できる→活動が新しい」順）
-  //   - シーズンランキング（上の __zenicleProgramData）… チーム別の累計エール額・応援者数
-  //   - pitchVideoUrl / goalAmount … アプリ側に追加予定のフィールド（未実装の間は undefined）。
+  // ── プロジェクト一覧（チームカード） ──
+  // データ源は /public/team-explore の1本のみ（2026-09-14 にアプリ側で拡張済み）:
+  //   - teamName / description / iconUrl / supportState … サーバー側で「応援できる→活動が新しい」順
+  //   - totalAmount … 全期間の累計エール額（終了シーズン込み。順位表を非公開にしているプログラム分は除く）
+  //   - supporterCount … ユニークな応援者の実人数（エール件数ではない）
+  //   - pitchVideoUrl / goalAmount … チームコンソール「プロジェクト」カードから登録。
   //     動画が無ければ従来のチームアイコン画像を、目標額が無ければ進捗バーを出さない
   (async function loadTeamCards() {
     const API = 'https://api.zenicle.jp';
@@ -1041,7 +1042,7 @@
     modal?.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal && !modal.hidden) closeModal(); });
 
-    const buildCard = (t, stat) => {
+    const buildCard = (t) => {
       const teamUrl = `https://app.zenicle.jp/t/${esc(t.teamId)}`;
       const vid = youtubeId(t.pitchVideoUrl);
       // サムネイル: 動画があれば YouTube のサムネイル、無ければ従来のチームアイコン画像
@@ -1055,7 +1056,7 @@
       const thumbEl = vid
         ? `<button type="button" class="tcard-thumb" data-vid="${vid}" data-title="${esc(t.teamName)}" aria-label="${esc(t.teamName)} の動画を再生">${thumb}${play}</button>`
         : `<a class="tcard-thumb" href="${teamUrl}">${thumb}</a>`;
-      const amount = Number(stat?.totalAmount ?? 0);
+      const amount = Number(t.totalAmount ?? 0);
       const goal = Number(t.goalAmount ?? 0);
       const pct = goal > 0 ? Math.min(100, Math.round(amount / goal * 100)) : null;
       const progress = pct === null ? '' : `<div class="prog-bar"><i style="width:${pct}%"></i></div>`;
@@ -1072,15 +1073,15 @@
           ${t.description ? `<p class="tcard-desc">${esc(t.description)}</p>` : ''}
           ${amountRow}${progress}
           <div class="tcard-foot">
-            <span>👥 ${Number(stat?.supportersCount ?? 0).toLocaleString('ja-JP')}人</span>
+            <span>👥 ${Number(t.supporterCount ?? 0).toLocaleString('ja-JP')}人</span>
             <a href="${teamUrl}">エールを送る →</a>
           </div>
         </div>
       </article>`;
     };
 
-    const render = (teams, statByTeam) => {
-      grid.innerHTML = teams.map((t) => buildCard(t, statByTeam.get(t.teamId))).join('');
+    const render = (teams) => {
+      grid.innerHTML = teams.map(buildCard).join('');
       grid.querySelectorAll('button.tcard-thumb').forEach((b) => b.addEventListener('click', () => openModal(b.dataset.vid, b.dataset.title, b)));
     };
     try {
@@ -1089,18 +1090,7 @@
       // 公開済み（API側で保証）かつ、いまエールを送れるチームだけを全件表示する
       const teams = items.filter((t) => t && typeof t === 'object' && typeof t.teamId === 'string' && t.supportState === 'AVAILABLE');
       if (!teams.length) { grid.innerHTML = ''; return; }
-      // 1段階目: 集計を待たずにカードを出す（ランキング取得が遅くてもスケルトンのまま止めない）
-      render(teams, new Map());
-      // 2段階目: チーム別の累計（開催中シーズンのランキングを合算）が揃ったら差し込む
-      const statByTeam = new Map();
-      try {
-        const programs = await programDataPromise;
-        programs.forEach(({ seasons }) => (seasons ?? []).forEach((s) => (s.teams ?? []).forEach((r) => {
-          const cur = statByTeam.get(r.teamId) ?? { totalAmount: 0, supportersCount: 0 };
-          statByTeam.set(r.teamId, { totalAmount: cur.totalAmount + Number(r.totalAmount ?? 0), supportersCount: cur.supportersCount + Number(r.supportersCount ?? 0) });
-        })));
-      } catch (_) {}
-      if (statByTeam.size) render(teams, statByTeam);
+      render(teams);
     } catch (_) {
       grid.innerHTML = '<p class="text-sm col-span-full text-center py-6" style="color:var(--text-muted)">プロジェクト一覧を読み込めませんでした。時間をおいて再度お試しください。</p>';
     }
