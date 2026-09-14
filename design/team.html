@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>チームページ モック | ゼニくる デザイン</title>
+  <!--
+    チームページ（app.zenicle.jp/t/<teamId>）の再設計モック。
+    実API（api.zenicle.jp）で描画する。使い方:
+      ?team=<teamId>   任意のチームで表示（既定: 創輝Sendai）
+      &edit=1          メンバー表示。各セクションに「コンソールのどこで編集するか」を出す
+    アプリ実装時はこの HTML を参照する（構造・順番・見出し・トークン）。
+  -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    *{font-family:'Noto Sans JP',sans-serif}
+    /* ===== トークン（zenicle.jp の :root と同一。アプリの globals.css へそのまま移植する） ===== */
+    :root{
+      --bg:#F7F9FC; --bg-band:#FFFFFF; --bg-band-2:#EEF3FB;
+      --surface:#FFFFFF; --surface-soft:#F4F7FC;
+      --text:#14213D; --heading:#14213D; --text-muted:#5B6473; --text-subtle:#8A93A3;
+      --brand:#FF8A00; --brand-ink:#FFFFFF; --pink:#FF4D8D; --blue:#2563EB; --green:#7CC576;
+      --border:rgba(20,33,61,.10); --border-strong:rgba(20,33,61,.14);
+      --brand-grad:linear-gradient(135deg,#FFA726,#FF8A00);
+      --pink-grad:linear-gradient(135deg,#FF7BA8,#FF4D8D);
+      --brand-text-grad:linear-gradient(135deg,#FF8A00,#FF4D8D);
+      --card-shadow:0 10px 30px rgba(20,33,61,.08);
+      --card-shadow-hover:0 18px 44px rgba(20,33,61,.14);
+      --nav-bg:rgba(255,255,255,.72); --nav-border:rgba(20,33,61,.08);
+      --footer-bg:#14213D; --footer-text:rgba(255,255,255,.62); --footer-subtle:rgba(255,255,255,.4); --footer-border:rgba(255,255,255,.12);
+    }
+    body{background:var(--bg);color:var(--text)}
+    h1,h2,h3{color:var(--heading)}
+    .gold-text{background:var(--brand-text-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .btn-primary{background:var(--brand-grad);color:var(--brand-ink);box-shadow:0 10px 30px rgba(255,138,0,.28)}
+    .btn-ghost{border:1px solid var(--border-strong);color:var(--text);background:var(--surface)}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:1.25rem;box-shadow:var(--card-shadow)}
+    .muted{color:var(--text-muted)} .subtle{color:var(--text-subtle)}
+    #nav{background:var(--nav-bg);border-bottom:1px solid var(--nav-border);backdrop-filter:blur(12px)}
+    .navlink{color:var(--text-muted)} .navlink:hover{color:var(--brand)}
+
+    /* ===== セクション見出し（通し番号＋見出し。番号がページ全体の導線になる） ===== */
+    .sec{scroll-margin-top:5.5rem}
+    .sec-head{display:flex;align-items:baseline;gap:.9rem;margin-bottom:1rem}
+    .sec-num{font-size:.8rem;font-weight:900;letter-spacing:.18em;color:var(--brand)}
+    .sec-title{font-size:1.25rem;font-weight:900;line-height:1.3}
+    @media(min-width:768px){.sec-title{font-size:1.5rem}}
+    .sec-note{font-size:.8rem;color:var(--text-subtle);margin-left:auto}
+
+    /* ===== メンバー表示（?edit=1）: 編集先チップ ===== */
+    body:not(.is-editor) .edit-chip, body:not(.is-editor) #edit-banner{display:none}
+    .edit-chip{display:inline-flex;align-items:center;gap:.35rem;font-size:.72rem;font-weight:700;color:var(--blue);background:rgba(37,99,235,.08);border:1px dashed rgba(37,99,235,.45);border-radius:999px;padding:.25rem .7rem;margin-left:auto;white-space:nowrap}
+    .edit-chip:hover{background:rgba(37,99,235,.14)}
+    .is-editor .sec{outline:1px dashed rgba(37,99,235,.35);outline-offset:10px;border-radius:.5rem}
+
+    /* ===== カバー・動画 ===== */
+    .cover{aspect-ratio:21/9;background:var(--surface-soft);border-radius:1.25rem;overflow:hidden;position:relative}
+    .cover img{width:100%;height:100%;object-fit:cover;display:block}
+    .cover-tag{position:absolute;left:1rem;bottom:1rem;display:flex;flex-wrap:wrap;gap:.5rem}
+    .tag{font-size:.72rem;font-weight:900;padding:.35rem .75rem;border-radius:999px;background:rgba(255,255,255,.92);color:var(--text);backdrop-filter:blur(6px)}
+    .tag.brand{background:var(--brand-grad);color:#fff}
+    .video{aspect-ratio:16/9;background:#000;border-radius:1.25rem;overflow:hidden;position:relative;box-shadow:var(--card-shadow)}
+    .video iframe{width:100%;height:100%;border:0;display:block}
+    .video-empty{aspect-ratio:16/9;border-radius:1.25rem;border:2px dashed var(--border-strong);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;color:var(--text-subtle);background:var(--surface-soft)}
+
+    /* ===== 応援レール（PCは右に固定、スマホは動画の直後に置く） ===== */
+    .rail{position:sticky;top:5.5rem}
+    .big-amount{font-size:2.4rem;font-weight:900;line-height:1;letter-spacing:-.01em}
+    @media(min-width:1024px){.big-amount{font-size:2.75rem}}
+    .prog{height:.6rem;border-radius:999px;background:var(--surface-soft);border:1px solid var(--border);overflow:hidden}
+    .prog>i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#FFA726,#FF4D8D)}
+    .kpi{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+    .kpi div{background:var(--surface-soft);border:1px solid var(--border);border-radius:.9rem;padding:.7rem .9rem}
+    .kpi b{display:block;font-size:1.25rem;font-weight:900;line-height:1.1}
+    .kpi span{font-size:.72rem;color:var(--text-muted);font-weight:700}
+    .share{display:flex;gap:.5rem}
+    .share a,.share button{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:.35rem;height:2.5rem;border-radius:.75rem;border:1px solid var(--border-strong);background:var(--surface);font-size:.75rem;font-weight:700;color:var(--text);cursor:pointer}
+    .share a:hover,.share button:hover{border-color:var(--brand);color:var(--brand)}
+    /* スマホ下部の固定CTA */
+    #cta-bar{position:fixed;left:0;right:0;bottom:0;z-index:40;padding:.6rem 1rem calc(.6rem + env(safe-area-inset-bottom));background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-top:1px solid var(--border);display:flex;align-items:center;gap:.75rem}
+    @media(min-width:1024px){#cta-bar{display:none}}
+
+    /* ===== メンバー・応援者・投稿 ===== */
+    .member{display:flex;gap:.9rem;align-items:flex-start;padding:1rem;border:1px solid var(--border);border-radius:1rem;background:var(--surface)}
+    .avatar{width:3.25rem;height:3.25rem;border-radius:50%;object-fit:cover;flex-shrink:0;background:var(--surface-soft);border:1px solid var(--border)}
+    .avatar.ph{display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--brand);background:rgba(255,138,0,.12)}
+    .role{font-size:.65rem;font-weight:900;padding:.15rem .5rem;border-radius:999px;background:rgba(255,138,0,.12);color:var(--brand);margin-left:.4rem;vertical-align:middle}
+    .supp{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.75rem 0;border-top:1px solid var(--border)}
+    .supp:first-child{border-top:0}
+    .post{display:grid;grid-template-columns:5.5rem 1fr;gap:1rem;padding:1rem 0;border-top:1px solid var(--border)}
+    .post:first-child{border-top:0}
+    .post time{font-size:.75rem;font-weight:700;color:var(--text-subtle);padding-top:.15rem}
+    .post h3{font-size:1rem;font-weight:900}
+    .empty{padding:1.5rem;border:1px dashed var(--border-strong);border-radius:1rem;color:var(--text-subtle);font-size:.85rem;text-align:center;background:var(--surface-soft)}
+    .todo{font-size:.7rem;font-weight:900;color:#B45309;background:#FEF3C7;border:1px solid #FCD34D;border-radius:.4rem;padding:.1rem .45rem;vertical-align:middle}
+    .skel{background:linear-gradient(90deg,var(--surface-soft),#fff,var(--surface-soft));background-size:200% 100%;animation:sk 1.4s ease infinite;border-radius:1rem}
+    @keyframes sk{from{background-position:200% 0}to{background-position:-200% 0}}
+  </style>
+</head>
+<body>
+
+<!-- ===== NAV（アプリ側 SiteHeader をLPのトーンに合わせたもの） ===== -->
+<nav id="nav" class="fixed top-0 inset-x-0 z-50">
+  <div class="max-w-6xl mx-auto px-5 py-3 flex items-center justify-between gap-4">
+    <a href="https://app.zenicle.jp/" class="flex items-center shrink-0" aria-label="ゼニくる"><img src="../logo.png" alt="ゼニくる" class="h-8 w-auto"></a>
+    <div class="hidden md:flex items-center gap-6 text-sm font-medium">
+      <a href="https://app.zenicle.jp/" class="navlink">ホーム</a>
+      <a href="https://app.zenicle.jp/teams" class="navlink">チーム一覧</a>
+      <a href="https://app.zenicle.jp/p" class="navlink">プログラム</a>
+      <a href="https://zenicle.jp/#about" class="navlink">ゼニくるとは</a>
+    </div>
+    <div class="flex items-center gap-4 shrink-0">
+      <a href="https://app.zenicle.jp/login" class="navlink text-sm font-bold hidden sm:inline">ログイン</a>
+      <a href="https://app.zenicle.jp/login" class="btn-primary text-sm font-bold px-5 py-2.5 rounded-full">新規登録（無料）</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== メンバー表示バナー（?edit=1 のときだけ） ===== -->
+<div id="edit-banner" class="fixed top-[3.6rem] inset-x-0 z-40 text-center text-xs font-bold py-1.5" style="background:rgba(37,99,235,.1);color:var(--blue);border-bottom:1px dashed rgba(37,99,235,.45)">
+  ✎ メンバー表示中：各セクションの右上に編集先（コンソールの画面名）を出しています。公開ページでは非表示
+</div>
+
+<main class="max-w-6xl mx-auto px-5 pt-24 pb-28 lg:pb-16">
+
+  <!-- 01 カバー（team-explore / teams:id の iconUrl。21:9） -->
+  <section class="sec mb-6" id="s-cover">
+    <div class="cover" id="cover">
+      <div class="skel absolute inset-0"></div>
+    </div>
+    <div class="flex flex-wrap items-start gap-3 mt-5">
+      <div class="min-w-0 flex-1">
+        <p id="program-line" class="text-xs font-bold subtle mb-1">&nbsp;</p>
+        <h1 id="team-name" class="text-2xl md:text-4xl font-black leading-tight">読み込み中…</h1>
+      </div>
+      <a class="edit-chip" href="#" data-console="チーム設定 › ヘッダー">✎ カバー画像・チーム名を編集 → コンソール「チーム設定 › ヘッダー」</a>
+    </div>
+  </section>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+    <!-- ========== 本文カラム ========== -->
+    <div class="lg:col-span-8 space-y-12">
+
+      <!-- 02 動画（pitchVideoUrl） -->
+      <section class="sec" id="s-video">
+        <div class="sec-head">
+          <span class="sec-num">01</span><h2 class="sec-title">プロジェクト説明動画</h2>
+          <a class="edit-chip" href="#" data-console="チーム設定 › プロジェクト">✎ 動画URLを編集 → コンソール「チーム設定 › プロジェクト」</a>
+        </div>
+        <div id="video"></div>
+      </section>
+
+      <!-- （スマホのみ）応援レールをここに差し込む。PCは右カラム -->
+      <div id="rail-mobile" class="lg:hidden"></div>
+
+      <!-- 03 活動紹介・メッセージ（description ＋ thanksMessage【要確認】） -->
+      <section class="sec" id="s-about">
+        <div class="sec-head">
+          <span class="sec-num">02</span><h2 class="sec-title">活動紹介・メッセージ</h2>
+          <a class="edit-chip" href="#" data-console="チーム設定 › 活動紹介">✎ 紹介文を編集 → コンソール「チーム設定 › 活動紹介」</a>
+        </div>
+        <div class="card p-6 md:p-8">
+          <p id="description" class="text-[15px] leading-[1.9] whitespace-pre-wrap"></p>
+          <p class="mt-5 text-xs subtle">
+            <span class="todo">要確認</span> 「チームからのメッセージ（thanksMessage）」は現在シーズン単位で保存され、公開APIの teams/:id には含まれない。ここに出すなら API へ追加が必要。
+          </p>
+        </div>
+      </section>
+
+      <!-- 04 メンバー紹介（memberRoster） -->
+      <section class="sec" id="s-members">
+        <div class="sec-head">
+          <span class="sec-num">03</span><h2 class="sec-title">メンバー紹介</h2>
+          <a class="edit-chip" href="#" data-console="メンバー">✎ メンバー・プロフィールを編集 → コンソール「メンバー」</a>
+        </div>
+        <div id="members" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+      </section>
+
+      <!-- 05 お金の使い道（fundUsage） -->
+      <section class="sec" id="s-fund">
+        <div class="sec-head">
+          <span class="sec-num">04</span><h2 class="sec-title">エールの使い道</h2>
+          <a class="edit-chip" href="#" data-console="使い道（支出）">✎ 使い道を登録 → コンソール「使い道（支出）」</a>
+        </div>
+        <div id="fund"></div>
+      </section>
+
+      <!-- 06 現在の応援者（recentSupporters ＋ supporter-rankings） -->
+      <section class="sec" id="s-supporters">
+        <div class="sec-head">
+          <span class="sec-num">05</span><h2 class="sec-title">応援してくれている人</h2>
+          <span class="sec-note">自動で表示されます</span>
+        </div>
+        <div class="card p-6" id="supporters"></div>
+      </section>
+
+      <!-- 07 活動レポート（progressPosts。supporter向け reports は認証必須） -->
+      <section class="sec" id="s-reports">
+        <div class="sec-head">
+          <span class="sec-num">06</span><h2 class="sec-title">活動レポート</h2>
+          <a class="edit-chip" href="#" data-console="活動レポート（投稿）">✎ 投稿する → コンソール「活動レポート（投稿）」</a>
+        </div>
+        <div class="card p-6" id="posts"></div>
+        <p class="mt-3 text-xs subtle"><span class="todo">要確認</span> 支援者限定レポート（/teams/:id/reports）はログイン必須。公開ページでは「支援者限定 ○件」と件数だけ見せる案。</p>
+      </section>
+    </div>
+
+    <!-- ========== 応援レール（PC：右に固定） ========== -->
+    <aside class="lg:col-span-4 hidden lg:block self-stretch">
+      <div class="rail" id="rail-desktop"></div>
+    </aside>
+  </div>
+</main>
+
+<!-- 応援レールのテンプレート（PC / スマホの両方に差し込む） -->
+<template id="rail-tpl">
+  <section class="sec card p-6" id="s-yell">
+    <div class="sec-head" style="margin-bottom:.75rem">
+      <span class="sec-num">応援</span>
+      <a class="edit-chip" href="#" data-console="チーム設定 › プロジェクト">✎ 目標額 → 「チーム設定 › プロジェクト」</a>
+    </div>
+    <div class="big-amount gold-text" data-f="amount">¥0</div>
+    <div class="mt-1 text-sm muted" data-f="goal-line"></div>
+    <div class="prog mt-3" data-f="prog-wrap" hidden><i data-f="prog"></i></div>
+    <div class="kpi mt-4">
+      <div><b data-f="supporters">0</b><span>応援してくれた人</span></div>
+      <div><b data-f="days">—</b><span data-f="days-label">受付期限</span></div>
+    </div>
+    <a data-f="cta" href="#" class="btn-primary mt-5 flex items-center justify-center gap-2 font-black text-base py-4 rounded-full transition-transform hover:scale-[1.02]">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      このチームを応援する
+    </a>
+    <p class="text-center text-xs subtle mt-2">500円から・返礼品なし・カード決済</p>
+    <p class="text-xs font-bold muted mt-5 mb-2">このチームを広める</p>
+    <div class="share">
+      <a data-f="share-x" target="_blank" rel="noopener" href="#" aria-label="Xでシェア"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.655l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77Z"/></svg>X</a>
+      <a data-f="share-threads" target="_blank" rel="noopener" href="#">Threads</a>
+      <a data-f="share-line" target="_blank" rel="noopener" href="#">LINE</a>
+      <button type="button" data-f="copy">URLコピー</button>
+    </div>
+  </section>
+</template>
+
+<!-- スマホ下部の固定CTA -->
+<div id="cta-bar">
+  <div class="min-w-0 flex-1">
+    <div class="text-xs muted font-bold truncate" id="bar-name"></div>
+    <div class="font-black gold-text text-lg leading-tight" id="bar-amount"></div>
+  </div>
+  <a id="bar-cta" href="#" class="btn-primary font-black px-6 py-3 rounded-full text-sm whitespace-nowrap">応援する</a>
+</div>
+
+<footer class="mt-16" style="background:var(--footer-bg)">
+  <div class="max-w-6xl mx-auto px-5 py-10 text-xs" style="color:var(--footer-subtle)">
+    デザインモック（zenicle.jp/design/team.html）— 実装時はこの構造・順番・見出し・トークンに合わせる。
+  </div>
+</footer>
+
+<script>
+(async function () {
+  const API = 'https://api.zenicle.jp';
+  const q = new URLSearchParams(location.search);
+  const teamId = q.get('team') || 'cmnaoawxu000duny4pxwveozo';  // 既定: 創輝Sendai（投稿・メンバーが多い）
+  if (q.get('edit') === '1') document.body.classList.add('is-editor');
+
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  const yen = (n) => `¥${(Number.isFinite(Number(n)) ? Number(n) : 0).toLocaleString('ja-JP')}`;
+  const fmtDate = (v) => { const d = new Date(v); return isNaN(d) ? '' : `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`; };
+  const youtubeId = (url) => {
+    if (!url) return null;
+    try {
+      const u = new URL(String(url)); const host = u.hostname.replace(/^www\.|^m\./, ''); let id = null;
+      if (host === 'youtu.be') id = u.pathname.slice(1).split('/')[0];
+      else if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
+        if (u.pathname === '/watch') id = u.searchParams.get('v');
+        else { const m = u.pathname.match(/^\/(shorts|embed|live|v)\/([^/?#]+)/); if (m) id = m[2]; }
+      }
+      return id && /^[\w-]{11}$/.test(id) ? id : null;
+    } catch (_) { return null; }
+  };
+  const ok = (r) => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`));
+
+  // 編集チップ: コンソールへの導線（モックでは alert の代わりに title で示す）
+  document.querySelectorAll('.edit-chip').forEach((a) => { a.title = `コンソール「${a.dataset.console}」を開く`; a.addEventListener('click', (e) => e.preventDefault()); });
+
+  let team, explore, posts, rankings;
+  try {
+    [team, explore, posts, rankings] = await Promise.all([
+      fetch(`${API}/teams/${teamId}`).then(ok).then((d) => d?.data ?? d),
+      fetch(`${API}/public/team-explore`).then(ok).then((d) => (d?.data?.items ?? []).find((t) => t.teamId === teamId) ?? {}).catch(() => ({})),
+      fetch(`${API}/teams/${teamId}/posts`).then(ok).then((d) => Array.isArray(d?.data) ? d.data : []).catch(() => []),
+      fetch(`${API}/teams/${teamId}/supporter-rankings`).then(ok).then((d) => d?.data?.seasons ?? []).catch(() => []),
+    ]);
+  } catch (e) {
+    document.getElementById('team-name').textContent = 'チーム情報を取得できませんでした';
+    return;
+  }
+
+  const pageUrl = `https://app.zenicle.jp/t/${encodeURIComponent(teamId)}`;
+  document.title = `${team.name} | ゼニくる（モック）`;
+
+  // 01 カバー・見出し
+  const cover = document.getElementById('cover');
+  const tags = [];
+  const part = (team.participations ?? [])[0];
+  if (part) tags.push(`<span class="tag brand">${esc(part.programName)}</span>`);
+  if (team.nearestSeason?.seasonName) tags.push(`<span class="tag">${esc(team.nearestSeason.seasonName)} 開催中</span>`);
+  cover.innerHTML = (team.iconUrl ? `<img src="${esc(team.iconUrl)}" alt="">` : '') + `<div class="cover-tag">${tags.join('')}</div>`;
+  document.getElementById('team-name').textContent = team.name;
+  document.getElementById('program-line').textContent = part ? `参加プログラム：${part.programName}` : '';
+
+  // 02 動画
+  const vid = youtubeId(explore.pitchVideoUrl);
+  document.getElementById('video').innerHTML = vid
+    ? `<div class="video"><iframe src="https://www.youtube-nocookie.com/embed/${vid}?rel=0" title="${esc(team.name)} の説明動画" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe></div>`
+    : `<div class="video-empty"><svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" style="opacity:.35"><path d="M8 5v14l11-7z"/></svg><span class="text-sm font-bold">説明動画は準備中です</span><span class="text-xs">チームが登録すると、ここに熱意を語る動画が表示されます</span></div>`;
+
+  // 応援レール（PC右・スマホは動画直後）
+  const amount = Number(explore.totalAmount ?? 0);
+  const goal = Number(explore.goalAmount ?? 0);
+  const pct = goal > 0 ? Math.min(100, Math.round(amount / goal * 100)) : null;
+  const ends = team.nearestSeason?.endsAt ? new Date(team.nearestSeason.endsAt) : null;
+  const days = ends ? Math.max(0, Math.ceil((ends - Date.now()) / 86400000)) : null;
+  const yellHref = team.nearestSeason?.seasonTeamId ? `https://app.zenicle.jp/yell?seasonTeamId=${encodeURIComponent(team.nearestSeason.seasonTeamId)}` : pageUrl;
+  const shareText = `${team.name} を応援しています｜ゼニくる`;
+  const mountRail = (host) => {
+    const n = document.getElementById('rail-tpl').content.cloneNode(true);
+    const f = (k) => n.querySelector(`[data-f="${k}"]`);
+    f('amount').textContent = yen(amount);
+    f('goal-line').innerHTML = goal > 0 ? `目標 <b>${yen(goal)}</b>　達成率 <b style="color:var(--pink)">${pct}%</b>` : `<span class="subtle">目標額は未設定</span>`;
+    if (pct !== null) { f('prog-wrap').hidden = false; f('prog').style.width = `${pct}%`; }
+    f('supporters').textContent = Number(explore.supporterCount ?? team.supportersCount ?? 0).toLocaleString('ja-JP');
+    if (days !== null) { f('days').textContent = `あと${days}日`; f('days-label').textContent = `${team.nearestSeason.seasonName} 受付期限`; }
+    else { f('days').textContent = '—'; f('days-label').textContent = '受付中のシーズンなし'; }
+    f('cta').href = yellHref;
+    f('share-x').href = `https://x.com/intent/post?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(pageUrl)}`;
+    f('share-threads').href = `https://www.threads.net/intent/post?text=${encodeURIComponent(shareText + ' ' + pageUrl)}`;
+    f('share-line').href = `https://line.me/R/share?text=${encodeURIComponent(shareText + ' ' + pageUrl)}`;
+    f('copy').addEventListener('click', async (e) => { try { await navigator.clipboard.writeText(pageUrl); e.currentTarget.textContent = 'コピーしました'; setTimeout(() => e.currentTarget.textContent = 'URLコピー', 1500); } catch (_) {} });
+    n.querySelector('.edit-chip').title = 'コンソール「チーム設定 › プロジェクト」を開く';
+    host.appendChild(n);
+  };
+  mountRail(document.getElementById('rail-desktop'));
+  mountRail(document.getElementById('rail-mobile'));
+  document.getElementById('bar-name').textContent = team.name;
+  document.getElementById('bar-amount').textContent = yen(amount) + (goal > 0 ? ` / ${yen(goal)}` : '');
+  document.getElementById('bar-cta').href = yellHref;
+
+  // 03 活動紹介
+  document.getElementById('description').textContent = team.description || '（紹介文は未登録）';
+
+  // 04 メンバー
+  const roster = team.memberRoster ?? [];
+  document.getElementById('members').innerHTML = roster.length ? roster.map((m) => `
+    <div class="member">
+      ${m.avatarUrl ? `<img class="avatar" src="${esc(m.avatarUrl)}" alt="">` : `<div class="avatar ph">${esc((m.displayName || '?').slice(0, 1))}</div>`}
+      <div class="min-w-0">
+        <div class="font-black text-[15px]">${esc(m.displayName)}${m.role === 'admin' ? '<span class="role">代表</span>' : ''}</div>
+        ${m.bio ? `<p class="text-xs muted mt-1 leading-relaxed whitespace-pre-wrap">${esc(m.bio)}</p>` : ''}
+      </div>
+    </div>`).join('') : `<div class="empty md:col-span-2">メンバー紹介はまだ登録されていません</div>`;
+
+  // 05 使い道
+  const fund = team.fundUsage ?? [];
+  document.getElementById('fund').innerHTML = fund.length
+    ? `<div class="card p-6">${fund.map((r) => `<div class="supp"><span class="text-sm font-bold">${esc(r.title ?? r.category ?? '')}</span><span class="font-black">${yen(r.amount)}</span></div>`).join('')}</div>`
+    : `<div class="empty">エールの使い道はまだ登録されていません。登録すると「何にいくら使ったか」がここに並びます。</div>`;
+
+  // 06 応援者（直近のエール ＋ シーズン別ランキング上位）
+  const recent = team.recentSupporters ?? [];
+  const topRank = rankings.flatMap((s) => (s.rankings ?? []).slice(0, 3).map((r) => ({ ...r, season: s.seasonName })));
+  document.getElementById('supporters').innerHTML = (recent.length || topRank.length) ? `
+    ${topRank.length ? `<p class="text-xs font-bold muted mb-2">エール額ランキング</p><div class="mb-5">${topRank.map((r) => `<div class="supp"><span class="text-sm"><b style="color:var(--brand)">${r.rank}</b>　${esc(r.label)} <span class="subtle text-xs">${esc(r.season)}</span></span><span class="font-black">${yen(r.totalAmount)}</span></div>`).join('')}</div>` : ''}
+    ${recent.length ? `<p class="text-xs font-bold muted mb-2">最近のエール</p><div>${recent.slice(0, 8).map((r) => `<div class="supp"><span class="text-sm">${esc(r.displayLabel)}</span><span class="text-xs subtle">${fmtDate(r.donatedAt)}　<b class="text-sm" style="color:var(--text)">${yen(r.amount)}</b></span></div>`).join('')}</div>` : ''}`
+    : `<div class="empty">まだエールはありません。最初の応援者になりませんか？</div>`;
+
+  // 07 活動レポート（公開の進捗投稿）
+  document.getElementById('posts').innerHTML = posts.length ? posts.slice(0, 6).map((p) => `
+    <a class="post" href="https://app.zenicle.jp/t/${encodeURIComponent(teamId)}/posts/${encodeURIComponent(p.id)}">
+      <time>${fmtDate(p.createdAt)}</time>
+      <div><h3>${esc(p.title)}</h3>${p.content ? `<p class="text-sm muted mt-1 line-clamp-2">${esc(p.content)}</p>` : ''}</div>
+    </a>`).join('') : `<div class="empty">活動レポートはまだありません</div>`;
+})();
+</script>
+</body>
+</html>
