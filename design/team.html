@@ -62,6 +62,9 @@
     .add-box b{font-size:.95rem} .add-box span{font-size:.78rem;color:var(--text-muted)}
     .is-editor .empty{display:none}
     .dirty{display:inline-flex;align-items:center;font-size:.68rem;font-weight:900;color:#fff;background:var(--pink);border-radius:999px;padding:.15rem .55rem;margin-left:.5rem;vertical-align:middle}
+    .pchip{display:inline-flex;align-items:center;gap:.5rem;padding:.5rem .9rem;border-radius:.9rem;border:1px solid var(--border);background:var(--surface);font-size:.85rem;font-weight:700}
+    .pchip small{font-size:.68rem;font-weight:900;padding:.1rem .5rem;border-radius:999px;background:rgba(255,138,0,.12);color:var(--brand)}
+    .pchip small.gray{background:var(--surface-soft);color:var(--text-subtle)}
     .m-edit{position:absolute;right:.6rem;top:.6rem;width:1.9rem;height:1.9rem;border-radius:50%;border:1.5px solid rgba(37,99,235,.5);background:#fff;color:var(--blue);font-size:.8rem;display:flex;align-items:center;justify-content:center;cursor:pointer}
     .member{position:relative}
     /* 右ドロワー */
@@ -147,13 +150,23 @@
 <!-- 編集モードのステータスバー：下書き → 公開申請 → 運営の承認 → 公開 -->
 <div id="edit-banner" class="fixed top-[3.6rem] inset-x-0 z-40 text-xs font-bold" style="background:#fff;color:var(--text);border-bottom:1px solid rgba(37,99,235,.35);box-shadow:0 4px 16px rgba(20,33,61,.08)">
   <div class="max-w-6xl mx-auto px-5 py-2 flex flex-wrap items-center gap-x-4 gap-y-1">
-    <span style="color:var(--blue)">✎ 編集モード</span>
-    <span class="subtle font-medium">応援者と同じ画面を見ながら直せます。変更は保存しても公開されず、<b>ゼニくる運営の承認後に公開</b>されます</span>
+    <span style="color:var(--blue)">✎ チームコンソール</span>
+    <select id="team-switch" class="text-xs font-bold rounded-lg px-2 py-1" style="border:1px solid var(--border-strong);background:#fff;max-width:16rem" title="チームを切り替える（管理しているチーム）"></select>
+    <button type="button" id="todo-toggle" class="text-xs font-bold px-2 py-1 rounded-lg" style="border:1px solid var(--border-strong);background:#fff">やること <span id="todo-count" class="px-1.5 rounded-full" style="background:var(--pink);color:#fff">0</span></button>
     <span class="ml-auto flex items-center gap-2">
       <span id="draft-state" class="px-2 py-0.5 rounded-full" style="background:var(--surface-soft);color:var(--text-muted)">未公開の変更：0件</span>
       <button type="button" id="submit-review" class="btn-primary px-3 py-1 rounded-full disabled:opacity-40" disabled>公開を申請する</button>
       <a href="?team=" id="exit-edit" class="underline subtle">終了</a>
     </span>
+  </div>
+</div>
+
+<!-- やること：空欄のセクションへのジャンプ（編集モードのみ） -->
+<div id="todo-panel" class="max-w-6xl mx-auto px-5 pt-24 -mb-16" hidden>
+  <div class="card p-5" style="border-color:rgba(255,77,141,.35)">
+    <p class="text-xs font-black mb-2" style="color:var(--pink)">やること — 公開ページで空欄になっている項目</p>
+    <ul id="todo-list" class="text-sm font-bold space-y-1"></ul>
+    <p class="text-xs subtle mt-3">各行をクリックするとその場所へ移動します。埋めるほど応援されやすくなります。</p>
   </div>
 </div>
 
@@ -171,6 +184,15 @@
       </div>
       <button type="button" class="edit-chip" data-edit="header">✎ 編集</button>
     </div>
+  </section>
+
+  <!-- 参加プログラム（participations ＋ seasonTeams）。編集モードの管理者は「＋ プログラムにエントリー」 -->
+  <section class="sec mb-10" id="s-programs">
+    <div class="sec-head" style="margin-bottom:.6rem">
+      <span class="sec-num">参加</span><h2 class="sec-title" style="font-size:1.1rem">参加プログラム</h2>
+      <button type="button" class="edit-chip" data-edit="entry">＋ プログラムにエントリー</button>
+    </div>
+    <div id="programs" class="flex flex-wrap gap-2"></div>
   </section>
 
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
@@ -369,6 +391,7 @@
     member: (m) => ({ where: 'チームページの「03 メンバー紹介」', title: `${m.displayName} のプロフィール（管理者が編集）`, body: F.file('f-avatar', 'アイコン画像') + F.text('f-mname', '表示名', m.displayName) + F.area('f-bio', '自己紹介', m.bio, 4) + F.text('f-mx', 'X', m.xUrl) + F.text('f-mig', 'Instagram', m.instagramUrl) + F.text('f-mweb', 'Web', m.webUrl) }),
     fund:   () => ({ where: 'チームページの「04 エールの使い道」', title: '使い道を登録', body: F.text('f-fund-title', '何に使ったか', '') + F.text('f-fund-amt', '金額（円）', '') + F.text('f-fund-date', '日付', '') }),
     post:   () => ({ where: 'チームページの「06 活動レポート」', title: '活動レポートを投稿', body: F.text('f-post-title', 'タイトル', '') + F.area('f-post-body', '本文', '', 8) + F.file('f-post-img', '画像') }),
+    entry:  () => ({ where: 'チームページの「参加プログラム」', title: 'プログラムにエントリー（管理者のみ）', body: (accepting.length ? `<div><label>受付中のプログラム</label>${accepting.map((p) => `<label style="display:flex;gap:.6rem;align-items:flex-start;padding:.7rem;border:1px solid var(--border);border-radius:.75rem;margin-bottom:.5rem;font-weight:400;color:var(--text)"><input type="radio" name="f-entry" style="width:auto;margin-top:.2rem"><span><b>${esc(p.programName)}</b><br><span class="hint">${esc(p.primarySeasonName ?? '')}</span></span></label>`).join('')}</div>` : '<p class="hint">いま受付中のプログラムはありません</p>') + F.area('f-entry-msg', '主催者へのメッセージ（任意）', '', 3, 'エントリー後は主催者の承認を待ちます') }),
     sns:    () => ({ where: 'チームページの「07 SNS・リンク」', title: 'SNS・リンク', body: F.text('f-web', 'Web', team.webUrl) + F.text('f-x', 'X', team.xUrl) + F.text('f-ig', 'Instagram', team.instagramUrl) + F.text('f-yt', 'YouTube', team.youtubeUrl) + F.text('f-other', 'その他', team.otherUrl) }),
   };
   const drawer = document.getElementById('drawer');
@@ -416,6 +439,27 @@
   });
   // 空欄の枠（編集モードのときだけ表示される）
   const addBox = (key, label, hint) => `<div class="add-box" data-edit="${key}"><b>＋ ${label}</b><span>${hint}</span></div>`;
+
+  // 参加プログラム（受付中の一覧はエントリー用ドロワーに使う）
+  let accepting = [];
+  try {
+    const pk = await fetch(`${API}/public/program-pickups`).then(ok);
+    accepting = (pk?.data?.items ?? []).filter((p) => p.acceptingEntries);
+  } catch (_) {}
+  const parts = team.participations ?? [];
+  document.getElementById('programs').innerHTML = parts.length
+    ? parts.map((pp) => `<a class="pchip" href="https://app.zenicle.jp/p/${esc(pp.programSlug || pp.programId)}">${esc(pp.programName)}${pp.activeSeason ? `<small>${esc(pp.activeSeason.name)} 参加中</small>` : `<small class="gray">開催中シーズンなし</small>`}</a>`).join('')
+    : (isEditor ? addBox('entry', 'プログラムにエントリーする', '参加すると応援（エール）を受け付けられます') : '<p class="text-sm subtle">参加中のプログラムはありません</p>');
+
+  // チーム切替（コンソールのヘッダー相当。モックでは応援受付中のチームを候補にする）
+  if (isEditor) {
+    try {
+      const all = await fetch(`${API}/public/team-explore`).then(ok).then((d) => d?.data?.items ?? []);
+      const sel = document.getElementById('team-switch');
+      sel.innerHTML = all.filter((t) => t.supportState === 'AVAILABLE').map((t) => `<option value="${esc(t.teamId)}" ${t.teamId === teamId ? 'selected' : ''}>${esc(t.teamName)}</option>`).join('');
+      sel.addEventListener('change', () => { location.search = `?team=${encodeURIComponent(sel.value)}&edit=1`; });
+    } catch (_) {}
+  }
 
   // 01 カバー・見出し
   const cover = document.getElementById('cover');
@@ -516,6 +560,22 @@
   document.getElementById('sns').innerHTML = links.length
     ? `<div class="flex flex-wrap gap-2">${links.map(([k, u]) => `<a class="btn-ghost text-sm font-bold px-4 py-2 rounded-full" href="${esc(u)}" target="_blank" rel="noopener">${esc(k)}</a>`).join('')}</div>`
     : (isEditor ? addBox('sns', 'SNS・リンクを登録する', '普段の発信先があると信頼につながります') : `<div class="empty">SNS リンクはまだ登録されていません</div>`);
+
+  // やること：空欄を集計してジャンプ先を並べる（編集モードのみ）
+  if (isEditor) {
+    const todos = [];
+    if (!vid) todos.push(['s-video', 'プロジェクト説明動画が未登録です']);
+    if (!(goal > 0)) todos.push(['s-yell', '目標エール額が未設定です']);
+    if (!team.description) todos.push(['s-about', '活動紹介が未登録です']);
+    if (!roster.length) todos.push(['s-members', 'メンバー紹介がありません']);
+    if (!fund.length) todos.push(['s-fund', 'エールの使い道が未登録です']);
+    if (!posts.length) todos.push(['s-reports', '活動レポートがまだありません']);
+    if (!links.length) todos.push(['s-sns', 'SNS・リンクが未登録です']);
+    if (!parts.length) todos.push(['s-programs', 'プログラムに参加していません']);
+    document.getElementById('todo-count').textContent = todos.length;
+    document.getElementById('todo-list').innerHTML = todos.map(([id, t]) => `<li><a href="#${id}" style="color:var(--blue)">☐ ${t} →</a></li>`).join('') || '<li class="subtle">空欄はありません</li>';
+    document.getElementById('todo-toggle').addEventListener('click', () => { const p = document.getElementById('todo-panel'); p.hidden = !p.hidden; });
+  }
 })();
 </script>
 </body>
