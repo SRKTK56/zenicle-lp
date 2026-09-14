@@ -124,21 +124,73 @@
     .editorial-list{border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
     .editorial-list>*+*{border-top:1px solid var(--border)}
 
-    /* ── Hero ── */
-    #heroSection{background:var(--bg-hero)}
-    #heroScrim{position:absolute;inset:0;background:var(--hero-scrim);pointer-events:none}
-    .cup-ribbon{background:var(--pink-grad);color:#fff;box-shadow:0 8px 24px rgba(255,77,141,.32)}
-    /* スマホでは背景画像を上部バナーとして通常フローに出し、その下にテキストを配置（重なり回避） */
+    /* ── Hero（2カラム：左コピー／右写真） ── */
+    #heroSection{background:var(--bg-hero);position:relative;overflow:hidden}
+    /* 画面端のカラフルなにじみ */
+    .hero-blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;pointer-events:none}
+    /* 見出し・リード文は各行を折り返さず、画面幅に合わせて文字サイズを縮めて2行に収める
+       （見出し11文字／リード文22文字が横幅 100vw−左右余白2.5rem に入るサイズを上限にする） */
     @media(max-width:767px){
-      #heroSection{display:block!important;min-height:auto!important;padding:6.5rem 1.25rem 3.5rem!important}
-      #heroScrim{display:none!important}
-      #heroBg{
-        position:relative!important;inset:auto!important;
-        width:100%!important;aspect-ratio:1915/821!important;height:auto!important;max-height:none!important;
-        background-position:center!important;background-size:cover!important;
-        border-radius:1rem!important;margin-bottom:1.75rem!important;
-      }
+      .hero-h1{font-size:min(2.05rem,calc((100vw - 2.5rem) / 11.3))}
+      .hero-lead{font-size:min(1rem,calc((100vw - 2.5rem) / 23.2))}
     }
+    .hero-stat{display:flex;align-items:center;gap:.75rem}
+    .hero-stat+.hero-stat{border-left:1px solid var(--border-strong);padding-left:1.25rem}
+    .hero-stat-label{font-size:.7rem;color:var(--text-muted);font-weight:700}
+    .hero-stat-value{font-size:1.5rem;font-weight:900;line-height:1.1}
+    .hero-stat-value small{font-size:.75rem;font-weight:700;margin-left:.1em}
+    /* 背景写真：右半分に敷き、左端に向かって透明になるマスクで背景色へ溶かす */
+    /* 写真右端のコピー「私は、挑戦を諦めない。」が見切れないよう、右端基準で配置する */
+    #heroBg{position:absolute;top:0;bottom:0;right:0;left:35%;pointer-events:none;
+      background:url('./photos/hero-woman.png') right 40%/cover no-repeat;
+      -webkit-mask-image:linear-gradient(to right,transparent 0%,rgba(0,0,0,.35) 30%,#000 60%);
+              mask-image:linear-gradient(to right,transparent 0%,rgba(0,0,0,.35) 30%,#000 60%)}
+    @supports not ((mask-image:linear-gradient(#000,#000)) or (-webkit-mask-image:linear-gradient(#000,#000))){
+      #heroBg::after{content:'';position:absolute;inset:0;background:linear-gradient(to right,var(--bg-hero) 0%,rgba(234,242,255,.85) 30%,rgba(234,242,255,0) 60%)}
+    }
+    /* スマホでは写真を上部に全幅で敷き（枠なし）、下に向かって背景色へ溶かしてからテキストを置く（重なり回避） */
+    @media(max-width:1023px){
+      #heroBg{position:relative;left:auto;right:auto;top:auto;bottom:auto;
+        width:calc(100% + 2.5rem);margin:-1.5rem -1.25rem .5rem;aspect-ratio:4/3;
+        background-position:right 30%;
+        -webkit-mask-image:linear-gradient(to bottom,#000 55%,transparent 100%);
+                mask-image:linear-gradient(to bottom,#000 55%,transparent 100%)}
+    }
+    .cup-ribbon{background:var(--pink-grad);color:#fff;box-shadow:0 8px 24px rgba(255,77,141,.32)}
+
+    /* ── チームカード（いま、応援したい挑戦） ── */
+    .tcard{background:var(--surface);border:1px solid var(--border);border-radius:1rem;overflow:hidden;box-shadow:var(--card-shadow);transition:transform .3s ease,box-shadow .3s ease,border-color .3s ease;display:flex;flex-direction:column}
+    .tcard:hover{transform:translateY(-4px);box-shadow:var(--card-shadow-hover);border-color:rgba(255,138,0,.4)}
+    /* チームのカバー画像は 21:9 で登録されているので枠も合わせる（YouTube サムネは中央を切り出す） */
+    .tcard-thumb{position:relative;aspect-ratio:21/9;background:var(--surface-soft);overflow:hidden;display:block;cursor:pointer;border:0;padding:0;width:100%;text-align:left}
+    .tcard-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s ease}
+    .tcard:hover .tcard-thumb img{transform:scale(1.04)}
+    .play-btn{position:absolute;inset:0;margin:auto;width:3.75rem;height:3.75rem;border-radius:50%;background:rgba(20,33,61,.72);border:2px solid rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;color:#fff;transition:transform .2s ease,background .2s ease;pointer-events:none}
+    .tcard-thumb:hover .play-btn{transform:scale(1.08);background:var(--brand)}
+    .play-btn svg{margin-left:.2rem}
+    .tcard-body{padding:1.1rem 1.15rem 1.15rem;display:flex;flex-direction:column;gap:.6rem;flex:1}
+    .tcard-title{font-weight:900;font-size:1.05rem;line-height:1.5;color:var(--heading);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .tcard-desc{font-size:.82rem;line-height:1.65;color:var(--text-muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .tcard-amount{font-weight:900;font-size:1.2rem;color:var(--heading)}
+    .tcard-amount small{font-weight:700;font-size:.78rem;color:var(--text-subtle)}
+    .tcard-pct{font-weight:900;font-size:1.05rem;color:var(--brand)}
+    .prog-bar{height:.5rem;border-radius:999px;background:var(--surface-soft);overflow:hidden;border:1px solid var(--border)}
+    .prog-bar>i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#FFA726,#FF4D8D)}
+    .tcard-foot{display:flex;align-items:center;justify-content:space-between;gap:.5rem;font-size:.82rem;color:var(--text-muted);border-top:1px solid var(--border);padding-top:.6rem;margin-top:auto}
+    .tcard-foot a{color:var(--brand);font-weight:900;white-space:nowrap}
+    .tcard-skel{aspect-ratio:21/9;border-radius:1rem;background:linear-gradient(90deg,var(--surface-soft),#fff,var(--surface-soft));background-size:200% 100%;animation:skel 1.4s ease infinite}
+    @keyframes skel{from{background-position:200% 0}to{background-position:-200% 0}}
+
+    /* ── 動画モーダル ── */
+    #vmodal[hidden]{display:none}
+    #vmodal{position:fixed;inset:0;z-index:100;background:rgba(10,8,18,.82);display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(6px)}
+    #vmodal .vwrap{width:min(100%,64rem)}
+    #vmodal .vbar{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.6rem}
+    #vmodal .vbox{aspect-ratio:16/9;background:#000;border-radius:1rem;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+    #vmodal iframe{width:100%;height:100%;border:0;display:block}
+    #vmodal .vclose{flex-shrink:0;color:#fff;font-weight:900;font-size:.85rem;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:.4rem .9rem;cursor:pointer}
+    #vmodal .vclose:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+    #vmodal .vtitle{color:#fff;font-weight:700;font-size:.85rem;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
     /* ── Team Ticker ── */
     #team-ticker{position:fixed;top:3.75rem;inset-x:0;z-index:48;height:2rem;display:flex;align-items:center;background:var(--ticker-bg);border-bottom:1px solid var(--ticker-border);backdrop-filter:blur(8px)}
@@ -150,17 +202,6 @@
     @keyframes ticker-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
     .ticker-anim{animation:ticker-scroll 55s linear infinite}
     .ticker-anim:hover{animation-play-state:paused}
-
-    /* ── Activity Marquee ── */
-    .marquee-viewport{overflow:hidden;width:100%}
-    .marquee-track{display:flex;gap:.75rem;width:max-content}
-    .marquee-track img{height:9rem;width:auto;border-radius:.75rem;object-fit:cover;flex-shrink:0;border:1px solid var(--border)}
-    @media(min-width:768px){.marquee-track img{height:11rem}}
-    @keyframes marquee-left{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-    @keyframes marquee-right{from{transform:translateX(-50%)}to{transform:translateX(0)}}
-    .marquee-left{animation:marquee-left 32s linear infinite}
-    .marquee-right{animation:marquee-right 38s linear infinite}
-    .marquee-viewport:hover .marquee-track{animation-play-state:paused}
 
     /* ── Footer（両テーマともダーク地） ── */
     footer{background:var(--footer-bg)}
@@ -185,61 +226,106 @@
 
 <!-- ========== NAV ========== -->
 <nav id="nav" class="fixed top-0 inset-x-0 z-50 backdrop-blur-md">
-  <div class="max-w-7xl mx-auto px-5 py-3.5 flex items-center justify-between">
-    <a href="#" class="flex items-center" aria-label="ゼニくる">
+  <div class="max-w-7xl mx-auto px-5 py-3.5 flex items-center justify-between gap-4">
+    <a href="#" class="flex items-center shrink-0" aria-label="ゼニくる">
       <img src="logo.png" alt="ゼニくる" class="h-8 w-auto object-contain">
     </a>
-    <div class="hidden md:flex items-center gap-7 text-sm font-medium">
-      <a href="#support"  class="navlink">応援実績</a>
-      <a href="#projects" class="navlink">プログラム</a>
-      <a href="#howto"    class="navlink">仕組み</a>
-      <a href="#faq"      class="navlink">FAQ</a>
+    <div class="hidden lg:flex items-center gap-7 text-sm font-medium">
+      <a href="#teams"          class="navlink">プロジェクトを探す</a>
+      <a href="#about"          class="navlink">ゼニくるとは</a>
+      <a href="#direct-economy" class="navlink">応援する理由</a>
+      <a href="#howto"          class="navlink">仕組み</a>
+      <a href="#faq"            class="navlink">FAQ</a>
     </div>
-    <a href="https://app.zenicle.jp"
-       class="btn-primary text-sm font-bold px-5 py-2.5 rounded-full transition-all hover:scale-105 transform">
-      今すぐ始める
-    </a>
+    <div class="flex items-center gap-3 sm:gap-5 shrink-0">
+      <a href="https://app.zenicle.jp/login" class="navlink text-sm font-bold hidden sm:inline">ログイン</a>
+      <a href="https://app.zenicle.jp/login"
+         class="btn-primary text-sm font-bold px-5 py-2.5 rounded-full transition-all hover:scale-105 transform whitespace-nowrap">
+        新規登録（無料）
+      </a>
+    </div>
   </div>
 </nav>
 
 
 <!-- ========== HERO ========== -->
-<section id="heroSection" class="relative overflow-hidden" style="min-height:88vh;padding:8.5rem 1.25rem 4rem;display:flex;align-items:center">
-  <div id="heroBg" class="absolute inset-0 pointer-events-none" style="background:url('./photos/hero-woman.png') 72% 40%/cover no-repeat"></div>
-  <div id="heroScrim"></div>
-  <div class="max-w-7xl mx-auto relative w-full">
-    <div class="reveal max-w-2xl">
-      <p class="text-xs font-bold tracking-[.28em] mb-4" style="color:var(--brand)">次世代応援プラットフォーム『ゼニくる』</p>
-      <h1 class="text-4xl md:text-5xl lg:text-6xl font-black leading-tight mb-5">
-        <span class="gold-text">エール（応援金）</span>が、<br>挑戦者に<span class="brand-underline">直接届く</span>。
+<section id="heroSection" class="relative" style="padding:6.75rem 1.25rem 1.75rem">
+  <!-- 画面端のカラフルなにじみ（装飾） -->
+  <div class="hero-blob" style="width:22rem;height:22rem;left:-8rem;top:6rem;background:linear-gradient(135deg,#FFD23F,#FF4D8D)"></div>
+  <div class="hero-blob" style="width:20rem;height:20rem;right:-7rem;top:2rem;background:linear-gradient(135deg,#60A5FA,#A78BFA)"></div>
+  <div class="hero-blob" style="width:16rem;height:16rem;right:10%;bottom:-6rem;background:linear-gradient(135deg,#7CC576,#FFD23F)"></div>
+
+  <!-- 背景写真：右半分に配置し、左へ向かってグラデーションで溶かす（差し替え予定。photos/hero-woman.png を仮置き） -->
+  <div id="heroBg" aria-hidden="true"></div>
+
+  <div class="max-w-7xl mx-auto relative w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+    <!-- 左：コピー -->
+    <div class="reveal lg:col-span-7">
+      <h1 class="hero-h1 md:text-5xl xl:text-[3.4rem] font-black leading-[1.18] mb-4">
+        <span class="whitespace-nowrap"><span class="gold-text">熱量の高い挑戦</span>が集まる</span><br>
+        <span class="whitespace-nowrap">応援プラットフォーム</span>
       </h1>
-      <p class="text-base leading-relaxed max-w-md muted-line mb-7">
-        応援したい人と挑戦したい人を、ダイレクトにつなぐ新しい応援のかたち。500円からエールを送り、挑戦者の一歩を支えられます。
+      <p class="hero-lead md:text-lg leading-relaxed max-w-xl muted-line mb-6">
+        <span class="whitespace-nowrap">クラウドファンディングで掲載しづらい挑戦でも、</span><br>
+        <span class="whitespace-nowrap">想いの強さがあれば掲載できる可能性がある。</span>
       </p>
-      <div class="flex flex-col sm:flex-row gap-3">
-        <a href="https://app.zenicle.jp"
-           class="btn-primary inline-flex items-center justify-center font-black px-8 py-4 rounded-full transition-all hover:scale-105 transform">
-          今すぐ始める
+      <div class="flex flex-col sm:flex-row gap-3 mb-6">
+        <a href="#teams"
+           class="btn-primary inline-flex items-center justify-center gap-2 font-black px-8 py-4 rounded-full transition-all hover:scale-105 transform">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          今すぐ応援する →
         </a>
-        <a href="#projects"
-           class="btn-ghost inline-flex items-center justify-center font-bold px-8 py-4 rounded-full transition-colors">
-          現在応援できるプログラム
+        <a href="https://app.zenicle.jp/p"
+           class="btn-ghost inline-flex items-center justify-center gap-2 font-bold px-8 py-4 rounded-full transition-colors">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+          チームを立ち上げる →
         </a>
       </div>
+      <!-- 実績（API: /public/stats で更新） -->
+      <div class="flex flex-wrap gap-x-5 gap-y-4">
+        <div class="hero-stat">
+          <div><div class="hero-stat-label">累計応援総額</div><div id="stat-amount" class="hero-stat-value gold-text">¥850,400</div></div>
+        </div>
+        <div class="hero-stat">
+          <div><div class="hero-stat-label">応援者数</div><div id="stat-supporters" class="hero-stat-value gold-text">32<small>人</small></div></div>
+        </div>
+        <div class="hero-stat">
+          <div><div class="hero-stat-label">挑戦中のチーム</div><div id="stat-teams" class="hero-stat-value gold-text">16<small>チーム</small></div></div>
+        </div>
+      </div>
       <a href="#cup"
-         class="cup-ribbon inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-black transition-transform hover:scale-105 mt-6">
+         class="cup-ribbon inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-black whitespace-nowrap transition-transform hover:scale-105 mt-5">
         🎉 第1回 ゼニくるCUP｜総額100万円を勝ち取れ！
       </a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ========== TEAMS（いま、応援したい挑戦） ========== -->
+<section id="teams" class="pt-4 pb-10 md:pt-5 md:pb-12" style="background:var(--bg)">
+  <div class="max-w-7xl mx-auto px-5">
+    <!-- チームカード（API: /public/team-explore ＋ シーズンランキングで動的生成） -->
+    <div id="team-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div class="tcard-skel"></div><div class="tcard-skel"></div><div class="tcard-skel"></div><div class="tcard-skel"></div>
+      <div class="tcard-skel"></div><div class="tcard-skel"></div><div class="tcard-skel"></div><div class="tcard-skel"></div>
+    </div>
+    <div class="text-right mt-5">
+      <a href="https://app.zenicle.jp/teams" class="text-sm font-bold whitespace-nowrap" style="color:var(--brand)">すべてのプロジェクトを見る →</a>
     </div>
   </div>
 </section>
 
-<!-- ========== ACTIVITY PHOTO MARQUEE ========== -->
-<section id="activity" style="background:var(--bg-band-2);padding:2.25rem 0 2.5rem;overflow:hidden">
-  <div class="marquee-viewport" id="marquee-row1"></div>
-</section>
-
-<div class="gold-divider"></div>
+<!-- 動画モーダル（熱意動画の再生） -->
+<div id="vmodal" hidden role="dialog" aria-modal="true" aria-label="プロジェクト説明動画">
+  <div class="vwrap">
+    <div class="vbar">
+      <span class="vtitle" id="vmodal-title"></span>
+      <button type="button" class="vclose" id="vmodal-close">閉じる ✕</button>
+    </div>
+    <div class="vbox"><div id="vmodal-frame" style="width:100%;height:100%"></div></div>
+  </div>
+</div>
 
 
 <!-- ========== CUP CAMPAIGN ========== -->
@@ -302,33 +388,6 @@
             キャンペーン詳細（プレスリリース）
           </a>
         </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="gold-divider"></div>
-
-
-<!-- ========== STATS BAR ========== -->
-<section id="support" style="background:var(--bg);padding:1.75rem 1.25rem 2.25rem">
-  <div class="max-w-3xl mx-auto text-center">
-    <div class="reveal mb-6">
-      <div class="s-label mb-4">SUPPORT</div>
-      <h2 class="text-2xl md:text-3xl font-black mb-3">これまでの応援</h2>
-    </div>
-    <div class="grid grid-cols-3 gap-4 text-center">
-      <div class="reveal">
-        <div id="stat-amount" class="text-2xl md:text-3xl font-black gold-text">¥850,400</div>
-        <div class="text-xs mt-1 tracking-wider" style="color:var(--text-subtle)">累計エール総額</div>
-      </div>
-      <div class="reveal" style="transition-delay:.05s">
-        <div id="stat-supporters" class="text-2xl md:text-3xl font-black gold-text">32人</div>
-        <div class="text-xs mt-1 tracking-wider" style="color:var(--text-subtle)">支援者数</div>
-      </div>
-      <div class="reveal" style="transition-delay:.1s">
-        <div id="stat-teams" class="text-2xl md:text-3xl font-black gold-text">16チーム</div>
-        <div class="text-xs mt-1 tracking-wider" style="color:var(--text-subtle)">参加チーム数</div>
       </div>
     </div>
   </div>
@@ -403,7 +462,7 @@
           挑戦は、<br><span class="gold-text">始める前に止まりやすい。</span>
         </h2>
         <p class="text-sm leading-relaxed" style="color:var(--text-muted)">
-          やりたいことがあっても、相談先・検証機会・活動資金のどれかが欠けるだけで、最初の一歩は重くなります。
+          やりたいことがあっても、掲載できる場・検証機会・活動資金のどれかが欠けるだけで、最初の一歩は重くなります。
         </p>
       </div>
       <div class="reveal" style="transition-delay:.08s">
@@ -411,8 +470,8 @@
           <div class="grid sm:grid-cols-[4rem_1fr] gap-5 py-7">
             <p class="text-sm font-bold tracking-widest" style="color:var(--brand)">01</p>
             <div>
-              <h3 class="text-lg md:text-xl font-bold mb-2">進め方を相談できる相手が少ない</h3>
-              <p class="text-sm leading-relaxed" style="color:var(--text-muted)">アイデアはあっても、何から始めるか、誰に聞けばいいかが見えず、一人で止まってしまう。</p>
+              <h3 class="text-lg md:text-xl font-bold mb-2">既存のクラウドファンディングでは掲載しづらい</h3>
+              <p class="text-sm leading-relaxed" style="color:var(--text-muted)">実績やリターン設計、目標額が求められ、「想いはあるが形はこれから」という挑戦は、そもそも載せてもらえない。</p>
             </div>
           </div>
           <div class="grid sm:grid-cols-[4rem_1fr] gap-5 py-7">
@@ -547,27 +606,27 @@
         <h2 class="text-3xl md:text-4xl font-black leading-tight mb-5">
           応援までの流れは、<br><span class="gold-text">シンプルです。</span>
         </h2>
-        <p class="text-sm leading-relaxed" style="color:var(--text-muted)">プログラムを選び、金額を決めて、支援する。余計な手続きはできるだけ減らしています。</p>
+        <p class="text-sm leading-relaxed" style="color:var(--text-muted)">応援したいチームを選び、金額を決めて、エールを送る。余計な手続きはできるだけ減らしています。</p>
       </div>
       <div class="editorial-list reveal" style="transition-delay:.08s">
         <div class="grid sm:grid-cols-[4rem_1fr] gap-5 py-7">
           <p class="text-sm font-bold tracking-widest" style="color:var(--brand)">01</p>
           <div>
-            <h3 class="text-lg md:text-xl font-bold mb-2">プログラムを見る</h3>
-            <p class="text-sm leading-relaxed" style="color:var(--text-muted)">活動内容、支援状況、挑戦者の想いを確認します。</p>
+            <h3 class="text-lg md:text-xl font-bold mb-2">応援したいチームを見つける</h3>
+            <p class="text-sm leading-relaxed" style="color:var(--text-muted)">トップの一覧から気になるチームを開き、説明動画や活動内容、応援状況、挑戦者の想いを確認します。</p>
           </div>
         </div>
         <div class="grid sm:grid-cols-[4rem_1fr] gap-5 py-7">
           <p class="text-sm font-bold tracking-widest" style="color:var(--brand)">02</p>
           <div>
-            <h3 class="text-lg md:text-xl font-bold mb-2">支援金額を選ぶ</h3>
+            <h3 class="text-lg md:text-xl font-bold mb-2">エールの金額を選ぶ</h3>
             <p class="text-sm leading-relaxed" style="color:var(--text-muted)">500円から、応援したい気持ちに合わせて金額を決められます。</p>
           </div>
         </div>
         <div class="grid sm:grid-cols-[4rem_1fr] gap-5 py-7">
           <p class="text-sm font-bold tracking-widest" style="color:var(--brand)">03</p>
           <div>
-            <h3 class="text-lg md:text-xl font-bold mb-2">決済して応援する</h3>
+            <h3 class="text-lg md:text-xl font-bold mb-2">決済してエールを送る</h3>
             <p class="text-sm leading-relaxed" style="color:var(--text-muted)">クレジットカード・デビットカード・プリペイドカードに対応しています。JPYCでの支援にも対応予定です。</p>
           </div>
         </div>
@@ -591,11 +650,11 @@
         <h2 class="text-3xl md:text-4xl font-black leading-tight mb-5">
           小さな挑戦にも、<br><span class="gold-text">応援が届くように。</span>
         </h2>
-        <p class="leading-relaxed mb-7 text-sm" style="color:var(--text-muted)">年齢や職業に関係なく、取り組みを公開し、応援を受け取れる場所です。まずは現在の活動や想いを、ひとつのプログラムとして届けられます。</p>
+        <p class="leading-relaxed mb-7 text-sm" style="color:var(--text-muted)">年齢や職業に関係なく、取り組みを公開し、応援を受け取れる場所です。まずは現在の活動や想いを、チームのプロジェクトとして届けられます。</p>
         <div class="editorial-list mb-8">
           <div class="py-4">
-            <p class="text-sm font-bold mb-1">プログラムを公開する</p>
-            <p class="text-sm leading-relaxed" style="color:var(--text-muted)">活動内容、必要な支援、今後の予定を整理して掲載できます。</p>
+            <p class="text-sm font-bold mb-1">チームのプロジェクトを公開する</p>
+            <p class="text-sm leading-relaxed" style="color:var(--text-muted)">活動内容、必要な支援、今後の予定に加え、熱意を語る説明動画で想いを届けられます。</p>
           </div>
           <div class="py-4">
             <p class="text-sm font-bold mb-1">返礼品なしで始められる</p>
@@ -721,7 +780,7 @@
       <div>
         <p class="text-sm font-semibold mb-4 foot-head">サービス</p>
         <ul class="space-y-2 text-sm">
-          <li><a href="#support"  class="foot-link">応援実績</a></li>
+          <li><a href="#teams"    class="foot-link">プロジェクトを探す</a></li>
           <li><a href="#projects" class="foot-link">公開プログラム</a></li>
           <li><a href="#howto"    class="foot-link">仕組み</a></li>
           <li><a href="#faq"      class="foot-link">よくある質問</a></li>
@@ -779,48 +838,44 @@
     track.appendChild(frag);
   })();
 
-  // ── Activity Photo Marquee ──
-  // 写真を追加する場合: photos/ フォルダにファイルを追加し、下記リストに追記してください
-  const activityPhotos = [
-    './photos/photo1.jpg',
-    './photos/photo2.jpg',
-    './photos/photo3.jpg',
-    './photos/photo4.jpg',
-    './photos/photo5.jpg',
-  ];
-
-  (function buildMarquee() {
-    const shuffle = arr => [...arr].sort(() => Math.random() - .5);
-    const makeTrack = (photos, dir) => {
-      const track = document.createElement('div');
-      track.className = `marquee-track ${dir === 'left' ? 'marquee-left' : 'marquee-right'}`;
-      // duplicate for seamless loop
-      [...photos, ...photos].forEach(src => {
-        const img = document.createElement('img');
-        img.src = src;
-        img.alt = '挑戦者たちの活動記録';
-        img.loading = 'lazy';
-        track.appendChild(img);
-      });
-      return track;
+  // ── 公開プログラム＋開催中シーズン＋ランキング（プロジェクトカードとチームカードで共有） ──
+  const programDataPromise = (async () => {
+    const API = 'https://api.zenicle.jp';
+    // プログラムごとに「開催中(ACTIVE)のシーズン」と参加チーム（ランキング）を取得
+    const fetchSeasonsWithTeams = async (programId) => {
+      try {
+        const seasons = await fetch(`${API}/programs/${programId}/seasons`).then(r => r.json()).then(d => d?.data ?? []).catch(() => []);
+        const active = (Array.isArray(seasons) ? seasons : []).filter(s => s.status === 'ACTIVE');
+        return await Promise.all(active.map(async (s) => {
+          const rk = await fetch(`${API}/seasons/${s.id}/rankings`).then(r => r.json()).then(d => d?.data?.rankings ?? []).catch(() => []);
+          const hidden = new Set((s.teamDisplay && s.teamDisplay.hidden) ?? []);
+          const teams = (Array.isArray(rk) ? rk : []).filter(t => !hidden.has(t.teamId));
+          return { id: s.id, name: s.name, status: s.status, endsAt: s.endsAt, coverImageUrl: s.coverImageUrl, teams };
+        }));
+      } catch (_) { return []; }
     };
-    const r1 = document.getElementById('marquee-row1');
-    if (r1) r1.appendChild(makeTrack(shuffle(activityPhotos), 'left'));
+    try {
+      const pickupRes = await fetch(`${API}/public/program-pickups`).then(r => r.json());
+      const items = Array.isArray(pickupRes?.data?.items) ? pickupRes.data.items : [];
+      return await Promise.all(items.map(async (p) => ({ p, seasons: await fetchSeasonsWithTeams(p.programId) })));
+    } catch (_) { return []; }
   })();
 
   // Stats fetch
   (async function loadStats() {
     const API = 'https://api.zenicle.jp';
-    const fmt = n => `¥${n.toLocaleString('ja-JP')}`;
+    const fmt = n => `¥${(Number.isFinite(Number(n)) ? Number(n) : 0).toLocaleString('ja-JP')}`;
     // 要素が存在しなくても例外で止まらないようにする（null安全）
     const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+    // 数値＋単位（<small>）のように装飾を含む場合のみ使う。API由来の値は数値だけを入れること
+    const setHTML = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
 
     // 「これまでの応援」統計バー: 集計API（/public/stats）から取得
     try {
       const stats = await fetch(`${API}/public/stats`).then(r => r.json());
       if (stats?.totalDonationAmount > 0) setText('stat-amount', fmt(stats.totalDonationAmount));
-      if (stats?.supporterCount > 0)      setText('stat-supporters', `${stats.supporterCount}人`);
-      if (stats?.teamCount > 0)           setText('stat-teams', `${stats.teamCount}チーム`);
+      if (stats?.supporterCount > 0)      setHTML('stat-supporters', `${Number(stats.supporterCount).toLocaleString('ja-JP')}<small>人</small>`);
+      if (stats?.teamCount > 0)           setHTML('stat-teams', `${Number(stats.teamCount).toLocaleString('ja-JP')}<small>チーム</small>`);
     } catch (_) {}
 
     // 「現在応援できるプログラム」カード: 全テナント横断の公開プログラムを取得し動的にカード生成
@@ -834,7 +889,7 @@
       const buildTeamRow = (t) => `
             <div class="py-2.5" style="border-top:1px solid var(--border)">
               <div class="flex items-center gap-2.5">
-                <span class="text-xs font-bold tabular-nums w-4 shrink-0" style="color:var(--brand)">${t.rank}</span>
+                <span class="text-xs font-bold tabular-nums w-4 shrink-0" style="color:var(--brand)">${Number(t.rank) || ''}</span>
                 <span class="text-sm flex-1 min-w-0 truncate">${esc(t.teamName)}</span>
               </div>
               <div class="flex items-center justify-between gap-2 mt-1.5" style="padding-left:1.625rem">
@@ -923,28 +978,132 @@
         </article>`;
       };
 
-      // プログラムごとに「開催中(ACTIVE)のシーズン」と参加チーム（ランキング）を取得
-      const fetchSeasonsWithTeams = async (programId) => {
-        try {
-          const seasons = await fetch(`${API}/programs/${programId}/seasons`).then(r => r.json()).then(d => d?.data ?? []).catch(() => []);
-          const active = (Array.isArray(seasons) ? seasons : []).filter(s => s.status === 'ACTIVE');
-          return await Promise.all(active.map(async (s) => {
-            const rk = await fetch(`${API}/seasons/${s.id}/rankings`).then(r => r.json()).then(d => d?.data?.rankings ?? []).catch(() => []);
-            const hidden = new Set((s.teamDisplay && s.teamDisplay.hidden) ?? []);
-            const teams = (Array.isArray(rk) ? rk : []).filter(t => !hidden.has(t.teamId));
-            return { id: s.id, name: s.name, status: s.status, endsAt: s.endsAt, coverImageUrl: s.coverImageUrl, teams };
-          }));
-        } catch (_) { return []; }
-      };
-
-      const pickupRes = await fetch(`${API}/public/program-pickups`).then(r => r.json());
-      const items = (pickupRes?.data?.items ?? []).slice(0, 4);
+      const enriched = (await programDataPromise).slice(0, 4);
       const container = document.getElementById('project-cards');
-      if (container && items.length) {
-        const enriched = await Promise.all(items.map(async (p) => ({ p, seasons: await fetchSeasonsWithTeams(p.programId) })));
+      if (container && enriched.length) {
         container.innerHTML = enriched.map(({ p, seasons }) => buildProjectCard(p, seasons)).join('');
       }
     } catch (_) {}
+  })();
+
+  // ── いま、応援したい挑戦（チームカード） ──
+  // データ源:
+  //   - /public/team-explore … チーム名・説明・アイコン・応援可否（サーバー側で「応援できる→活動が新しい」順）
+  //   - シーズンランキング（上の __zenicleProgramData）… チーム別の累計エール額・応援者数
+  //   - pitchVideoUrl / goalAmount … アプリ側に追加予定のフィールド（未実装の間は undefined）。
+  //     動画が無ければ従来のチームアイコン画像を、目標額が無ければ進捗バーを出さない
+  (async function loadTeamCards() {
+    const API = 'https://api.zenicle.jp';
+    const grid = document.getElementById('team-cards');
+    if (!grid) return;
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+    const yen = (n) => `¥${Number(n ?? 0).toLocaleString('ja-JP')}`;
+
+    // YouTube の URL から動画IDを取り出す（watch?v= / youtu.be / shorts / embed / live）。動画でなければ null
+    const youtubeId = (url) => {
+      if (!url) return null;
+      try {
+        const u = new URL(String(url));
+        const host = u.hostname.replace(/^www\.|^m\./, '');
+        let id = null;
+        if (host === 'youtu.be') id = u.pathname.slice(1).split('/')[0];
+        else if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
+          if (u.pathname === '/watch') id = u.searchParams.get('v');
+          else { const m = u.pathname.match(/^\/(shorts|embed|live|v)\/([^/?#]+)/); if (m) id = m[2]; }
+        }
+        return id && /^[\w-]{11}$/.test(id) ? id : null;
+      } catch (_) { return null; }
+    };
+
+    // 動画モーダル
+    const modal = document.getElementById('vmodal');
+    const frame = document.getElementById('vmodal-frame');
+    const titleEl = document.getElementById('vmodal-title');
+    const closeBtn = document.getElementById('vmodal-close');
+    let opener = null;  // モーダルを開いた要素（閉じたときにフォーカスを戻す）
+    const setBackgroundInert = (on) => [...document.body.children].forEach((el) => { if (el !== modal) el.inert = on; });
+    const closeModal = () => {
+      if (!modal || modal.hidden) return;
+      modal.hidden = true; frame.innerHTML = ''; document.body.style.overflow = '';
+      setBackgroundInert(false);
+      opener?.focus?.(); opener = null;
+    };
+    const openModal = (vid, title, from) => {
+      if (!modal) return;
+      opener = from ?? document.activeElement;
+      titleEl.textContent = title || '';
+      frame.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${esc(vid)}?autoplay=1&rel=0" title="${esc(title || '動画')}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
+      modal.hidden = false; document.body.style.overflow = 'hidden';
+      setBackgroundInert(true);
+      closeBtn?.focus();
+    };
+    closeBtn?.addEventListener('click', closeModal);
+    modal?.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal && !modal.hidden) closeModal(); });
+
+    const buildCard = (t, stat) => {
+      const teamUrl = `https://app.zenicle.jp/t/${esc(t.teamId)}`;
+      const vid = youtubeId(t.pitchVideoUrl);
+      // サムネイル: 動画があれば YouTube のサムネイル、無ければ従来のチームアイコン画像
+      const thumb = vid
+        ? `<img src="https://i.ytimg.com/vi/${vid}/maxresdefault.jpg" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${vid}/hqdefault.jpg'" alt="${esc(t.teamName)} の説明動画" loading="lazy" decoding="async">`
+        : (t.iconUrl ? `<img src="${esc(t.iconUrl)}" alt="${esc(t.teamName)}" loading="lazy" decoding="async">` : '');
+      const play = vid
+        ? `<span class="play-btn" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>`
+        : '';
+      // サムネイル部: 動画なら LP 上のモーダルで再生、無ければチームページへ
+      const thumbEl = vid
+        ? `<button type="button" class="tcard-thumb" data-vid="${vid}" data-title="${esc(t.teamName)}" aria-label="${esc(t.teamName)} の動画を再生">${thumb}${play}</button>`
+        : `<a class="tcard-thumb" href="${teamUrl}">${thumb}</a>`;
+      const amount = Number(stat?.totalAmount ?? 0);
+      const goal = Number(t.goalAmount ?? 0);
+      const pct = goal > 0 ? Math.min(100, Math.round(amount / goal * 100)) : null;
+      const progress = pct === null ? '' : `<div class="prog-bar"><i style="width:${pct}%"></i></div>`;
+      const amountRow = `
+        <div class="flex items-baseline justify-between gap-2">
+          <div class="tcard-amount">${yen(amount)}${goal > 0 ? ` <small>/ ${yen(goal)}</small>` : ''}</div>
+          ${pct === null ? '' : `<div class="tcard-pct">${pct}%</div>`}
+        </div>`;
+      return `
+      <article class="tcard">
+        ${thumbEl}
+        <div class="tcard-body">
+          <a href="${teamUrl}" class="tcard-title">${esc(t.teamName)}</a>
+          ${t.description ? `<p class="tcard-desc">${esc(t.description)}</p>` : ''}
+          ${amountRow}${progress}
+          <div class="tcard-foot">
+            <span>👥 ${Number(stat?.supportersCount ?? 0).toLocaleString('ja-JP')}人</span>
+            <a href="${teamUrl}">エールを送る →</a>
+          </div>
+        </div>
+      </article>`;
+    };
+
+    const render = (teams, statByTeam) => {
+      grid.innerHTML = teams.map((t) => buildCard(t, statByTeam.get(t.teamId))).join('');
+      grid.querySelectorAll('button.tcard-thumb').forEach((b) => b.addEventListener('click', () => openModal(b.dataset.vid, b.dataset.title, b)));
+    };
+    try {
+      const res = await fetch(`${API}/public/team-explore`).then((r) => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)));
+      const items = Array.isArray(res?.data?.items) ? res.data.items : [];
+      // 公開済み（API側で保証）かつ、いまエールを送れるチームだけを全件表示する
+      const teams = items.filter((t) => t && typeof t === 'object' && typeof t.teamId === 'string' && t.supportState === 'AVAILABLE');
+      if (!teams.length) { grid.innerHTML = ''; return; }
+      // 1段階目: 集計を待たずにカードを出す（ランキング取得が遅くてもスケルトンのまま止めない）
+      render(teams, new Map());
+      // 2段階目: チーム別の累計（開催中シーズンのランキングを合算）が揃ったら差し込む
+      const statByTeam = new Map();
+      try {
+        const programs = await programDataPromise;
+        programs.forEach(({ seasons }) => (seasons ?? []).forEach((s) => (s.teams ?? []).forEach((r) => {
+          const cur = statByTeam.get(r.teamId) ?? { totalAmount: 0, supportersCount: 0 };
+          statByTeam.set(r.teamId, { totalAmount: cur.totalAmount + Number(r.totalAmount ?? 0), supportersCount: cur.supportersCount + Number(r.supportersCount ?? 0) });
+        })));
+      } catch (_) {}
+      if (statByTeam.size) render(teams, statByTeam);
+    } catch (_) {
+      grid.innerHTML = '<p class="text-sm col-span-full text-center py-6" style="color:var(--text-muted)">プロジェクト一覧を読み込めませんでした。時間をおいて再度お試しください。</p>';
+    }
   })();
 
   // Scroll reveal
