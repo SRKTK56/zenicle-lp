@@ -9,7 +9,10 @@
     チームページ（app.zenicle.jp/t/<teamId>）の再設計モック。
     実API（api.zenicle.jp）で描画する。使い方:
       ?team=<teamId>   任意のチームで表示（既定: 創輝Sendai）
-      &edit=1          メンバー表示。各セクションに「コンソールのどこで編集するか」を出す
+      &edit=1          編集モード（チーム管理者・メンバーでログインした状態の想定）。
+                       各セクションに「✎ 編集」が出て、クリックするとその場（右ドロワー）で編集できる。
+                       空欄のセクションは応援者から見える位置に「＋ 追加」の枠が出る。
+                       ＝ コンソールに別の編集画面を作らず、チームページそのものを編集画面にする
     アプリ実装時はこの HTML を参照する（構造・順番・見出し・トークン）。
   -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -49,11 +52,33 @@
     @media(min-width:768px){.sec-title{font-size:1.5rem}}
     .sec-note{font-size:.8rem;color:var(--text-subtle);margin-left:auto}
 
-    /* ===== メンバー表示（?edit=1）: 編集先チップ ===== */
-    body:not(.is-editor) .edit-chip, body:not(.is-editor) #edit-banner{display:none}
-    .edit-chip{display:inline-flex;align-items:center;gap:.35rem;font-size:.72rem;font-weight:700;color:var(--blue);background:rgba(37,99,235,.08);border:1px dashed rgba(37,99,235,.45);border-radius:999px;padding:.25rem .7rem;margin-left:auto;white-space:nowrap}
-    .edit-chip:hover{background:rgba(37,99,235,.14)}
+    /* ===== 編集モード（?edit=1）: ページそのものが編集画面 ===== */
+    body:not(.is-editor) .edit-chip, body:not(.is-editor) #edit-banner, body:not(.is-editor) .add-box, body:not(.is-editor) .m-edit{display:none}
+    .edit-chip{display:inline-flex;align-items:center;gap:.35rem;font-size:.75rem;font-weight:900;color:var(--blue);background:#fff;border:1.5px solid rgba(37,99,235,.5);border-radius:999px;padding:.3rem .8rem;margin-left:auto;white-space:nowrap;cursor:pointer;transition:background .15s}
+    .edit-chip:hover{background:rgba(37,99,235,.08)}
     .is-editor .sec{outline:1px dashed rgba(37,99,235,.35);outline-offset:10px;border-radius:.5rem}
+    /* 空欄の枠：応援者に見える位置に「ここに○○が出ます」を置き、その場で追加させる */
+    .add-box{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;padding:1.5rem;border:2px dashed rgba(37,99,235,.45);border-radius:1rem;background:rgba(37,99,235,.04);color:var(--blue);text-align:center;cursor:pointer}
+    .add-box b{font-size:.95rem} .add-box span{font-size:.78rem;color:var(--text-muted)}
+    .is-editor .empty{display:none}
+    .dirty{display:inline-flex;align-items:center;font-size:.68rem;font-weight:900;color:#fff;background:var(--pink);border-radius:999px;padding:.15rem .55rem;margin-left:.5rem;vertical-align:middle}
+    .m-edit{position:absolute;right:.6rem;top:.6rem;width:1.9rem;height:1.9rem;border-radius:50%;border:1.5px solid rgba(37,99,235,.5);background:#fff;color:var(--blue);font-size:.8rem;display:flex;align-items:center;justify-content:center;cursor:pointer}
+    .member{position:relative}
+    /* 右ドロワー */
+    #drawer{position:fixed;inset:0;z-index:90;display:flex;justify-content:flex-end;background:rgba(20,33,61,.35);backdrop-filter:blur(2px)}
+    #drawer[hidden]{display:none}
+    #drawer .panel{width:min(100%,30rem);height:100%;background:#fff;box-shadow:-20px 0 60px rgba(20,33,61,.2);display:flex;flex-direction:column}
+    #drawer .p-head{padding:1.1rem 1.25rem;border-bottom:1px solid var(--border)}
+    #drawer .p-head small{display:block;font-size:.72rem;font-weight:700;color:var(--blue);margin-bottom:.2rem}
+    #drawer .p-head h3{font-size:1.1rem;font-weight:900}
+    #drawer .p-body{padding:1.25rem;overflow:auto;flex:1;display:flex;flex-direction:column;gap:1rem}
+    #drawer label{display:block;font-size:.78rem;font-weight:700;color:var(--text-muted);margin-bottom:.35rem}
+    #drawer input,#drawer textarea,#drawer select{width:100%;border:1px solid var(--border-strong);border-radius:.75rem;padding:.65rem .8rem;font-size:.9rem;background:#fff}
+    #drawer input:focus,#drawer textarea:focus{outline:2px solid var(--brand);outline-offset:1px;border-color:transparent}
+    #drawer .hint{font-size:.72rem;color:var(--text-subtle);margin-top:.3rem}
+    #drawer .p-foot{padding:1rem 1.25rem;border-top:1px solid var(--border);display:flex;gap:.6rem;justify-content:flex-end}
+    #drawer .p-foot button{font-weight:900;font-size:.85rem;padding:.65rem 1.2rem;border-radius:999px}
+    #drawer .save{background:var(--brand-grad);color:#fff} #drawer .cancel{border:1px solid var(--border-strong);background:#fff}
 
     /* ===== カバー・動画 ===== */
     .cover{aspect-ratio:21/9;background:var(--surface-soft);border-radius:1.25rem;overflow:hidden;position:relative}
@@ -119,8 +144,17 @@
 </nav>
 
 <!-- ===== メンバー表示バナー（?edit=1 のときだけ） ===== -->
-<div id="edit-banner" class="fixed top-[3.6rem] inset-x-0 z-40 text-center text-xs font-bold py-1.5" style="background:rgba(37,99,235,.1);color:var(--blue);border-bottom:1px dashed rgba(37,99,235,.45)">
-  ✎ メンバー表示中：各セクションの右上に編集先（コンソールの画面名）を出しています。公開ページでは非表示
+<!-- 編集モードのステータスバー：下書き → 公開申請 → 運営の承認 → 公開 -->
+<div id="edit-banner" class="fixed top-[3.6rem] inset-x-0 z-40 text-xs font-bold" style="background:#fff;color:var(--text);border-bottom:1px solid rgba(37,99,235,.35);box-shadow:0 4px 16px rgba(20,33,61,.08)">
+  <div class="max-w-6xl mx-auto px-5 py-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+    <span style="color:var(--blue)">✎ 編集モード</span>
+    <span class="subtle font-medium">応援者と同じ画面を見ながら直せます。変更は保存しても公開されず、<b>ゼニくる運営の承認後に公開</b>されます</span>
+    <span class="ml-auto flex items-center gap-2">
+      <span id="draft-state" class="px-2 py-0.5 rounded-full" style="background:var(--surface-soft);color:var(--text-muted)">未公開の変更：0件</span>
+      <button type="button" id="submit-review" class="btn-primary px-3 py-1 rounded-full disabled:opacity-40" disabled>公開を申請する</button>
+      <a href="?team=" id="exit-edit" class="underline subtle">終了</a>
+    </span>
+  </div>
 </div>
 
 <main class="max-w-6xl mx-auto px-5 pt-24 pb-28 lg:pb-16">
@@ -135,7 +169,7 @@
         <p id="program-line" class="text-xs font-bold subtle mb-1">&nbsp;</p>
         <h1 id="team-name" class="text-2xl md:text-4xl font-black leading-tight">読み込み中…</h1>
       </div>
-      <a class="edit-chip" href="#" data-console="チーム設定 › ヘッダー">✎ カバー画像・チーム名を編集 → コンソール「チーム設定 › ヘッダー」</a>
+      <button type="button" class="edit-chip" data-edit="header">✎ 編集</button>
     </div>
   </section>
 
@@ -147,7 +181,7 @@
       <section class="sec" id="s-video">
         <div class="sec-head">
           <span class="sec-num">01</span><h2 class="sec-title">プロジェクト説明動画</h2>
-          <a class="edit-chip" href="#" data-console="チーム設定 › プロジェクト">✎ 動画URLを編集 → コンソール「チーム設定 › プロジェクト」</a>
+          <button type="button" class="edit-chip" data-edit="video">✎ 編集</button>
         </div>
         <div id="video"></div>
       </section>
@@ -159,13 +193,11 @@
       <section class="sec" id="s-about">
         <div class="sec-head">
           <span class="sec-num">02</span><h2 class="sec-title">活動紹介・メッセージ</h2>
-          <a class="edit-chip" href="#" data-console="チーム設定 › 活動紹介">✎ 紹介文を編集 → コンソール「チーム設定 › 活動紹介」</a>
+          <button type="button" class="edit-chip" data-edit="about">✎ 編集</button>
         </div>
         <div class="card p-6 md:p-8">
           <p id="description" class="text-[15px] leading-[1.9] whitespace-pre-wrap"></p>
-          <p class="mt-5 text-xs subtle">
-            <span class="todo">#47</span> 「チームからのメッセージ（thanksMessage）」は teams/:id に解決済みの値が追加され次第、ここに表示する。
-          </p>
+          <div id="thanks" class="mt-5"></div>
         </div>
       </section>
 
@@ -173,7 +205,7 @@
       <section class="sec" id="s-members">
         <div class="sec-head">
           <span class="sec-num">03</span><h2 class="sec-title">メンバー紹介</h2>
-          <a class="edit-chip" href="#" data-console="メンバー">✎ メンバー・プロフィールを編集 → コンソール「メンバー」</a>
+          <button type="button" class="edit-chip" data-edit="members">＋ メンバーを追加</button>
         </div>
         <div id="members" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
       </section>
@@ -182,7 +214,7 @@
       <section class="sec" id="s-fund">
         <div class="sec-head">
           <span class="sec-num">04</span><h2 class="sec-title">エールの使い道</h2>
-          <a class="edit-chip" href="#" data-console="使い道（支出）">✎ 使い道を登録 → コンソール「使い道（支出）」</a>
+          <button type="button" class="edit-chip" data-edit="fund">＋ 使い道を登録</button>
         </div>
         <div id="fund"></div>
       </section>
@@ -200,10 +232,19 @@
       <section class="sec" id="s-reports">
         <div class="sec-head">
           <span class="sec-num">06</span><h2 class="sec-title">活動レポート</h2>
-          <a class="edit-chip" href="#" data-console="活動レポート（投稿）">✎ 投稿する → コンソール「活動レポート（投稿）」</a>
+          <button type="button" class="edit-chip" data-edit="post">＋ 投稿する</button>
         </div>
         <div class="card p-6" id="posts"></div>
-        <p class="mt-3 text-xs subtle"><span class="todo">#47</span> 支援者限定レポートは件数だけ teams/:id に追加され次第、「支援者限定 ○件」と表示する（タイトル・日付は出さない）。</p>
+        <p class="mt-3 text-xs subtle" id="report-count"></p>
+      </section>
+
+      <!-- 08 SNS（webUrl / xUrl / instagramUrl / youtubeUrl / otherUrl） -->
+      <section class="sec" id="s-sns">
+        <div class="sec-head">
+          <span class="sec-num">07</span><h2 class="sec-title">SNS・リンク</h2>
+          <button type="button" class="edit-chip" data-edit="sns">✎ 編集</button>
+        </div>
+        <div id="sns"></div>
       </section>
     </div>
 
@@ -219,7 +260,7 @@
   <section class="sec card p-6" id="s-yell">
     <div class="sec-head" style="margin-bottom:.75rem">
       <span class="sec-num">応援</span>
-      <a class="edit-chip" href="#" data-console="チーム設定 › プロジェクト">✎ 目標額 → 「チーム設定 › プロジェクト」</a>
+      <button type="button" class="edit-chip" data-edit="goal">✎ 目標額</button>
     </div>
     <div class="big-amount gold-text" data-f="amount">¥0</div>
     <div class="mt-1 text-sm muted" data-f="goal-line"></div>
@@ -242,6 +283,18 @@
     </div>
   </section>
 </template>
+
+<!-- 編集ドロワー（編集モードで「✎ 編集」を押すと開く。保存はモックなので動かない） -->
+<div id="drawer" hidden role="dialog" aria-modal="true">
+  <div class="panel">
+    <div class="p-head"><small id="d-where"></small><h3 id="d-title"></h3></div>
+    <div class="p-body" id="d-body"></div>
+    <div class="p-foot">
+      <button type="button" class="cancel" id="d-cancel">キャンセル</button>
+      <button type="button" class="save" id="d-save" title="モックのため保存されません">保存</button>
+    </div>
+  </div>
+</div>
 
 <!-- スマホ下部の固定CTA -->
 <div id="cta-bar">
@@ -282,8 +335,8 @@
   };
   const ok = (r) => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`));
 
-  // 編集チップ: コンソールへの導線（モックでは alert の代わりに title で示す）
-  document.querySelectorAll('.edit-chip').forEach((a) => { a.title = `コンソール「${a.dataset.console}」を開く`; a.addEventListener('click', (e) => e.preventDefault()); });
+  const isEditor = document.body.classList.contains('is-editor');
+  document.getElementById('exit-edit').href = `?team=${encodeURIComponent(teamId)}`;
 
   let team, explore, posts, rankings;
   try {
@@ -301,6 +354,69 @@
   const pageUrl = `https://app.zenicle.jp/t/${encodeURIComponent(teamId)}`;
   document.title = `${team.name} | ゼニくる（モック）`;
 
+  // ── 編集ドロワー：セクションごとのフォーム定義（「チームページの『○○』を編集」と必ず明示する）
+  const F = {
+    text: (id, label, val, hint) => `<div><label for="${id}">${label}</label><input id="${id}" value="${esc(val ?? '')}">${hint ? `<p class="hint">${hint}</p>` : ''}</div>`,
+    area: (id, label, val, rows, hint) => `<div><label for="${id}">${label}</label><textarea id="${id}" rows="${rows || 5}">${esc(val ?? '')}</textarea>${hint ? `<p class="hint">${hint}</p>` : ''}</div>`,
+    file: (id, label, hint) => `<div><label for="${id}">${label}</label><input id="${id}" type="file" accept="image/*">${hint ? `<p class="hint">${hint}</p>` : ''}</div>`,
+  };
+  const forms = {
+    header: () => ({ where: 'チームページの「ヘッダー」', title: 'カバー画像・チーム名', body: F.file('f-cover', 'カバー画像（21:9）', '推奨 2100×900px。一覧のサムネイルにも使われます') + F.text('f-name', 'チーム名', team.name) }),
+    video:  () => ({ where: 'チームページの「01 プロジェクト説明動画」', title: '説明動画', body: F.text('f-video', 'YouTube の動画URL', explore.pitchVideoUrl, 'youtube.com/watch?v=… または youtu.be/… 。限定公開でも可') }),
+    goal:   () => ({ where: 'チームページの「応援」', title: '目標エール額', body: F.text('f-goal', '目標エール額（円）', explore.goalAmount, '未設定なら達成率は表示されません') }),
+    about:  () => ({ where: 'チームページの「02 活動紹介・メッセージ」', title: '活動紹介・メッセージ', body: F.area('f-desc', '活動紹介', team.description, 6, '一覧のカードには冒頭2行が出ます') + F.area('f-thanks', '応援してくれた人へのメッセージ', team.thanksMessage, 4) }),
+    members:() => ({ where: 'チームページの「03 メンバー紹介」', title: 'メンバーを追加', body: F.text('f-invite', 'メールアドレスで招待', '', '招待された人がログインするとメンバーになります') }),
+    member: (m) => ({ where: 'チームページの「03 メンバー紹介」', title: `${m.displayName} のプロフィール（管理者が編集）`, body: F.file('f-avatar', 'アイコン画像') + F.text('f-mname', '表示名', m.displayName) + F.area('f-bio', '自己紹介', m.bio, 4) + F.text('f-mx', 'X', m.xUrl) + F.text('f-mig', 'Instagram', m.instagramUrl) + F.text('f-mweb', 'Web', m.webUrl) }),
+    fund:   () => ({ where: 'チームページの「04 エールの使い道」', title: '使い道を登録', body: F.text('f-fund-title', '何に使ったか', '') + F.text('f-fund-amt', '金額（円）', '') + F.text('f-fund-date', '日付', '') }),
+    post:   () => ({ where: 'チームページの「06 活動レポート」', title: '活動レポートを投稿', body: F.text('f-post-title', 'タイトル', '') + F.area('f-post-body', '本文', '', 8) + F.file('f-post-img', '画像') }),
+    sns:    () => ({ where: 'チームページの「07 SNS・リンク」', title: 'SNS・リンク', body: F.text('f-web', 'Web', team.webUrl) + F.text('f-x', 'X', team.xUrl) + F.text('f-ig', 'Instagram', team.instagramUrl) + F.text('f-yt', 'YouTube', team.youtubeUrl) + F.text('f-other', 'その他', team.otherUrl) }),
+  };
+  const drawer = document.getElementById('drawer');
+  const openDrawer = (key, arg) => {
+    const def = forms[key]?.(arg); if (!def) return;
+    currentKey = key;
+    document.getElementById('d-where').textContent = `${def.where} に表示されます`;
+    document.getElementById('d-title').textContent = def.title;
+    document.getElementById('d-body').innerHTML = def.body;
+    drawer.hidden = false; document.body.style.overflow = 'hidden';
+    drawer.querySelector('input,textarea')?.focus();
+  };
+  const closeDrawer = () => { drawer.hidden = true; document.body.style.overflow = ''; };
+  document.getElementById('d-cancel').addEventListener('click', closeDrawer);
+  // 保存 → 下書きとして積む（公開はされない）。該当セクションに「未公開の変更」バッジ
+  const secOf = { header: 's-cover', video: 's-video', goal: 's-yell', about: 's-about', members: 's-members', member: 's-members', fund: 's-fund', post: 's-reports', sns: 's-sns' };
+  const dirty = new Set(); let currentKey = null;
+  const refreshDraftState = () => {
+    const n = dirty.size;
+    document.getElementById('draft-state').textContent = `未公開の変更：${n}件`;
+    document.getElementById('submit-review').disabled = n === 0;
+  };
+  document.getElementById('d-save').addEventListener('click', () => {
+    if (currentKey) {
+      dirty.add(currentKey);
+      document.querySelectorAll(`#${secOf[currentKey]} .sec-title, #${secOf[currentKey]} h1`).forEach((h) => { if (!h.querySelector('.dirty')) h.insertAdjacentHTML('beforeend', '<span class="dirty">未公開の変更</span>'); });
+      refreshDraftState();
+    }
+    closeDrawer();
+  });
+  document.getElementById('submit-review').addEventListener('click', () => {
+    const bar = document.getElementById('draft-state');
+    bar.textContent = `承認待ち：${dirty.size}件（運営が確認中。公開までは前の内容が表示されます）`;
+    bar.style.background = '#FEF3C7'; bar.style.color = '#B45309';
+    document.getElementById('submit-review').disabled = true;
+    document.querySelectorAll('.dirty').forEach((b) => { b.textContent = '承認待ち'; b.style.background = '#B45309'; });
+  });
+  drawer.addEventListener('click', (e) => { if (e.target === drawer) closeDrawer(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !drawer.hidden) closeDrawer(); });
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-edit]'); if (!b) return;
+    e.preventDefault();
+    if (b.dataset.edit === 'member') openDrawer('member', roster[Number(b.dataset.idx)]);
+    else openDrawer(b.dataset.edit);
+  });
+  // 空欄の枠（編集モードのときだけ表示される）
+  const addBox = (key, label, hint) => `<div class="add-box" data-edit="${key}"><b>＋ ${label}</b><span>${hint}</span></div>`;
+
   // 01 カバー・見出し
   const cover = document.getElementById('cover');
   const tags = [];
@@ -315,7 +431,9 @@
   const vid = youtubeId(explore.pitchVideoUrl);
   document.getElementById('video').innerHTML = vid
     ? `<div class="video"><iframe src="https://www.youtube-nocookie.com/embed/${vid}?rel=0" title="${esc(team.name)} の説明動画" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe></div>`
-    : `<div class="video-empty"><svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" style="opacity:.35"><path d="M8 5v14l11-7z"/></svg><span class="text-sm font-bold">説明動画は準備中です</span><span class="text-xs">チームが登録すると、ここに熱意を語る動画が表示されます</span></div>`;
+    : (isEditor
+        ? `<div class="add-box" data-edit="video" style="aspect-ratio:16/9"><b>＋ 説明動画を登録する</b><span>応援者が最初に見る場所です。YouTube の URL を貼るだけで表示されます</span></div>`
+        : `<div class="video-empty"><svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" style="opacity:.35"><path d="M8 5v14l11-7z"/></svg><span class="text-sm font-bold">説明動画は準備中です</span><span class="text-xs">チームが登録すると、ここに熱意を語る動画が表示されます</span></div>`);
 
   // 応援レール（PC右・スマホは動画直後）
   const amount = Number(explore.totalAmount ?? 0);
@@ -330,7 +448,7 @@
     const n = document.getElementById('rail-tpl').content.cloneNode(true);
     const f = (k) => n.querySelector(`[data-f="${k}"]`);
     f('amount').textContent = yen(amount);
-    f('goal-line').innerHTML = pct !== null ? `目標 <b>${yen(goal)}</b>　達成率 <b style="color:var(--pink)">${pct}%</b>` : (goal > 0 ? `目標 <b>${yen(goal)}</b>` : `<span class="subtle">目標額は未設定</span>`);
+    f('goal-line').innerHTML = pct !== null ? `目標 <b>${yen(goal)}</b>　達成率 <b style="color:var(--pink)">${pct}%</b>` : (goal > 0 ? `目標 <b>${yen(goal)}</b>` : (isEditor ? `<button type="button" class="edit-chip" data-edit="goal" style="margin-left:0">＋ 目標額を設定する</button>` : `<span class="subtle">目標額は未設定</span>`));
     if (pct !== null) { f('prog-wrap').hidden = false; f('prog').style.width = `${pct}%`; }
     f('supporters').textContent = Number(explore.supporterCount ?? team.supportersCount ?? 0).toLocaleString('ja-JP');
     if (days !== null) { f('days').textContent = `あと${days}日`; f('days-label').textContent = `${team.nearestSeason.seasonName} 受付期限`; }
@@ -350,24 +468,30 @@
   document.getElementById('bar-cta').href = yellHref;
 
   // 03 活動紹介
-  document.getElementById('description').textContent = team.description || '（紹介文は未登録）';
+  document.getElementById('description').textContent = team.description || '';
+  if (!team.description) document.getElementById('description').outerHTML = isEditor ? addBox('about', '活動紹介を書く', '何に挑戦しているか・なぜやるかを、応援者に向けて') : '<p class="text-sm subtle">紹介文は未登録です</p>';
+  document.getElementById('thanks').innerHTML = team.thanksMessage
+    ? `<p class="text-xs font-bold muted mb-1">応援してくれた人へのメッセージ</p><p class="text-[15px] leading-[1.9] whitespace-pre-wrap" style="border-left:3px solid var(--brand);padding-left:.9rem">${esc(team.thanksMessage)}</p>`
+    : (isEditor ? addBox('about', 'メッセージを書く', '応援してくれた人に届く一言。空だと何も表示されません') : '');
 
   // 04 メンバー
   const roster = team.memberRoster ?? [];
-  document.getElementById('members').innerHTML = roster.length ? roster.map((m) => `
+  document.getElementById('members').innerHTML = roster.length ? roster.map((m, i) => `
     <div class="member">
+      <button type="button" class="m-edit" data-edit="member" data-idx="${i}" title="管理者はメンバーの表示名・アイコン・SNSを編集できる">✎</button>
       ${m.avatarUrl ? `<img class="avatar" src="${esc(m.avatarUrl)}" alt="">` : `<div class="avatar ph">${esc((m.displayName || '?').slice(0, 1))}</div>`}
       <div class="min-w-0">
         <div class="font-black text-[15px]">${esc(m.displayName)}${m.role === 'admin' ? '<span class="role">代表</span>' : ''}</div>
         ${m.bio ? `<p class="text-xs muted mt-1 leading-relaxed whitespace-pre-wrap">${esc(m.bio)}</p>` : ''}
       </div>
     </div>`).join('') : `<div class="empty md:col-span-2">メンバー紹介はまだ登録されていません</div>`;
+  if (isEditor) document.getElementById('members').insertAdjacentHTML('beforeend', addBox('members', 'メンバーを追加', '顔が見えるほど応援は集まります'));
 
   // 05 使い道
   const fund = team.fundUsage ?? [];
   document.getElementById('fund').innerHTML = fund.length
     ? `<div class="card p-6">${fund.map((r) => `<div class="supp"><span class="text-sm font-bold">${esc(r.title ?? r.category ?? '')}</span><span class="font-black">${yen(r.amount)}</span></div>`).join('')}</div>`
-    : `<div class="empty">エールの使い道はまだ登録されていません。登録すると「何にいくら使ったか」がここに並びます。</div>`;
+    : (isEditor ? addBox('fund', '使い道を登録する', '「何にいくら使ったか」が見えると、次のエールにつながります') : `<div class="empty">エールの使い道はまだ登録されていません。登録すると「何にいくら使ったか」がここに並びます。</div>`);
 
   // 06 応援者（直近のエール ＋ シーズン別ランキング上位）
   const recent = team.recentSupporters ?? [];
@@ -382,7 +506,16 @@
     <a class="post" href="https://app.zenicle.jp/t/${encodeURIComponent(teamId)}/posts/${encodeURIComponent(p.id)}">
       <time>${fmtDate(p.createdAt)}</time>
       <div><h3>${esc(p.title)}</h3>${p.content ? `<p class="text-sm muted mt-1 line-clamp-2">${esc(p.content)}</p>` : ''}</div>
-    </a>`).join('') : `<div class="empty">活動レポートはまだありません</div>`;
+    </a>`).join('') : (isEditor ? addBox('post', '最初の活動レポートを書く', '近況が更新されているチームは応援されやすい') : `<div class="empty">活動レポートはまだありません</div>`);
+  // 支援者限定レポートは件数だけ（#47 の reportCount）
+  const rc = Number(team.reportCount ?? 0);
+  document.getElementById('report-count').textContent = rc > 0 ? `支援者限定レポート ${rc}件（エールを送ると読めます）` : '';
+
+  // 08 SNS
+  const links = [['Web', team.webUrl], ['X', team.xUrl], ['Instagram', team.instagramUrl], ['YouTube', team.youtubeUrl], ['その他', team.otherUrl]].filter(([, u]) => u);
+  document.getElementById('sns').innerHTML = links.length
+    ? `<div class="flex flex-wrap gap-2">${links.map(([k, u]) => `<a class="btn-ghost text-sm font-bold px-4 py-2 rounded-full" href="${esc(u)}" target="_blank" rel="noopener">${esc(k)}</a>`).join('')}</div>`
+    : (isEditor ? addBox('sns', 'SNS・リンクを登録する', '普段の発信先があると信頼につながります') : `<div class="empty">SNS リンクはまだ登録されていません</div>`);
 })();
 </script>
 </body>
