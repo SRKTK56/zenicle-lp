@@ -1101,6 +1101,9 @@
       // 公開済み（API側で保証）かつ、いまエールを送れるチームだけを全件表示する
       const teams = items.filter((t) => t && typeof t === 'object' && typeof t.teamId === 'string' && t.supportState === 'AVAILABLE');
       if (!teams.length) { grid.innerHTML = ''; return; }
+      // 掲載順は累計エール額の高い順（2026-09-17 決定）。同額は応援者数の多い順、それも同じならサーバー順を保つ（sort は安定）
+      const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+      teams.sort((a, b) => (num(b.totalAmount) - num(a.totalAmount)) || (num(b.supporterCount) - num(a.supporterCount)));
       render(teams);
     } catch (_) {
       grid.innerHTML = '<p class="text-sm col-span-full text-center py-6" style="color:var(--text-muted)">プロジェクト一覧を読み込めませんでした。時間をおいて再度お試しください。</p>';
