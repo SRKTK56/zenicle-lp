@@ -164,11 +164,14 @@
     .cup-ribbon:hover{background:rgba(255,77,141,.08)}
 
     /* ── チームカード（いま、応援したい挑戦） ── */
-    .tcard{background:var(--surface);border:1px solid var(--border);border-radius:1rem;overflow:hidden;box-shadow:var(--card-shadow);transition:transform .3s ease,box-shadow .3s ease,border-color .3s ease;display:flex;flex-direction:column}
+    .tcard{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:1rem;overflow:hidden;box-shadow:var(--card-shadow);transition:transform .3s ease,box-shadow .3s ease,border-color .3s ease;display:flex;flex-direction:column}
     .tcard:hover{transform:translateY(-4px);box-shadow:var(--card-shadow-hover);border-color:rgba(255,138,0,.4)}
     /* スマホは1列なので 17 枚並べると 6,000px になり、サービス説明（ABOUT）に辿り着けない。4枚で切る */
     @media(max-width:639px){#team-cards > .tcard:nth-child(n+5){display:none}}
     /* チームのカバー画像は 21:9 で登録されているので枠も合わせる（YouTube サムネは中央を切り出す） */
+    /* 参加プログラムのバッジ: サムネイル左上に重ねる（本文の情報量を増やさない）。半透明の白地＋ネイビー文字で画像を問わず読める */
+    .tcard-progs{position:absolute;top:.55rem;left:.55rem;z-index:2;display:flex;flex-wrap:wrap;gap:.3rem;max-width:calc(100% - 1.1rem);pointer-events:none}
+    .tcard-prog{font-size:.7rem;font-weight:800;line-height:1;padding:.35rem .6rem;border-radius:999px;background:rgba(255,255,255,.88);color:var(--heading);border:1px solid rgba(255,255,255,.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);white-space:nowrap;max-width:14em;overflow:hidden;text-overflow:ellipsis}
     .tcard-thumb{position:relative;aspect-ratio:21/9;background:var(--surface-soft);overflow:hidden;display:block;cursor:pointer;border:0;padding:0;width:100%;text-align:left}
     .tcard-thumb img{width:100%;height:100%;object-fit:cover;object-position:50% 28%;display:block;transition:transform .4s ease}
     .tcard:hover .tcard-thumb img{transform:scale(1.04)}
@@ -1066,6 +1069,13 @@
       const thumbEl = vid
         ? `<button type="button" class="tcard-thumb" data-vid="${vid}" data-title="${esc(t.teamName)}" aria-label="${esc(t.teamName)} の動画を再生">${thumb}${play}</button>`
         : `<a class="tcard-thumb" href="${teamUrl}">${thumb}</a>`;
+      // 参加プログラムのバッジ。正式名は長い（「REGIONLINK #003：地域ビジネスの…」）ので「：」「:」「｜」より前だけを短縮名として使う。
+      // 最大2件＋「+n」。サムネイルは <a>/<button> なのでバッジは中に入れず（入れ子は不正）、カードに重ねて置く
+      const shortProg = (name) => String(name ?? '').split(/[：:｜|]/)[0].trim();
+      const progs = (Array.isArray(t.participations) ? t.participations : []).map((p) => shortProg(p.programName)).filter(Boolean);
+      const progBadges = progs.length
+        ? `<div class="tcard-progs" aria-label="参加プログラム: ${esc(progs.join('、'))}">${progs.slice(0, 2).map((n) => `<span class="tcard-prog">${esc(n)}</span>`).join('')}${progs.length > 2 ? `<span class="tcard-prog">+${progs.length - 2}</span>` : ''}</div>`
+        : '';
       const amount = Number(t.totalAmount ?? 0);
       const goal = Number(t.goalAmount ?? 0);
       // totalAmount は順位表を公開しているプログラム分のみの合算。0 のときは達成率を出さない（0% と誤解させない）
@@ -1078,6 +1088,7 @@
         </div>`;
       return `
       <article class="tcard">
+        ${progBadges}
         ${thumbEl}
         <div class="tcard-body">
           <a href="${teamUrl}" class="tcard-title">${esc(t.teamName)}</a>
