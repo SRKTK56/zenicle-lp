@@ -9,7 +9,7 @@
     チームページ（app.zenicle.jp/t/<teamId>）の再設計モック。
     実API（api.zenicle.jp）で描画する。使い方:
       ?team=<teamId>   任意のチームで表示（既定: 創輝Sendai）
-      &edit=1          編集モード（チーム管理者・メンバーでログインした状態の想定）。
+      &edit=1          編集モード（チーム管理者でログインした状態の想定。&role=member でメンバー＝閲覧のみ）。
                        各セクションに「✎ 編集」が出て、クリックするとその場（右ドロワー）で編集できる。
                        空欄のセクションは応援者から見える位置に「＋ 追加」の枠が出る。
                        ＝ コンソールに別の編集画面を作らず、チームページそのものを編集画面にする
@@ -61,16 +61,19 @@
     .add-box{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;padding:1.5rem;border:2px dashed rgba(37,99,235,.45);border-radius:1rem;background:rgba(37,99,235,.04);color:var(--blue);text-align:center;cursor:pointer}
     .add-box b{font-size:.95rem} .add-box span{font-size:.78rem;color:var(--text-muted)}
     .is-editor .empty{display:none}
+    .is-viewer .edit-chip, .is-viewer .add-box, .is-viewer .m-edit, .is-viewer #submit-review, .is-viewer #draft-state, .is-viewer #todo-toggle{display:none!important}
+    .is-viewer .empty{display:block}
     .dirty{display:inline-flex;align-items:center;font-size:.68rem;font-weight:900;color:#fff;background:var(--pink);border-radius:999px;padding:.15rem .55rem;margin-left:.5rem;vertical-align:middle}
     .pchip{display:inline-flex;align-items:center;gap:.5rem;padding:.5rem .9rem;border-radius:.9rem;border:1px solid var(--border);background:var(--surface);font-size:.85rem;font-weight:700}
     .pchip small{font-size:.68rem;font-weight:900;padding:.1rem .5rem;border-radius:999px;background:rgba(255,138,0,.12);color:var(--brand)}
     .pchip small.gray{background:var(--surface-soft);color:var(--text-subtle)}
     .m-edit{position:absolute;right:.6rem;top:.6rem;width:1.9rem;height:1.9rem;border-radius:50%;border:1.5px solid rgba(37,99,235,.5);background:#fff;color:var(--blue);font-size:.8rem;display:flex;align-items:center;justify-content:center;cursor:pointer}
     .member{position:relative}
-    /* 右ドロワー */
-    #drawer{position:fixed;inset:0;z-index:90;display:flex;justify-content:flex-end;background:rgba(20,33,61,.35);backdrop-filter:blur(2px)}
+    /* 編集モーダル（ページを離れずに編集する。スマホは全幅のボトムシート） */
+    #drawer{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:1rem;background:rgba(20,33,61,.45);backdrop-filter:blur(3px)}
     #drawer[hidden]{display:none}
-    #drawer .panel{width:min(100%,30rem);height:100%;background:#fff;box-shadow:-20px 0 60px rgba(20,33,61,.2);display:flex;flex-direction:column}
+    #drawer .panel{width:min(100%,36rem);max-height:90vh;background:#fff;border-radius:1.25rem;box-shadow:0 30px 80px rgba(20,33,61,.3);display:flex;flex-direction:column;overflow:hidden}
+    @media(max-width:640px){#drawer{padding:0;align-items:flex-end}#drawer .panel{max-height:92vh;border-radius:1.25rem 1.25rem 0 0}}
     #drawer .p-head{padding:1.1rem 1.25rem;border-bottom:1px solid var(--border)}
     #drawer .p-head small{display:block;font-size:.72rem;font-weight:700;color:var(--blue);margin-bottom:.2rem}
     #drawer .p-head h3{font-size:1.1rem;font-weight:900}
@@ -150,13 +153,13 @@
 <!-- 編集モードのステータスバー：下書き → 公開申請 → 運営の承認 → 公開 -->
 <div id="edit-banner" class="fixed top-[3.6rem] inset-x-0 z-40 text-xs font-bold" style="background:#fff;color:var(--text);border-bottom:1px solid rgba(37,99,235,.35);box-shadow:0 4px 16px rgba(20,33,61,.08)">
   <div class="max-w-6xl mx-auto px-5 py-2 flex flex-wrap items-center gap-x-4 gap-y-1">
-    <span style="color:var(--blue)">✎ チームコンソール</span>
-    <select id="team-switch" class="text-xs font-bold rounded-lg px-2 py-1" style="border:1px solid var(--border-strong);background:#fff;max-width:16rem" title="チームを切り替える（管理しているチーム）"></select>
+    <a href="console.html" style="color:var(--blue)">← チーム一覧</a>
+    <span id="role-badge" class="px-2 py-0.5 rounded-full" style="background:rgba(255,138,0,.12);color:var(--brand)">管理者：編集できます</span>
     <button type="button" id="todo-toggle" class="text-xs font-bold px-2 py-1 rounded-lg" style="border:1px solid var(--border-strong);background:#fff">やること <span id="todo-count" class="px-1.5 rounded-full" style="background:var(--pink);color:#fff">0</span></button>
     <span class="ml-auto flex items-center gap-2">
       <span id="draft-state" class="px-2 py-0.5 rounded-full" style="background:var(--surface-soft);color:var(--text-muted)">未公開の変更：0件</span>
       <button type="button" id="submit-review" class="btn-primary px-3 py-1 rounded-full disabled:opacity-40" disabled>公開を申請する</button>
-      <a href="?team=" id="exit-edit" class="underline subtle">終了</a>
+      <a href="?team=" id="exit-edit" class="underline subtle">公開ページを見る</a>
     </span>
   </div>
 </div>
@@ -339,6 +342,9 @@
   const q = new URLSearchParams(location.search);
   const teamId = q.get('team') || 'cmnaoawxu000duny4pxwveozo';  // 既定: 創輝Sendai（投稿・メンバーが多い）
   if (q.get('edit') === '1') document.body.classList.add('is-editor');
+  // role=member: メンバーとして所属（閲覧のみ・自分のプロフィールだけ編集）。管理者は編集できる
+  const isViewer = q.get('role') === 'member';
+  if (isViewer) { document.body.classList.add('is-viewer'); document.getElementById('role-badge').textContent = 'メンバー：閲覧のみ（自分のプロフィールは編集できます）'; document.getElementById('role-badge').style.cssText = 'background:var(--surface-soft);color:var(--text-muted)'; }
 
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
   const yen = (n) => `¥${(Number.isFinite(Number(n)) ? Number(n) : 0).toLocaleString('ja-JP')}`;
@@ -451,15 +457,7 @@
     ? parts.map((pp) => `<a class="pchip" href="https://app.zenicle.jp/p/${esc(pp.programSlug || pp.programId)}">${esc(pp.programName)}${pp.activeSeason ? `<small>${esc(pp.activeSeason.name)} 参加中</small>` : `<small class="gray">開催中シーズンなし</small>`}</a>`).join('')
     : (isEditor ? addBox('entry', 'プログラムにエントリーする', '参加すると応援（エール）を受け付けられます') : '<p class="text-sm subtle">参加中のプログラムはありません</p>');
 
-  // チーム切替（コンソールのヘッダー相当。モックでは応援受付中のチームを候補にする）
-  if (isEditor) {
-    try {
-      const all = await fetch(`${API}/public/team-explore`).then(ok).then((d) => d?.data?.items ?? []);
-      const sel = document.getElementById('team-switch');
-      sel.innerHTML = all.filter((t) => t.supportState === 'AVAILABLE').map((t) => `<option value="${esc(t.teamId)}" ${t.teamId === teamId ? 'selected' : ''}>${esc(t.teamName)}</option>`).join('');
-      sel.addEventListener('change', () => { location.search = `?team=${encodeURIComponent(sel.value)}&edit=1`; });
-    } catch (_) {}
-  }
+
 
   // 01 カバー・見出し
   const cover = document.getElementById('cover');
@@ -575,6 +573,7 @@
     document.getElementById('todo-count').textContent = todos.length;
     document.getElementById('todo-list').innerHTML = todos.map(([id, t]) => `<li><a href="#${id}" style="color:var(--blue)">☐ ${t} →</a></li>`).join('') || '<li class="subtle">空欄はありません</li>';
     document.getElementById('todo-toggle').addEventListener('click', () => { const p = document.getElementById('todo-panel'); p.hidden = !p.hidden; });
+    if (isViewer) document.getElementById('todo-panel').hidden = true;
   }
 })();
 </script>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>チームコンソール モック | ゼニくる デザイン</title>
+  <!--
+    チームコンソールのトップ（/team/console）の再設計モック。
+    ログイン中のアカウントが「管理者」または「メンバー」になっているチームだけを一覧にし、
+    チームを選ぶとチームページ（team.html）が開く。管理者なら編集モード、メンバーなら閲覧のみ。
+    一覧のチームは新地さんのアカウントの実データ（2026-09-16 時点）。役割はモック上の想定。
+  -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    *{font-family:'Noto Sans JP',sans-serif}
+    :root{--bg:#F7F9FC;--surface:#FFFFFF;--surface-soft:#F4F7FC;--text:#14213D;--text-muted:#5B6473;--text-subtle:#8A93A3;--brand:#FF8A00;--pink:#FF4D8D;--blue:#2563EB;--border:rgba(20,33,61,.10);--border-strong:rgba(20,33,61,.14);--brand-grad:linear-gradient(135deg,#FFA726,#FF8A00);--card-shadow:0 10px 30px rgba(20,33,61,.08);--nav-bg:rgba(255,255,255,.72);--nav-border:rgba(20,33,61,.08)}
+    body{background:var(--bg);color:var(--text)}
+    #nav{background:var(--nav-bg);border-bottom:1px solid var(--nav-border);backdrop-filter:blur(12px)}
+    .navlink{color:var(--text-muted)} .navlink:hover{color:var(--brand)}
+    .btn-primary{background:var(--brand-grad);color:#fff;box-shadow:0 10px 30px rgba(255,138,0,.28)}
+    .team{display:grid;grid-template-columns:8.5rem 1fr auto;gap:1.1rem;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:1.25rem;box-shadow:var(--card-shadow);padding:1rem;transition:transform .2s,border-color .2s;text-decoration:none;color:inherit}
+    .team:hover{transform:translateY(-2px);border-color:var(--brand)}
+    .team .thumb{aspect-ratio:21/9;border-radius:.75rem;overflow:hidden;background:var(--surface-soft)}
+    .team .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .role{font-size:.68rem;font-weight:900;padding:.15rem .55rem;border-radius:999px;background:rgba(255,138,0,.12);color:var(--brand)}
+    .role.member{background:var(--surface-soft);color:var(--text-muted)}
+    .state{font-size:.72rem;font-weight:700;color:var(--text-subtle)}
+    .todo{font-size:.7rem;font-weight:900;color:#fff;background:var(--pink);border-radius:999px;padding:.1rem .5rem}
+    .cta{font-size:.85rem;font-weight:900;color:var(--brand);white-space:nowrap}
+    @media(max-width:640px){.team{grid-template-columns:1fr}.team .thumb{aspect-ratio:21/9}}
+  </style>
+</head>
+<body>
+<nav id="nav" class="fixed top-0 inset-x-0 z-50">
+  <div class="max-w-4xl mx-auto px-5 py-3 flex items-center justify-between gap-4">
+    <a href="https://app.zenicle.jp/" class="flex items-center shrink-0" aria-label="ゼニくる"><img src="../logo.png" alt="ゼニくる" class="h-8 w-auto"></a>
+    <span class="text-sm font-black">チームコンソール</span>
+    <span class="text-xs" style="color:var(--text-subtle)">shinchi.takahiro24@gmail.com</span>
+  </div>
+</nav>
+
+<main class="max-w-4xl mx-auto px-5 pt-24 pb-20">
+  <h1 class="text-2xl md:text-3xl font-black mb-1">あなたのチーム</h1>
+  <p class="text-sm mb-6" style="color:var(--text-muted)">管理者またはメンバーになっているチームだけが表示されます。チームを選ぶとチームページが開き、<b>管理者はその場で編集</b>できます。</p>
+
+  <div class="space-y-4">
+    <!-- 管理者のチーム：編集モードで開く -->
+    <a class="team" href="team.html?team=cmryjwwln0002eoyxvv5kzsxb&edit=1">
+      <div class="thumb"><img src="https://assets.zenicle.jp/v1/teams/cmryjwwln0002eoyxvv5kzsxb/icon/placeholder.jpg" alt="" onerror="this.remove()"></div>
+      <div class="min-w-0">
+        <div class="flex flex-wrap items-center gap-2 mb-1"><span class="role">管理者</span><span class="state">ゼニくるCUP ／ 第１回（エントリー受付中）</span><span class="todo">やること 4</span></div>
+        <div class="font-black leading-snug">【ビーチサッカー元日本代表｜原口翔太郎】室内ビーチスポーツコートを作りたい！</div>
+        <div class="text-xs mt-1" style="color:var(--text-subtle)">動画・目標額・使い道・活動レポートが未登録</div>
+      </div>
+      <span class="cta">ページを開いて編集 →</span>
+    </a>
+
+    <!-- 管理者のチーム（開催中シーズンなし） -->
+    <a class="team" href="team.html?team=cmmzq8izd0001620q6sw5pof4&edit=1">
+      <div class="thumb"></div>
+      <div class="min-w-0">
+        <div class="flex flex-wrap items-center gap-2 mb-1"><span class="role">管理者</span><span class="state">参加中のプログラムなし</span></div>
+        <div class="font-black leading-snug">チーム霧島</div>
+        <div class="text-xs mt-1" style="color:var(--text-subtle)">プログラムにエントリーすると応援を受け付けられます</div>
+      </div>
+      <span class="cta">ページを開いて編集 →</span>
+    </a>
+
+    <!-- メンバーとして所属（閲覧のみ）：モック上の想定 -->
+    <a class="team" href="team.html?team=cmnaoawxu000duny4pxwveozo&edit=1&role=member">
+      <div class="thumb"><img src="https://assets.zenicle.jp/v1/migrated/teams/cmnaoawxu000duny4pxwveozo/icon/212d0e31-3654-46de-b403-aee81f7e2f2a.jpg" alt=""></div>
+      <div class="min-w-0">
+        <div class="flex flex-wrap items-center gap-2 mb-1"><span class="role member">メンバー</span><span class="state">REGIONLINK #003 ／ ROUND2 参加中</span></div>
+        <div class="font-black leading-snug">創輝Sendai｜宮城県仙台市 <span class="text-xs font-bold" style="color:var(--text-subtle)">（例：メンバーとして所属している場合）</span></div>
+        <div class="text-xs mt-1" style="color:var(--text-subtle)">メンバーは閲覧のみ。自分のプロフィールだけ編集できます</div>
+      </div>
+      <span class="cta">ページを開く →</span>
+    </a>
+  </div>
+
+  <div class="mt-10 pt-6 text-sm" style="border-top:1px solid var(--border);color:var(--text-muted)">
+    <p class="font-bold mb-2" style="color:var(--text)">その他</p>
+    <div class="flex flex-wrap gap-3">
+      <a href="#" class="px-4 py-2 rounded-full text-sm font-bold" style="border:1px solid var(--border-strong);background:#fff">新しいチームを作る</a>
+      <a href="#" class="px-4 py-2 rounded-full text-sm font-bold" style="border:1px solid var(--border-strong);background:#fff">支援者限定レポート</a>
+      <a href="#" class="px-4 py-2 rounded-full text-sm font-bold" style="border:1px solid var(--border-strong);background:#fff">リワード</a>
+      <a href="#" class="px-4 py-2 rounded-full text-sm font-bold" style="border:1px solid var(--border-strong);background:#fff">公開設定・誓約</a>
+    </div>
+  </div>
+</main>
+</body>
+</html>
