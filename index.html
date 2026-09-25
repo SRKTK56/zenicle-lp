@@ -189,6 +189,16 @@
     .prog-bar>i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#FFA726,#FF4D8D)}
     .tcard-foot{display:flex;align-items:center;justify-content:space-between;gap:.5rem;font-size:.82rem;color:var(--text-muted);border-top:1px solid var(--border);padding-top:.6rem;margin-top:auto}
     .tcard-foot a{color:var(--brand);font-weight:900;white-space:nowrap}
+    /* いいね（ログイン不要）。押した状態はピンクで塗る */
+    .tcard-like{display:inline-flex;align-items:center;gap:.28rem;font-size:.82rem;font-weight:800;line-height:1;color:var(--text-muted);background:none;border:0;padding:.2rem .1rem;cursor:pointer;transition:color .2s ease,transform .12s ease}
+    .tcard-like:hover{color:var(--pink)}
+    .tcard-like:active{transform:scale(.92)}
+    .tcard-like svg{width:1.05rem;height:1.05rem;fill:none;stroke:currentColor;stroke-width:2;transition:fill .2s ease,transform .2s ease}
+    .tcard-like[aria-pressed="true"]{color:var(--pink)}
+    .tcard-like[aria-pressed="true"] svg{fill:currentColor;stroke:currentColor}
+    .tcard-like.pop svg{animation:likepop .32s ease}
+    @keyframes likepop{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
+    @media(prefers-reduced-motion:reduce){.tcard-like.pop svg{animation:none}}
     .tcard-skel{aspect-ratio:21/9;border-radius:1rem;background:linear-gradient(90deg,var(--surface-soft),#fff,var(--surface-soft));background-size:200% 100%;animation:skel 1.4s ease infinite}
     @keyframes skel{from{background-position:200% 0}to{background-position:-200% 0}}
 
@@ -1056,6 +1066,68 @@
     modal?.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal && !modal.hidden) closeModal(); });
 
+    // ── いいね（ログイン不要。2026-09-25 §3.12） ──
+    // API は匿名IDを「ボディ」で受ける（ヘッダにすると CORS の許可が要り、一覧の取得まで巻き添えで落ちるため）。
+    // 「自分が押したか」は API から返らない（訪問者ハッシュに IP/UA を含むので回線が変わると一致しない）。LP 側も localStorage で持つ。
+    const LIKE_KEYS = { visitor: 'zenicle_visitor_id', liked: 'zenicle_liked_teams' };
+    const ls = {
+      get(k, fallback) { try { return localStorage.getItem(k) ?? fallback; } catch (_) { return fallback; } },
+      set(k, v) { try { localStorage.setItem(k, v); } catch (_) {} },
+    };
+    const visitorId = (() => {
+      let v = ls.get(LIKE_KEYS.visitor, '');
+      if (!v) {
+        v = (crypto?.randomUUID?.() ?? `v-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+        ls.set(LIKE_KEYS.visitor, v);
+      }
+      return v;
+    })();
+    const likedSet = (() => {
+      try { const a = JSON.parse(ls.get(LIKE_KEYS.liked, '[]')); return new Set(Array.isArray(a) ? a : []); }
+      catch (_) { return new Set(); }
+    })();
+    const saveLiked = () => ls.set(LIKE_KEYS.liked, JSON.stringify([...likedSet]));
+
+    const heartSvg = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-9.7A4.3 4.3 0 0 1 12 8.2a4.3 4.3 0 0 1 7.5 2.6c0 5.1-7.5 9.7-7.5 9.7Z"/></svg>';
+    // 0 件のときは数字を出さない（0 が並ぶと寂しい）
+    const likeLabel = (n) => (n > 0 ? `<span>${Number(n).toLocaleString('ja-JP')}</span>` : '');
+    const likeBtn = (t) => {
+      const on = likedSet.has(t.teamId);
+      const n = Number(t.likeCount ?? 0);
+      return `<button type="button" class="tcard-like" data-team="${esc(t.teamId)}" data-count="${n}"
+        aria-pressed="${on}" aria-label="${esc(t.teamName)} にいいね" title="いいね">${heartSvg}${likeLabel(n)}</button>`;
+    };
+
+    const toggleLike = async (btn) => {
+      const teamId = btn.dataset.team;
+      const wasOn = btn.getAttribute('aria-pressed') === 'true';
+      const before = Number(btn.dataset.count || 0);
+      const after = Math.max(0, before + (wasOn ? -1 : 1));
+      // 楽観更新（押した瞬間に反映し、失敗したら戻す）
+      const paint = (on, n) => {
+        btn.setAttribute('aria-pressed', String(on));
+        btn.dataset.count = String(n);
+        btn.innerHTML = heartSvg + likeLabel(n);
+      };
+      paint(!wasOn, after);
+      if (!wasOn) { btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop'); }
+      btn.disabled = true;
+      try {
+        const res = await fetch(`${API}/public/teams/${encodeURIComponent(teamId)}/like`, {
+          method: wasOn ? 'DELETE' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ visitorId }),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (wasOn) likedSet.delete(teamId); else likedSet.add(teamId);
+        saveLiked();
+      } catch (_) {
+        paint(wasOn, before);
+      } finally {
+        btn.disabled = false;
+      }
+    };
+
     const buildCard = (t) => {
       const teamUrl = `https://app.zenicle.jp/t/${esc(t.teamId)}`;
       const vid = youtubeId(t.pitchVideoUrl);
@@ -1101,6 +1173,7 @@
           ${amountRow}${progress}
           <div class="tcard-foot">
             <span>👥 ${Number(t.supporterCount ?? 0).toLocaleString('ja-JP')}人</span>
+            ${likeBtn(t)}
             <a href="${teamUrl}">エールを送る →</a>
           </div>
         </div>
@@ -1110,6 +1183,7 @@
     const render = (teams) => {
       grid.innerHTML = teams.map(buildCard).join('');
       grid.querySelectorAll('button.tcard-thumb').forEach((b) => b.addEventListener('click', () => openModal(b.dataset.vid, b.dataset.title, b)));
+      grid.querySelectorAll('button.tcard-like').forEach((b) => b.addEventListener('click', () => toggleLike(b)));
     };
     try {
       const res = await fetch(`${API}/public/team-explore`).then((r) => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)));
