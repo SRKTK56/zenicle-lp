@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>リーグ応援ランキング モック v2 | ゼニくる デザイン</title>
+<!--
+  リーグの応援ランキング（営業資料 p5「〇〇杯 応援ランキング」）の動くモック。v2 トークン（tokens.css）の最初の適用先。
+  アプリでの置き場所: 公開ページ /s/[seasonId]（Season＝3か月の企画、Program＝リーグ、Tenant＝運営団体）。
+  ・データはすべてデモ。チーム名・冠スポンサー・大会名は【要確認】のまま。決済は発生しない
+  ・「応援する」→ スタンプを選んで送る → スコアが伸び、抜けば順位が入れ替わる、までを触れる
+  ・右の「いま届いた応援」は数秒ごとにデモの応援が届き、順位が動く（?live=0 で止める）
+  ・「選手」タブは設計のみ（法務の回答後に実装）
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Barlow+Condensed:ital,wght@0,600;0,800;1,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  /* ---------- レイアウト ---------- */
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+  .aside{margin-top:20px}
+  @media (min-width:1024px){ .aside{margin-top:0} .grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:32px;align-items:start} .aside{position:sticky;top:84px} }
+
+  /* ---------- 冠の帯・ヘッダー ---------- */
+  .presents{background:var(--night);color:#fff;font-size:.875rem;text-align:center;padding:8px 16px;letter-spacing:.04em}
+  .presents b{font-weight:900}
+  header.top{position:sticky;top:0;z-index:30;background:rgba(255,250,247,.86);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  header.top .wrap{display:flex;align-items:center;gap:14px;height:60px}
+  .logo{display:flex;align-items:center;gap:8px;font-weight:900;font-size:1.125rem;text-decoration:none;color:var(--ink)}
+  .logo img{height:28px;width:auto}
+  .league-name{font-weight:700;font-size:.875rem;color:var(--ink-muted);border-left:1px solid var(--line-strong);padding-left:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  /* ---------- ヒーロー：巨大な「1」が画面端からはみ出す ---------- */
+  .hero{position:relative;overflow:hidden;padding:40px 0 28px}
+  .hero::before{content:"";position:absolute;inset:0;background:
+      radial-gradient(60% 80% at 100% 0%,var(--blush) 0%,transparent 70%),
+      radial-gradient(50% 70% at 0% 100%,var(--peach) 0%,transparent 70%);z-index:-1}
+  .live{background:var(--surface);border:1px solid var(--line-strong);color:var(--ink)}
+  .live i{width:8px;height:8px;border-radius:50%;background:var(--heat-3);box-shadow:0 0 0 0 rgba(242,24,108,.5);animation:pulse 1.6s infinite}
+  @keyframes pulse{70%{box-shadow:0 0 0 8px rgba(242,24,108,0)}100%{box-shadow:0 0 0 0 rgba(242,24,108,0)}}
+  .hero h1{margin:16px 0 0;font-weight:900;line-height:1.08;letter-spacing:-.01em;font-size:clamp(2.6rem,7.4vw,5.4rem);word-break:auto-phrase;max-width:9.5em;position:relative;z-index:2}
+  .hero h1 .l2{display:block}
+  .hero .lead{margin:14px 0 0;font-size:1rem;line-height:1.8;color:var(--ink-muted);max-width:30em;position:relative;z-index:2}
+  .giant{position:absolute;right:-.06em;top:-.2em;z-index:0;font-family:var(--font-num);font-weight:800;font-style:italic;
+    font-size:clamp(16rem,42vw,34rem);line-height:.8;pointer-events:none;user-select:none;opacity:.95}
+  .leader{position:relative;z-index:2;margin-top:26px;display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.9);
+    border-radius:var(--r-card);padding:14px 18px 14px 14px;box-shadow:var(--shadow-card);width:max-content;max-width:100%;border:1px solid var(--line)}
+  .leader .k{font-size:.875rem;font-weight:700;color:var(--heat-text)}
+  .leader .n{font-weight:900;font-size:1.125rem}
+  .leader .s{font-size:1.75rem;font-weight:800;line-height:1}
+
+  /* ---------- 集計 ---------- */
+  .stats{display:flex;flex-wrap:wrap;gap:8px 28px;margin:26px 0 0;position:relative;z-index:2}
+  .stat .v{font-size:2rem;font-weight:800;line-height:1}
+  .stat .k{font-size:.875rem;color:var(--ink-muted);font-weight:500}
+
+  /* ---------- タブ ---------- */
+  .tabs{display:flex;gap:6px;margin:8px 0 14px;border-bottom:1px solid var(--line)}
+  .tab{appearance:none;background:none;border:0;padding:12px 6px;margin-right:14px;font:inherit;font-weight:900;font-size:1rem;color:var(--ink-subtle);cursor:pointer;position:relative}
+  .tab[aria-selected=true]{color:var(--ink)}
+  .tab[aria-selected=true]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;border-radius:3px;background:var(--heat-grad)}
+  .tab .soon{font-size:.75rem;font-family:var(--font-num);font-weight:600;letter-spacing:.06em;color:var(--ink-subtle);margin-left:4px}
+
+  /* ---------- ランキング行 ---------- */
+  .rank-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:10px}
+  .rank-head h2{margin:0;font-size:1.5rem;font-weight:900}
+  .rank-head .note{font-size:.875rem;color:var(--ink-muted)}
+  ol.board{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+  .row{position:relative;display:grid;grid-template-columns:56px 44px minmax(0,1fr) auto;align-items:center;gap:12px;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:14px 14px 18px 10px;box-shadow:var(--shadow-card);will-change:transform}
+  .row.top{border-color:transparent;background:linear-gradient(var(--surface),var(--surface)) padding-box,var(--heat-grad-diag) border-box;border:2px solid transparent}
+  .rk{text-align:center;line-height:1}
+  .rk .n{font-family:var(--font-num);font-weight:800;font-style:italic;font-size:2.6rem}
+  .row:nth-child(-n+3) .rk .n{background:var(--heat-grad-diag);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .rk .d{display:block;font-family:var(--font-num);font-weight:600;font-size:.8rem;margin-top:3px;color:var(--ink-subtle);white-space:nowrap}
+  .rk .d.up{color:var(--heat-text)} .rk .d.down{color:var(--ink-muted)}
+  .emb{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:#fff;font-family:var(--font-num);font-weight:800;font-size:1.3rem}
+  .row.top .emb{background:var(--heat-grad-diag)}
+  .who{min-width:0}
+  .who .nm{font-weight:900;font-size:1.0625rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .who .sub{font-size:.875rem;color:var(--ink-muted);margin-top:2px}
+  .score{text-align:right;line-height:1}
+  .score .v{font-family:var(--font-num);font-weight:800;font-size:1.75rem}
+  .score .u{font-size:.75rem;font-family:var(--font-num);font-weight:600;color:var(--ink-subtle);margin-left:2px}
+  .score .btn{margin-top:8px;padding:8px 16px;font-size:.875rem}
+  /* 熱量バー：全幅のグラデを clip で切る＝短いバーはオレンジ、長いほどマゼンタまで届く */
+  .bar{position:absolute;left:10px;right:14px;bottom:8px;height:5px;border-radius:5px;background:rgba(11,21,48,.06);overflow:hidden}
+  .bar i{position:absolute;inset:0;background:var(--heat-grad);clip-path:inset(0 calc(100% - var(--p,0)*1%) 0 0 round 5px);transition:clip-path var(--dur-slow) var(--ease-out)}
+  .row.flash{animation:flash 1.2s var(--ease-out)}
+  @keyframes flash{0%{box-shadow:0 0 0 0 rgba(242,24,108,.55),var(--shadow-lift)}100%{box-shadow:0 0 0 14px rgba(242,24,108,0),var(--shadow-card)}}
+  .upflag{position:absolute;right:14px;top:-12px;background:var(--heat-grad-btn);color:#fff;font-weight:900;font-size:.875rem;padding:4px 12px;border-radius:var(--r-pill);
+    box-shadow:var(--shadow-heat);animation:upflag 2.4s var(--ease-pop) forwards;z-index:3}
+  @keyframes upflag{0%{transform:translateY(8px) scale(.6);opacity:0}12%{transform:none;opacity:1}80%{opacity:1}100%{opacity:0;transform:translateY(-6px)}}
+  @media (max-width:560px){
+    .row{grid-template-columns:44px 38px minmax(0,1fr) auto;gap:10px;padding:12px 12px 18px 6px}
+    .rk .n{font-size:2.1rem} .emb{width:38px;height:38px;font-size:1.1rem}
+    .score .v{font-size:1.4rem}
+  }
+
+  /* ---------- 仕組みの一文 ---------- */
+  .how{margin:26px 0 0;padding:20px 22px;border-radius:var(--r-card);background:var(--peach);font-size:1rem;line-height:1.9}
+  .how b{font-weight:900}
+  .how .step{font-family:var(--font-num);font-weight:800;color:var(--heat-text-orange);margin-right:2px}
+  .how .safe{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .how .safe .chip{background:#fff;color:var(--ink);border:1px solid var(--line)}
+
+  /* ---------- 選手タブ（設計のみ） ---------- */
+  .players{border:2px dashed var(--line-strong);border-radius:var(--r-card);padding:28px 22px;background:var(--surface)}
+  .players h3{margin:0 0 8px;font-size:1.25rem;font-weight:900}
+  .players p{margin:0;color:var(--ink-muted);line-height:1.8;font-size:.9375rem}
+
+  /* ---------- サイド ---------- */
+  .panel{padding:20px;margin-bottom:16px}
+  .panel h3{margin:0 0 12px;font-size:1rem;font-weight:900;display:flex;align-items:center;justify-content:space-between}
+  .tl{position:relative;height:8px;border-radius:8px;background:rgba(11,21,48,.07);margin:44px 0 10px}
+  .tl i{position:absolute;inset:0;background:var(--heat-grad);clip-path:inset(0 calc(100% - var(--p)*1%) 0 0 round 8px)}
+  .tl .dot{position:absolute;top:50%;width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid var(--ink);transform:translate(-50%,-50%)}
+  .tl .now{position:absolute;top:-30px;transform:translateX(-50%);font-size:.75rem;font-weight:900;color:#fff;background:var(--heat-text);padding:2px 8px;border-radius:var(--r-pill);white-space:nowrap}
+  .tl-labels{display:grid;grid-template-columns:repeat(3,1fr);font-size:.875rem;gap:6px}
+  .tl-labels div:nth-child(2){text-align:center} .tl-labels div:nth-child(3){text-align:right}
+  .tl-labels b{display:block;font-weight:900}
+  .tl-labels span{color:var(--ink-muted)}
+  .count{display:flex;align-items:baseline;gap:4px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+  .count .k{font-size:.875rem;font-weight:700;margin-right:auto}
+  .count .v{font-family:var(--font-num);font-weight:800;font-size:1.9rem;line-height:1}
+  .count .u{font-size:.875rem;color:var(--ink-muted);margin-right:6px}
+  ul.feed{list-style:none;margin:0;padding:0;max-height:340px;overflow:hidden}
+  .feed li{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:.875rem;line-height:1.5;animation:feedin var(--dur-mid) var(--ease-out)}
+  .feed li:last-child{border-bottom:0}
+  .feed img{width:38px;height:38px;flex:none;object-fit:contain}
+  .feed b{font-weight:900}
+  .feed .t{display:block;color:var(--ink-subtle);font-size:.75rem;font-family:var(--font-num);font-weight:600}
+  .feed li.mine{background:var(--blush);margin:0 -10px;padding:9px 10px;border-radius:12px}
+  @keyframes feedin{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+  .sponsor .logo-slot{height:84px;border:2px dashed var(--line-strong);border-radius:14px;display:grid;place-items:center;color:var(--ink-muted);font-weight:700;font-size:.875rem;background:var(--canvas)}
+  .sponsor p{font-size:.875rem;line-height:1.8;color:var(--ink-muted);margin:12px 0 0}
+  .sponsor .proof{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  .sponsor .proof div{background:var(--blush);border-radius:14px;padding:12px}
+  .sponsor .proof .v{font-family:var(--font-num);font-weight:800;font-size:1.6rem;line-height:1}
+  .sponsor .proof .k{font-size:.875rem;color:var(--ink-muted)}
+
+  /* ---------- スマホ下部の固定CTA ---------- */
+  .dock{position:fixed;left:0;right:0;bottom:0;z-index:40;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:rgba(255,250,247,.94);backdrop-filter:blur(10px);border-top:1px solid var(--line)}
+  .dock .btn{width:100%;padding:15px;font-size:1.0625rem}
+  @media (min-width:1024px){.dock{display:none}}
+  body{padding-bottom:88px} @media (min-width:1024px){body{padding-bottom:0}}
+
+  /* ---------- スタンプを送るシート ---------- */
+  .scrim{position:fixed;inset:0;background:rgba(11,21,48,.5);z-index:60;opacity:0;pointer-events:none;transition:opacity var(--dur-mid)}
+  .scrim.on{opacity:1;pointer-events:auto}
+  .sheet{position:fixed;z-index:61;left:0;right:0;bottom:0;background:var(--surface);border-radius:24px 24px 0 0;padding:10px 20px calc(20px + env(safe-area-inset-bottom));
+    transform:translateY(105%);transition:transform var(--dur-mid) var(--ease-out);max-height:92vh;overflow:auto}
+  .sheet.on{transform:none}
+  @media (min-width:720px){.sheet{left:50%;right:auto;bottom:auto;top:50%;width:560px;border-radius:24px;transform:translate(-50%,-44%) scale(.96);opacity:0;pointer-events:none;transition:transform var(--dur-mid) var(--ease-pop),opacity var(--dur-fast)}
+    .sheet.on{transform:translate(-50%,-50%);opacity:1;pointer-events:auto}}
+  .grab{width:44px;height:5px;border-radius:5px;background:var(--line-strong);margin:0 auto 14px}
+  @media (min-width:720px){.grab{display:none}}
+  .sheet h2{margin:0;font-size:1.25rem;font-weight:900}
+  .sheet .to{font-size:.875rem;color:var(--ink-muted);margin-top:4px}
+  .teampick{display:flex;gap:8px;overflow-x:auto;padding:12px 0 4px;scrollbar-width:none}
+  .teampick button{flex:none;border:1.5px solid var(--line-strong);background:#fff;border-radius:var(--r-pill);padding:7px 14px;font:inherit;font-weight:700;font-size:.875rem;cursor:pointer;white-space:nowrap}
+  .teampick button[aria-pressed=true]{border-color:var(--heat-3);background:var(--blush);color:var(--heat-text)}
+  .stamps{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:14px 0 0}
+  .stamp{appearance:none;border:2px solid var(--line);background:var(--canvas);border-radius:16px;padding:8px 4px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font:inherit;transition:transform var(--dur-fast) var(--ease-pop),border-color var(--dur-fast)}
+  .stamp img{width:100%;max-width:74px;aspect-ratio:1;object-fit:contain;transition:transform var(--dur-mid) var(--ease-pop)}
+  .stamp .nm{font-size:.875rem;font-weight:900;white-space:nowrap}
+  .stamp .pr{font-family:var(--font-num);font-weight:800;font-size:1rem}
+  .stamp[aria-pressed=true]{border-color:var(--heat-3);background:var(--blush);transform:translateY(-3px)}
+  .stamp[aria-pressed=true] img{transform:scale(1.12) rotate(-6deg)}
+  @media (max-width:420px){.stamp .nm{font-size:.75rem}}
+  .gain{display:flex;justify-content:space-between;align-items:center;margin:16px 0 0;padding:14px 16px;border-radius:16px;background:var(--peach);font-size:.9375rem}
+  .gain b{font-family:var(--font-num);font-weight:800;font-size:1.4rem}
+  .sheet .send{width:100%;padding:16px;font-size:1.0625rem;margin-top:14px}
+  .sheet .fine{font-size:.75rem;color:var(--ink-subtle);text-align:center;margin:10px 0 0;line-height:1.6}
+
+  /* ---------- 送った瞬間の演出 ---------- */
+  .fly{position:fixed;z-index:80;width:84px;height:84px;pointer-events:none;object-fit:contain}
+  .spark{position:fixed;z-index:79;width:10px;height:10px;border-radius:3px;pointer-events:none}
+  .toast{position:fixed;left:50%;top:84px;z-index:90;transform:translate(-50%,-20px);opacity:0;background:var(--night);color:#fff;border-radius:var(--r-pill);padding:12px 22px;font-weight:900;font-size:.9375rem;box-shadow:var(--shadow-lift);transition:all var(--dur-mid) var(--ease-pop);white-space:nowrap}
+  .toast.on{opacity:1;transform:translate(-50%,0)}
+  .toast em{font-style:normal;background:var(--heat-grad-diag);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
+  .demo-note{font-size:.75rem;color:var(--ink-subtle);text-align:center;padding:28px 16px 40px;line-height:1.7}
+  footer{background:var(--night);color:rgba(255,255,255,.6);font-size:.875rem;padding:28px 0;margin-top:40px}
+</style>
+</head>
+<body>
+
+<div class="presents"><b>【要確認: 冠スポンサー名】</b> presents</div>
+
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="#"><img src="../../logo.png" alt="ゼニくる"></a>
+    <span class="league-name">【要確認: リーグ名】 × ゼニくる</span>
+  </div>
+</header>
+
+<section class="hero" aria-labelledby="h1">
+  <div class="giant heat-text num" aria-hidden="true">1</div>
+  <div class="wrap">
+    <span class="chip live"><i></i>開催中 ・ <span id="phaseLabel">2か月目</span></span>
+    <h1 id="h1">〇〇杯<span class="l2 heat-text">応援ランキング</span></h1>
+    <p class="lead">試合結果とは別の、もうひとつの順位表。<br>スタンプを送るたびに、応援しているチームの順位が動きます。</p>
+
+    <div class="leader" aria-live="polite">
+      <div class="emb" id="leadEmb">A</div>
+      <div>
+        <div class="k">いま1位</div>
+        <div class="n" id="leadName">Aチーム</div>
+      </div>
+      <div style="margin-left:18px;text-align:right">
+        <div class="s num" id="leadScore">0</div>
+        <div class="k" style="color:var(--ink-muted)">応援ポイント</div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="v num" id="stTotal">0</div><div class="k">リーグ全体の応援ポイント</div></div>
+      <div class="stat"><div class="v num" id="stPeople">0</div><div class="k">応援した人</div></div>
+      <div class="stat"><div class="v num" id="stStamps">0</div><div class="k">届いたスタンプ</div></div>
+    </div>
+  </div>
+</section>
+
+<main class="wrap grid">
+  <div>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="true" aria-controls="pTeams" id="tTeams">チーム</button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="pPlayers" id="tPlayers">選手<span class="soon">SOON</span></button>
+    </div>
+
+    <section id="pTeams" role="tabpanel" aria-labelledby="tTeams">
+      <div class="rank-head">
+        <h2>チームの順位</h2>
+        <span class="note">▲▼は前日からの変動</span>
+      </div>
+      <ol class="board" id="board" aria-live="polite"></ol>
+
+      <div class="how">
+        <span class="step">1</span><b>チームを選ぶ</b> → <span class="step">2</span><b>応援スタンプを買って送る</b> → <span class="step">3</span><b>応援ポイントが順位に加算</b>。<br>
+        中間発表と最終発表で順位が確定し、上位チームを表彰します。
+        <div class="safe">
+          <span class="chip">寄付ではなく、デジタルコンテンツの購入</span>
+          <span class="chip">独自通貨なし</span>
+          <span class="chip">転売できません</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="pPlayers" role="tabpanel" aria-labelledby="tPlayers" hidden>
+      <div class="players">
+        <h3>選手ランキングは準備中です</h3>
+        <p>選手ごとのページと応援、選手デジタルカードは<b>設計だけ先に進めています</b>。<br>
+        肖像の許諾の流れと法務の確認が済んでから公開します（段4で設計）。</p>
+      </div>
+    </section>
+  </div>
+
+  <aside class="aside">
+    <div class="card panel">
+      <h3>3か月のスケジュール</h3>
+      <div class="tl" style="--p:46"><i></i>
+        <span class="dot" style="left:0%"></span><span class="dot" style="left:50%"></span><span class="dot" style="left:100%"></span>
+        <span class="now" style="left:46%">いまここ</span>
+      </div>
+      <div class="tl-labels">
+        <div><b>開幕</b><span>ページ公開</span></div>
+        <div><b>中間発表</b><span>SNS・会場</span></div>
+        <div><b>最終発表</b><span>表彰</span></div>
+      </div>
+      <div class="count"><span class="k">中間発表まで</span><span class="v" id="cdD">12</span><span class="u">日</span><span class="v" id="cdH">04</span><span class="u">時間</span></div>
+    </div>
+
+    <div class="card panel">
+      <h3>いま届いた応援 <span class="chip live" style="font-size:.75rem"><i></i>LIVE</span></h3>
+      <ul class="feed" id="feed" aria-live="polite"></ul>
+    </div>
+
+    <div class="card panel sponsor">
+      <h3>この企画の協賛</h3>
+      <div class="logo-slot">【要確認: 冠スポンサーのロゴ】</div>
+      <p>【要確認: 協賛企業からのひとこと。例「地域のチームを、ファンと一緒に応援します」】</p>
+      <div class="proof">
+        <div><div class="v num" id="spPeople">0</div><div class="k">人が参加</div></div>
+        <div><div class="v num" id="spStamps">0</div><div class="k">件の応援</div></div>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<p class="demo-note">このページはデザインのモックです。チーム名・数値・応援はすべてデモで、決済は発生しません。<br>冠スポンサー名・リーグ名・大会名は【要確認】です。</p>
+<footer><div class="wrap">© ゼニくる ／ 株式会社DAO</div></footer>
+
+<div class="dock"><button class="btn btn-heat" data-open>スタンプで応援する</button></div>
+
+<!-- スタンプを送るシート -->
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shTitle">
+  <div class="grab"></div>
+  <h2 id="shTitle">スタンプを送って応援</h2>
+  <div class="to">送り先のチーム</div>
+  <div class="teampick" id="teampick"></div>
+  <div class="stamps" id="stamps"></div>
+  <div class="gain"><span><span id="gTeam">Aチーム</span>に加わる応援ポイント</span><b class="heat-text" id="gPts">+1,000</b></div>
+  <button class="btn btn-heat send" id="send">¥1,000 で送る</button>
+  <p class="fine">デモのため決済は発生しません。実際の画面では、ここから決済に進みます。</p>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== デモデータ（実在のチーム・数値ではない） ===== */
+const STAMPS=[
+  {id:1,name:'旗ふり',price:500,img:'../stamps/512/lv1_supporter.png'},
+  {id:2,name:'メダル',price:1000,img:'../stamps/512/lv2_big_supporter.png'},
+  {id:3,name:'メガホン',price:3000,img:'../stamps/512/lv3_fan.png'},
+  {id:4,name:'ヒーロー',price:5000,img:'../stamps/512/lv4_super_fan.png'},
+  {id:5,name:'王冠',price:10000,img:'../stamps/512/lv5_legend.png'},
+];
+// 応援ポイント＝購入額（1円＝1pt）。重み付けは RankingPolicy で後から変えられる前提【要確認】
+const teams=[
+  ['A',12540,214],['B',8230,151],['C',5610,97],['D',4980,88],['E',3420,63],['F',2760,51],['G',1900,34],['H',1150,22]
+].map(([k,score,people],i)=>({id:k,name:k+'チーム',score,people,prev:[1,3,2,4,6,5,7,8][i]}));
+let stampsTotal=642;
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $=s=>document.querySelector(s);
+const fmt=n=>n.toLocaleString('ja-JP');
+
+/* ===== 数字のカウントアップ ===== */
+function countTo(el,to,dur=900){
+  const from=+(el.dataset.v||0); el.dataset.v=to;
+  if(reduce||from===to){el.textContent=fmt(to);return}
+  const t0=performance.now();
+  const step=t=>{const k=Math.min(1,(t-t0)/dur),e=1-Math.pow(1-k,3);el.textContent=fmt(Math.round(from+(to-from)*e));if(k<1)requestAnimationFrame(step)};
+  requestAnimationFrame(step);
+}
+
+/* ===== ランキングの描画（FLIP で入れ替わりを見せる） ===== */
+const board=$('#board');
+function rowHTML(t){
+  return `<div class="rk"><span class="n num"></span><span class="d num"></span></div>
+    <div class="emb">${t.id}</div>
+    <div class="who"><div class="nm">${t.name}</div><div class="sub">応援した人 <span class="ppl num"></span>人</div></div>
+    <div class="score"><span class="v num">0</span><span class="u">pt</span><br><button class="btn btn-ghost" data-open="${t.id}">応援</button></div>
+    <div class="bar"><i></i></div>`;
+}
+teams.forEach(t=>{const li=document.createElement('li');li.className='row';li.dataset.id=t.id;li.innerHTML=rowHTML(t);board.appendChild(li);t.el=li});
+
+function render({animate=true,justUp=null}={}){
+  const before=new Map(teams.map(t=>[t.id,t.el.getBoundingClientRect().top]));
+  const oldRank=new Map([...board.children].map((el,i)=>[el.dataset.id,i+1]));
+  teams.sort((a,b)=>b.score-a.score);
+  const max=teams[0].score;
+  teams.forEach((t,i)=>{
+    const r=i+1,el=t.el;
+    board.appendChild(el);
+    el.classList.toggle('top',r===1);
+    el.querySelector('.rk .n').textContent=r;
+    const d=el.querySelector('.rk .d'),diff=t.prev-r;
+    d.className='d num '+(diff>0?'up':diff<0?'down':'');
+    d.textContent=diff>0?`▲${diff}`:diff<0?`▼${-diff}`:'―';
+    countTo(el.querySelector('.score .v'),t.score);
+    el.querySelector('.ppl').textContent=fmt(t.people);
+    el.querySelector('.bar i').style.setProperty('--p',Math.max(3,t.score/max*100).toFixed(1));
+    if(animate&&!reduce){
+      const dy=before.get(t.id)-el.getBoundingClientRect().top;
+      if(dy) el.animate([{transform:`translateY(${dy}px)`},{transform:'none'}],{duration:700,easing:'cubic-bezier(.22,1,.36,1)'});
+    }
+    const was=oldRank.get(t.id);
+    if(t.id===justUp&&was&&r<was){
+      const f=document.createElement('span');f.className='upflag';f.textContent=`▲ ${r}位に浮上！`;el.appendChild(f);setTimeout(()=>f.remove(),2500);
+    }
+  });
+  // ヒーローとサマリー
+  const lead=teams[0];
+  $('#leadName').textContent=lead.name;$('#leadEmb').textContent=lead.id;countTo($('#leadScore'),lead.score);
+  const total=teams.reduce((s,t)=>s+t.score,0),people=teams.reduce((s,t)=>s+t.people,0);
+  countTo($('#stTotal'),total);countTo($('#stPeople'),people);countTo($('#stStamps'),stampsTotal);
+  countTo($('#spPeople'),people);countTo($('#spStamps'),stampsTotal);
+}
+
+/* ===== 応援を1件反映する（自分・デモ共通） ===== */
+function support(teamId,stamp,{mine=false}={}){
+  const t=teams.find(x=>x.id===teamId);
+  t.score+=stamp.price;t.people+=mine?1:(Math.random()<.6?1:0);stampsTotal++;
+  render({justUp:teamId});
+  t.el.classList.remove('flash');void t.el.offsetWidth;t.el.classList.add('flash');
+  addFeed(mine?'あなた':randName(),t.name,stamp,mine);
+}
+const NAMES=['ゆう','さくら','こうた','みお','けん','ひなた','そら','あおい','りく','はる'];
+const randName=()=>NAMES[Math.floor(Math.random()*NAMES.length)]+'さん';
+function addFeed(who,team,stamp,mine){
+  const li=document.createElement('li');if(mine)li.className='mine';
+  li.innerHTML=`<img src="${stamp.img}" alt=""><div><b>${who}</b>が <b>${team}</b>に「${stamp.name}」を送りました<span class="t">JUST NOW</span></div>`;
+  const f=$('#feed');f.prepend(li);while(f.children.length>6)f.lastChild.remove();
+}
+
+/* ===== シート ===== */
+let selTeam='A',selStamp=STAMPS[1];
+const tp=$('#teampick'),st=$('#stamps');
+function drawSheet(){
+  tp.innerHTML=teams.map(t=>`<button aria-pressed="${t.id===selTeam}" data-t="${t.id}">${t.name}</button>`).join('');
+  st.innerHTML=STAMPS.map(s=>`<button class="stamp" aria-pressed="${s.id===selStamp.id}" data-s="${s.id}"><img src="${s.img}" alt=""><span class="nm">${s.name}</span><span class="pr num">¥${fmt(s.price)}</span></button>`).join('');
+  $('#gTeam').textContent=selTeam+'チーム';$('#gPts').textContent='+'+fmt(selStamp.price);$('#send').textContent=`¥${fmt(selStamp.price)} で送る`;
+}
+function openSheet(id){if(id)selTeam=id;drawSheet();$('#scrim').classList.add('on');$('#sheet').classList.add('on');setTimeout(()=>$('#send').focus(),300)}
+function closeSheet(){$('#scrim').classList.remove('on');$('#sheet').classList.remove('on')}
+document.addEventListener('click',e=>{
+  const o=e.target.closest('[data-open]');if(o){openSheet(o.dataset.open||null);return}
+  const t=e.target.closest('[data-t]');if(t){selTeam=t.dataset.t;drawSheet();return}
+  const s=e.target.closest('[data-s]');if(s){selStamp=STAMPS.find(x=>x.id==s.dataset.s);drawSheet();return}
+});
+$('#scrim').onclick=closeSheet;
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
+
+/* ===== 送った瞬間：スタンプが飛んで行に着地し、火花が散る ===== */
+$('#send').onclick=()=>{
+  const from=st.querySelector('[aria-pressed=true] img').getBoundingClientRect();
+  const team=selTeam,stamp=selStamp;
+  closeSheet();
+  const row=teams.find(t=>t.id===team).el;
+  row.scrollIntoView({block:'center',behavior:reduce?'auto':'smooth'});
+  setTimeout(()=>{
+    const to=row.querySelector('.score').getBoundingClientRect();
+    if(!reduce){
+      const img=document.createElement('img');img.src=stamp.img;img.className='fly';document.body.appendChild(img);
+      const dx=to.left+to.width/2-42-from.left,dy=to.top+to.height/2-42-from.top;
+      img.style.left=from.left+'px';img.style.top=from.top+'px';
+      img.animate([
+        {transform:'translate(0,0) scale(1) rotate(0)'},
+        {transform:`translate(${dx*.5}px,${dy*.5-120}px) scale(1.5) rotate(-12deg)`,offset:.45},
+        {transform:`translate(${dx}px,${dy}px) scale(.5) rotate(8deg)`,opacity:.9}
+      ],{duration:750,easing:'cubic-bezier(.45,0,.2,1)'}).onfinish=()=>{img.remove();burst(to.left+to.width/2,to.top+to.height/2);land()};
+    }else land();
+    function land(){
+      support(team,stamp,{mine:true});
+      const r=teams.findIndex(t=>t.id===team)+1;
+      toast(`<em>+${fmt(stamp.price)}pt</em>　${team}チームはいま ${r}位`);
+    }
+  },reduce?0:380);
+};
+function burst(x,y){
+  const cols=['#FF8A1F','#FD434E','#F2186C','#FFC857'];
+  for(let i=0;i<18;i++){
+    const s=document.createElement('i');s.className='spark';s.style.left=x+'px';s.style.top=y+'px';s.style.background=cols[i%4];document.body.appendChild(s);
+    const a=Math.PI*2*i/18+Math.random()*.4,d=50+Math.random()*60;
+    s.animate([{transform:'translate(-50%,-50%) scale(1)',opacity:1},{transform:`translate(${Math.cos(a)*d-5}px,${Math.sin(a)*d-5}px) rotate(${Math.random()*360}deg) scale(.3)`,opacity:0}],
+      {duration:700+Math.random()*300,easing:'cubic-bezier(.22,1,.36,1)'}).onfinish=()=>s.remove();
+  }
+}
+let tt;function toast(html){const t=$('#toast');t.innerHTML=html;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2600)}
+
+/* ===== タブ ===== */
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',x===b));
+  $('#pTeams').hidden=b.id!=='tTeams';$('#pPlayers').hidden=b.id!=='tPlayers';
+});
+
+/* ===== 中間発表までのカウントダウン（デモ：12日4時間後） ===== */
+const deadline=Date.now()+(12*24+4)*3600e3;
+setInterval(()=>{const ms=deadline-Date.now();$('#cdD').textContent=Math.floor(ms/864e5);$('#cdH').textContent=String(Math.floor(ms/36e5)%24).padStart(2,'0')},60e3);
+
+/* ===== 起動：最初のフィード → 描画 → デモの応援が届き続ける ===== */
+[['C',2],['A',3],['B',1],['E',2]].forEach(([id,s])=>addFeed(randName(),id+'チーム',STAMPS[s]));
+render({animate:false});
+if(new URLSearchParams(location.search).get('live')!=='0'){
+  setInterval(()=>{
+    if(document.hidden||$('#sheet').classList.contains('on'))return;
+    // 下位ほど少し多めに届く＝順位が動きやすい
+    const pool=teams.flatMap((t,i)=>Array(i+1).fill(t.id));
+    const s=STAMPS[[0,0,0,1,1,1,2,2,3,4][Math.floor(Math.random()*10)]];
+    support(pool[Math.floor(Math.random()*pool.length)],s);
+  },5200);
+}
+</script>
+</body>
+</html>

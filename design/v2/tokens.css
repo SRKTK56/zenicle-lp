@@ -1,0 +1,77 @@
+/* ============================================================
+   ゼニくる デザイントークン v2（2026-10-01）
+   出典: 営業資料「リーグ運営団体向け提案資料」10p の実測値
+     - グラデ端点 #FD8121 → #FD434E → #F6186B（p5 下部帯を走査）
+     - 見出し #061228 前後、背景は白＋ピーチ／ブラッシュの暖色
+   v1（design/README.md §1）との違い:
+     - ピンクを「達成率だけ」から、オレンジと並ぶ主役へ格上げ
+     - グラデは飾りではなく「熱量の目盛り」。左＝温かい／右＝熱い
+     - 背景を青みのグレーから暖色の白へ
+   アプリ（globals.css）へはこのファイルの :root をそのまま移植する。
+   ============================================================ */
+:root{
+  /* --- 熱量（主役色）。単色で使うときは段階の意味を守る --- */
+  --heat-1:#FF8A1F;   /* ぬくもり：オレンジ。ボタン・アイコン */
+  --heat-2:#FD434E;   /* 高まり：コーラル。グラデの中間 */
+  --heat-3:#F2186C;   /* 熱狂：マゼンタ。1位・達成・送った瞬間 */
+  --heat-grad:linear-gradient(90deg,#FF8A1F 0%,#FD434E 52%,#F2186C 100%);
+  --heat-grad-diag:linear-gradient(120deg,#FF8A1F 0%,#FD434E 50%,#F2186C 100%);
+  /* 白文字を載せる塗り（ボタン）用。明るい --heat-grad だと端のオレンジで白文字が 2.4:1 になるため一段暗くする
+     白文字のコントラスト: 左端 3.8 / 中央 4.6 / 右端 4.9 */
+  --heat-grad-btn:linear-gradient(120deg,#E0542A 0%,#DA3348 50%,#D81E5F 100%);
+  /* 小さい文字（〜14px）に熱量色を使うときはこちら。白地で AA（4.5:1）以上 */
+  --heat-text:#C4124F;
+  --heat-text-orange:#B35300;
+
+  /* --- インク（文字） --- */
+  --ink:#0B1530;         /* 見出し・本文 */
+  --ink-muted:#4F576B;   /* 補足（白地 7.2:1） */
+  --ink-subtle:#6A7184;  /* 注釈（暖白地 4.7:1。小さい数字・単位にも使える） */
+
+  /* --- 面 --- */
+  --canvas:#FFFAF7;      /* ページ背景：暖かい白 */
+  --blush:#FFF0EF;       /* ピンク寄りの帯 */
+  --peach:#FFF2E7;       /* オレンジ寄りの帯 */
+  --surface:#FFFFFF;     /* カード */
+  --line:rgba(11,21,48,.09);
+  --line-strong:rgba(11,21,48,.16);
+  --night:#0B1530;       /* フッター・発表演出の暗転 */
+
+  /* --- 影：発光させない。紺の影を薄く、熱量の影は主CTAだけ --- */
+  --shadow-card:0 8px 28px rgba(11,21,48,.07);
+  --shadow-lift:0 18px 44px rgba(11,21,48,.13);
+  --shadow-heat:0 12px 32px rgba(242,24,108,.28);
+
+  /* --- 角丸：カード 20px・ボタンはピル。これ以外を作らない --- */
+  --r-card:20px; --r-pill:999px; --r-chip:12px;
+
+  /* --- 文字 --- */
+  --font-ja:'Noto Sans JP',system-ui,sans-serif;
+  --font-num:'Barlow Condensed','Noto Sans JP',sans-serif; /* 順位・スコア・期間など数字専用 */
+
+  /* --- 動き：意味ごとに3種類だけ --- */
+  --ease-pop:cubic-bezier(.34,1.56,.64,1);   /* 弾む：送った瞬間・順位上昇 */
+  --ease-out:cubic-bezier(.22,1,.36,1);      /* 滑らかに止まる：バーが伸びる・入れ替わり */
+  --dur-fast:.18s; --dur-mid:.45s; --dur-slow:1.1s;
+}
+
+/* ---------- 共通の部品（モック用。アプリでは ui/ に置き換える） ---------- */
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--font-ja);-webkit-font-smoothing:antialiased}
+.num{font-family:var(--font-num);font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.heat-text{background:var(--heat-grad-diag);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5em;border:0;cursor:pointer;
+  font-family:var(--font-ja);font-weight:900;border-radius:var(--r-pill);transition:transform var(--dur-fast) var(--ease-pop),box-shadow var(--dur-fast)}
+.btn:active{transform:scale(.96)}
+.btn-heat{background:var(--heat-grad-btn);color:#fff;box-shadow:var(--shadow-heat)}
+.btn-heat:hover{transform:translateY(-2px) scale(1.02)}
+.btn-ghost{background:var(--surface);color:var(--ink);border:1.5px solid var(--line-strong)}
+.btn-ghost:hover{border-color:var(--heat-2)}
+.chip{display:inline-flex;align-items:center;gap:.4em;border-radius:var(--r-pill);font-weight:700;font-size:.875rem;padding:.3em .85em;white-space:nowrap}
+.card{background:var(--surface);border-radius:var(--r-card);box-shadow:var(--shadow-card);border:1px solid var(--line)}
+:focus-visible{outline:3px solid var(--heat-2);outline-offset:3px}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
