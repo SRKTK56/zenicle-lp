@@ -31,32 +31,32 @@
   .logo img{height:28px;width:auto}
   .league-name{font-weight:700;font-size:.875rem;color:var(--ink-muted);border-left:1px solid var(--line-strong);padding-left:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-  /* ---------- ヒーロー：巨大な「1」が画面端からはみ出す ---------- */
-  .hero{position:relative;overflow:hidden;padding:40px 0 28px}
-  .hero::before{content:"";position:absolute;inset:0;background:
-      radial-gradient(60% 80% at 100% 0%,var(--blush) 0%,transparent 70%),
-      radial-gradient(50% 70% at 0% 100%,var(--peach) 0%,transparent 70%);z-index:-1}
+  /* ---------- タイトル帯：1段に畳み、主役はランキングに譲る ---------- */
+  .strip{background:radial-gradient(70% 140% at 100% 0%,var(--blush) 0%,transparent 70%),radial-gradient(50% 120% at 0% 100%,var(--peach) 0%,transparent 70%);border-bottom:1px solid var(--line)}
+  .strip-in{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 28px;padding:16px 20px}
   .live{background:var(--surface);border:1px solid var(--line-strong);color:var(--ink)}
   .live i{width:8px;height:8px;border-radius:50%;background:var(--heat-3);box-shadow:0 0 0 0 rgba(242,24,108,.5);animation:pulse 1.6s infinite}
   @keyframes pulse{70%{box-shadow:0 0 0 8px rgba(242,24,108,0)}100%{box-shadow:0 0 0 0 rgba(242,24,108,0)}}
-  .hero h1{margin:16px 0 0;font-weight:900;line-height:1.08;letter-spacing:-.01em;font-size:clamp(2.6rem,7.4vw,5.4rem);word-break:auto-phrase;max-width:9.5em;position:relative;z-index:2}
-  .hero h1 .l2{display:block}
-  .hero .lead{margin:14px 0 0;font-size:1rem;line-height:1.8;color:var(--ink-muted);max-width:30em;position:relative;z-index:2}
-  .giant{position:absolute;right:-.06em;top:-.2em;z-index:0;font-family:var(--font-num);font-weight:800;font-style:italic;
-    font-size:clamp(16rem,42vw,34rem);line-height:.8;pointer-events:none;user-select:none;opacity:.95}
-  .leader{position:relative;z-index:2;margin-top:26px;display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.9);
-    border-radius:var(--r-card);padding:14px 18px 14px 14px;box-shadow:var(--shadow-card);width:max-content;max-width:100%;border:1px solid var(--line)}
-  .leader .k{font-size:.875rem;font-weight:700;color:var(--heat-text)}
-  .leader .n{font-weight:900;font-size:1.125rem}
-  .leader .s{font-size:1.75rem;font-weight:800;line-height:1}
-
-  /* ---------- 集計 ---------- */
-  .stats{display:flex;flex-wrap:wrap;gap:8px 28px;margin:26px 0 0;position:relative;z-index:2}
-  .stat .v{font-size:2rem;font-weight:800;line-height:1}
-  .stat .k{font-size:.875rem;color:var(--ink-muted);font-weight:500}
+  .ttl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;min-width:0}
+  .ttl h1{margin:0;font-weight:900;line-height:1.15;font-size:clamp(1.6rem,3.2vw,2.3rem);letter-spacing:-.01em;white-space:nowrap}
+  .ttl .lead{margin:0;font-size:.875rem;color:var(--ink-muted);flex-basis:100%}
+  .kpis{display:flex;gap:6px 26px;margin:0;flex-wrap:wrap}
+  .kpis div{line-height:1.1}
+  .kpis dt{font-size:.875rem;color:var(--ink-muted);font-weight:500}
+  .kpis dd{margin:0;font-family:var(--font-num);font-weight:800;font-size:1.7rem}
+  .kpis dd small{font-family:var(--font-ja);font-size:.875rem;font-weight:700;color:var(--ink-muted);margin:0 3px 0 1px}
+  .kpis .cd dd{color:var(--heat-text)}
+  /* スマホだけ：最新の応援が流れる1行 */
+  .ticker{display:flex;align-items:center;gap:8px;padding:8px 20px;border-top:1px solid var(--line);background:rgba(255,255,255,.7);font-size:.875rem;overflow:hidden;white-space:nowrap}
+  .ticker img{width:26px;height:26px;object-fit:contain;flex:none}
+  .ticker span{overflow:hidden;text-overflow:ellipsis}
+  .ticker b{font-weight:900}
+  .ticker .in{animation:feedin var(--dur-mid) var(--ease-out)}
+  @media (min-width:1024px){.ticker{display:none}}
+  @media (max-width:560px){.kpis{gap:4px 18px}.kpis dd{font-size:1.35rem}.kpis .hide-sp{display:none}}
 
   /* ---------- タブ ---------- */
-  .tabs{display:flex;gap:6px;margin:8px 0 14px;border-bottom:1px solid var(--line)}
+  .tabs{display:flex;gap:6px;margin:4px 0 12px;border-bottom:1px solid var(--line)}
   .tab{appearance:none;background:none;border:0;padding:12px 6px;margin-right:14px;font:inherit;font-weight:900;font-size:1rem;color:var(--ink-subtle);cursor:pointer;position:relative}
   .tab[aria-selected=true]{color:var(--ink)}
   .tab[aria-selected=true]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;border-radius:3px;background:var(--heat-grad)}
@@ -66,36 +66,68 @@
   .rank-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:10px}
   .rank-head h2{margin:0;font-size:1.5rem;font-weight:900}
   .rank-head .note{font-size:.875rem;color:var(--ink-muted)}
-  ol.board{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
-  .row{position:relative;display:grid;grid-template-columns:56px 44px minmax(0,1fr) auto;align-items:center;gap:12px;
-    background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:14px 14px 18px 10px;box-shadow:var(--shadow-card);will-change:transform}
-  .row.top{border-color:transparent;background:linear-gradient(var(--surface),var(--surface)) padding-box,var(--heat-grad-diag) border-box;border:2px solid transparent}
+  ol.board{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+  .row{position:relative;display:grid;grid-template-columns:48px 40px minmax(0,1fr) auto auto;align-items:center;gap:12px;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:10px 14px 16px 8px;box-shadow:var(--shadow-card);will-change:transform;overflow:hidden}
   .rk{text-align:center;line-height:1}
-  .rk .n{font-family:var(--font-num);font-weight:800;font-style:italic;font-size:2.6rem}
+  .rk .n{font-family:var(--font-num);font-weight:800;font-style:italic;font-size:2.2rem}
   .row:nth-child(-n+3) .rk .n{background:var(--heat-grad-diag);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-  .rk .d{display:block;font-family:var(--font-num);font-weight:600;font-size:.8rem;margin-top:3px;color:var(--ink-subtle);white-space:nowrap}
+  .rk .d{display:block;font-family:var(--font-num);font-weight:600;font-size:.8rem;margin-top:2px;color:var(--ink-subtle);white-space:nowrap}
   .rk .d.up{color:var(--heat-text)} .rk .d.down{color:var(--ink-muted)}
-  .emb{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:#fff;font-family:var(--font-num);font-weight:800;font-size:1.3rem}
-  .row.top .emb{background:var(--heat-grad-diag)}
+  .emb{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:#fff;font-family:var(--font-num);font-weight:800;font-size:1.2rem}
   .who{min-width:0}
   .who .nm{font-weight:900;font-size:1.0625rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .who .sub{font-size:.875rem;color:var(--ink-muted);margin-top:2px}
-  .score{text-align:right;line-height:1}
-  .score .v{font-family:var(--font-num);font-weight:800;font-size:1.75rem}
+  .who .sub{font-size:.875rem;color:var(--ink-muted);margin-top:1px}
+  .score{text-align:right;line-height:1;white-space:nowrap}
+  .score .v{font-family:var(--font-num);font-weight:800;font-size:1.7rem}
   .score .u{font-size:.75rem;font-family:var(--font-num);font-weight:600;color:var(--ink-subtle);margin-left:2px}
-  .score .btn{margin-top:8px;padding:8px 16px;font-size:.875rem}
+  .row .go{padding:8px 16px;font-size:.875rem}
   /* 熱量バー：全幅のグラデを clip で切る＝短いバーはオレンジ、長いほどマゼンタまで届く */
-  .bar{position:absolute;left:10px;right:14px;bottom:8px;height:5px;border-radius:5px;background:rgba(11,21,48,.06);overflow:hidden}
+  .bar{position:absolute;left:8px;right:14px;bottom:7px;height:5px;border-radius:5px;background:rgba(11,21,48,.06);overflow:hidden}
   .bar i{position:absolute;inset:0;background:var(--heat-grad);clip-path:inset(0 calc(100% - var(--p,0)*1%) 0 0 round 5px);transition:clip-path var(--dur-slow) var(--ease-out)}
+
+  /* ---------- 1位の行＝このページの主役。巨大な「1」が行からはみ出す ---------- */
+  .row.top{grid-template-columns:120px 60px minmax(0,1fr) auto auto;padding:22px 22px 30px 0;border:0;background:var(--heat-grad-btn);color:#fff;box-shadow:var(--shadow-heat)}
+  .row.top::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 120% at 85% 0%,rgba(255,255,255,.22),transparent 60%);pointer-events:none}
+  .row.top .rk{align-self:stretch;display:flex;flex-direction:column;justify-content:center;margin:-22px 0 -30px}
+  .row.top .rk .n{font-size:8.5rem;line-height:.78;-webkit-text-fill-color:#fff;background:none;margin-left:-10px;text-shadow:0 6px 24px rgba(120,0,40,.25)}
+  .row.top .rk .d{color:rgba(255,255,255,.9);position:absolute;left:14px;top:12px}
+  .row.top .rk .d.same{display:none}
+  .row.top .emb{width:60px;height:60px;font-size:1.8rem;background:#fff;color:var(--heat-text)}
+  .row.top .who .nm{font-size:1.6rem;white-space:normal}
+  .row.top .who .sub{color:rgba(255,255,255,.88)}
+  .row.top .who .crown{display:inline-block;font-size:.875rem;font-weight:900;background:rgba(255,255,255,.2);border-radius:var(--r-pill);padding:2px 10px;margin-bottom:6px}
+  .row .who .crown{display:none} .row.top .who .crown{display:inline-block}
+  .row.top .score .v{font-size:3.4rem}
+  .row.top .score .u{color:rgba(255,255,255,.85);font-size:1rem}
+  .row.top .go{background:#fff;color:var(--heat-text);border:0;padding:12px 22px;font-size:1rem}
+  .row.top .bar{background:rgba(255,255,255,.22);left:0;right:0;bottom:0;height:6px;border-radius:0}
+  .row.top .bar i{background:#fff;clip-path:none}
   .row.flash{animation:flash 1.2s var(--ease-out)}
   @keyframes flash{0%{box-shadow:0 0 0 0 rgba(242,24,108,.55),var(--shadow-lift)}100%{box-shadow:0 0 0 14px rgba(242,24,108,0),var(--shadow-card)}}
   .upflag{position:absolute;right:14px;top:-12px;background:var(--heat-grad-btn);color:#fff;font-weight:900;font-size:.875rem;padding:4px 12px;border-radius:var(--r-pill);
     box-shadow:var(--shadow-heat);animation:upflag 2.4s var(--ease-pop) forwards;z-index:3}
   @keyframes upflag{0%{transform:translateY(8px) scale(.6);opacity:0}12%{transform:none;opacity:1}80%{opacity:1}100%{opacity:0;transform:translateY(-6px)}}
   @media (max-width:560px){
-    .row{grid-template-columns:44px 38px minmax(0,1fr) auto;gap:10px;padding:12px 12px 18px 6px}
-    .rk .n{font-size:2.1rem} .emb{width:38px;height:38px;font-size:1.1rem}
-    .score .v{font-size:1.4rem}
+    .row{grid-template-columns:38px 34px minmax(0,1fr) auto;gap:9px;padding:9px 10px 15px 4px}
+    .rk .n{font-size:1.9rem} .emb{width:34px;height:34px;font-size:1rem}
+    .who .nm{font-size:1rem}
+    .score .v{font-size:1.35rem}
+    .row .go{grid-column:4;padding:5px 12px;font-size:.8125rem;justify-self:end}
+    .row .score{grid-row:1;grid-column:4}
+    .row{grid-template-rows:auto auto}
+    .row .rk,.row .emb,.row .who{grid-row:1/3}
+    .row.top{grid-template-columns:78px 44px minmax(0,1fr) auto;padding:16px 14px 22px 0}
+    .row.top .rk{margin:-16px 0 -22px}
+    .row.top .rk .n{font-size:5.6rem;margin-left:-6px}
+    .row.top .emb{width:44px;height:44px;font-size:1.3rem}
+    .row.top .who .nm{font-size:1.2rem}
+    .row.top .score .v{font-size:2.1rem}
+    .row.top .go{padding:8px 14px;font-size:.875rem}
+    .row.top .who .crown{display:none}
+    .row.top .who .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ttl .lead{display:none}
+    .strip-in{padding-top:12px;padding-bottom:12px}
   }
 
   /* ---------- 仕組みの一文 ---------- */
@@ -125,7 +157,7 @@
   .count .k{font-size:.875rem;font-weight:700;margin-right:auto}
   .count .v{font-family:var(--font-num);font-weight:800;font-size:1.9rem;line-height:1}
   .count .u{font-size:.875rem;color:var(--ink-muted);margin-right:6px}
-  ul.feed{list-style:none;margin:0;padding:0;max-height:340px;overflow:hidden}
+  ul.feed{list-style:none;margin:0;padding:0;max-height:300px;overflow:hidden}
   .feed li{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:.875rem;line-height:1.5;animation:feedin var(--dur-mid) var(--ease-out)}
   .feed li:last-child{border-bottom:0}
   .feed img{width:38px;height:38px;flex:none;object-fit:contain}
@@ -196,31 +228,21 @@
   </div>
 </header>
 
-<section class="hero" aria-labelledby="h1">
-  <div class="giant heat-text num" aria-hidden="true">1</div>
-  <div class="wrap">
-    <span class="chip live"><i></i>開催中 ・ <span id="phaseLabel">2か月目</span></span>
-    <h1 id="h1">〇〇杯<span class="l2 heat-text">応援ランキング</span></h1>
-    <p class="lead">試合結果とは別の、もうひとつの順位表。<br>スタンプを送るたびに、応援しているチームの順位が動きます。</p>
-
-    <div class="leader" aria-live="polite">
-      <div class="emb" id="leadEmb">A</div>
-      <div>
-        <div class="k">いま1位</div>
-        <div class="n" id="leadName">Aチーム</div>
-      </div>
-      <div style="margin-left:18px;text-align:right">
-        <div class="s num" id="leadScore">0</div>
-        <div class="k" style="color:var(--ink-muted)">応援ポイント</div>
-      </div>
+<section class="strip" aria-labelledby="h1">
+  <div class="wrap strip-in" style="padding-left:20px;padding-right:20px">
+    <div class="ttl">
+      <span class="chip live"><i></i>開催中 ・ <span id="phaseLabel">2か月目</span></span>
+      <h1 id="h1">〇〇杯 <span class="heat-text">応援ランキング</span></h1>
+      <p class="lead">試合結果とは別の、もうひとつの順位表。スタンプを送るたびに順位が動きます。</p>
     </div>
-
-    <div class="stats">
-      <div class="stat"><div class="v num" id="stTotal">0</div><div class="k">リーグ全体の応援ポイント</div></div>
-      <div class="stat"><div class="v num" id="stPeople">0</div><div class="k">応援した人</div></div>
-      <div class="stat"><div class="v num" id="stStamps">0</div><div class="k">届いたスタンプ</div></div>
-    </div>
+    <dl class="kpis">
+      <div class="hide-sp"><dt>リーグ全体</dt><dd><span id="stTotal">0</span><small>pt</small></dd></div>
+      <div><dt>応援した人</dt><dd><span id="stPeople">0</span><small>人</small></dd></div>
+      <div class="hide-sp"><dt>届いたスタンプ</dt><dd><span id="stStamps">0</span><small>件</small></dd></div>
+      <div class="cd"><dt>中間発表まで</dt><dd><span id="cdD2">12</span><small>日</small><span id="cdH2">04</span><small>時間</small></dd></div>
+    </dl>
   </div>
+  <div class="ticker" id="ticker" aria-live="polite"></div>
 </section>
 
 <main class="wrap grid">
@@ -228,14 +250,11 @@
     <div class="tabs" role="tablist">
       <button class="tab" role="tab" aria-selected="true" aria-controls="pTeams" id="tTeams">チーム</button>
       <button class="tab" role="tab" aria-selected="false" aria-controls="pPlayers" id="tPlayers">選手<span class="soon">SOON</span></button>
+      <span class="note" style="margin-left:auto;align-self:center;font-size:.875rem;color:var(--ink-muted)">▲▼は前日比</span>
     </div>
 
     <section id="pTeams" role="tabpanel" aria-labelledby="tTeams">
-      <div class="rank-head">
-        <h2>チームの順位</h2>
-        <span class="note">▲▼は前日からの変動</span>
-      </div>
-      <ol class="board" id="board" aria-live="polite"></ol>
+            <ol class="board" id="board" aria-live="polite"></ol>
 
       <div class="how">
         <span class="step">1</span><b>チームを選ぶ</b> → <span class="step">2</span><b>応援スタンプを買って送る</b> → <span class="step">3</span><b>応援ポイントが順位に加算</b>。<br>
@@ -259,6 +278,11 @@
 
   <aside class="aside">
     <div class="card panel">
+      <h3>いま届いた応援 <span class="chip live" style="font-size:.75rem"><i></i>LIVE</span></h3>
+      <ul class="feed" id="feed" aria-live="polite"></ul>
+    </div>
+
+    <div class="card panel">
       <h3>3か月のスケジュール</h3>
       <div class="tl" style="--p:46"><i></i>
         <span class="dot" style="left:0%"></span><span class="dot" style="left:50%"></span><span class="dot" style="left:100%"></span>
@@ -269,12 +293,6 @@
         <div><b>中間発表</b><span>SNS・会場</span></div>
         <div><b>最終発表</b><span>表彰</span></div>
       </div>
-      <div class="count"><span class="k">中間発表まで</span><span class="v" id="cdD">12</span><span class="u">日</span><span class="v" id="cdH">04</span><span class="u">時間</span></div>
-    </div>
-
-    <div class="card panel">
-      <h3>いま届いた応援 <span class="chip live" style="font-size:.75rem"><i></i>LIVE</span></h3>
-      <ul class="feed" id="feed" aria-live="polite"></ul>
     </div>
 
     <div class="card panel sponsor">
@@ -340,8 +358,9 @@ const board=$('#board');
 function rowHTML(t){
   return `<div class="rk"><span class="n num"></span><span class="d num"></span></div>
     <div class="emb">${t.id}</div>
-    <div class="who"><div class="nm">${t.name}</div><div class="sub">応援した人 <span class="ppl num"></span>人</div></div>
-    <div class="score"><span class="v num">0</span><span class="u">pt</span><br><button class="btn btn-ghost" data-open="${t.id}">応援</button></div>
+    <div class="who"><span class="crown">いま1位</span><div class="nm">${t.name}</div><div class="sub"><span class="ppl num"></span>人が応援</div></div>
+    <div class="score"><span class="v num">0</span><span class="u">pt</span></div>
+    <button class="btn btn-ghost go" data-open="${t.id}" aria-label="${t.name}を応援">応援</button>
     <div class="bar"><i></i></div>`;
 }
 teams.forEach(t=>{const li=document.createElement('li');li.className='row';li.dataset.id=t.id;li.innerHTML=rowHTML(t);board.appendChild(li);t.el=li});
@@ -357,7 +376,7 @@ function render({animate=true,justUp=null}={}){
     el.classList.toggle('top',r===1);
     el.querySelector('.rk .n').textContent=r;
     const d=el.querySelector('.rk .d'),diff=t.prev-r;
-    d.className='d num '+(diff>0?'up':diff<0?'down':'');
+    d.className='d num '+(diff>0?'up':diff<0?'down':'same');
     d.textContent=diff>0?`▲${diff}`:diff<0?`▼${-diff}`:'―';
     countTo(el.querySelector('.score .v'),t.score);
     el.querySelector('.ppl').textContent=fmt(t.people);
@@ -371,9 +390,7 @@ function render({animate=true,justUp=null}={}){
       const f=document.createElement('span');f.className='upflag';f.textContent=`▲ ${r}位に浮上！`;el.appendChild(f);setTimeout(()=>f.remove(),2500);
     }
   });
-  // ヒーローとサマリー
-  const lead=teams[0];
-  $('#leadName').textContent=lead.name;$('#leadEmb').textContent=lead.id;countTo($('#leadScore'),lead.score);
+  // タイトル帯と協賛欄の集計
   const total=teams.reduce((s,t)=>s+t.score,0),people=teams.reduce((s,t)=>s+t.people,0);
   countTo($('#stTotal'),total);countTo($('#stPeople'),people);countTo($('#stStamps'),stampsTotal);
   countTo($('#spPeople'),people);countTo($('#spStamps'),stampsTotal);
@@ -392,7 +409,8 @@ const randName=()=>NAMES[Math.floor(Math.random()*NAMES.length)]+'さん';
 function addFeed(who,team,stamp,mine){
   const li=document.createElement('li');if(mine)li.className='mine';
   li.innerHTML=`<img src="${stamp.img}" alt=""><div><b>${who}</b>が <b>${team}</b>に「${stamp.name}」を送りました<span class="t">JUST NOW</span></div>`;
-  const f=$('#feed');f.prepend(li);while(f.children.length>6)f.lastChild.remove();
+  const f=$('#feed');f.prepend(li);while(f.children.length>5)f.lastChild.remove();
+  $('#ticker').innerHTML=`<img src="${stamp.img}" alt=""><span class="in"><b>${who}</b>が <b>${team}</b>に「${stamp.name}」</span>`;
 }
 
 /* ===== シート ===== */
@@ -458,7 +476,7 @@ document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
 
 /* ===== 中間発表までのカウントダウン（デモ：12日4時間後） ===== */
 const deadline=Date.now()+(12*24+4)*3600e3;
-setInterval(()=>{const ms=deadline-Date.now();$('#cdD').textContent=Math.floor(ms/864e5);$('#cdH').textContent=String(Math.floor(ms/36e5)%24).padStart(2,'0')},60e3);
+setInterval(()=>{const ms=deadline-Date.now();$('#cdD2').textContent=Math.floor(ms/864e5);$('#cdH2').textContent=String(Math.floor(ms/36e5)%24).padStart(2,'0')},60e3);
 
 /* ===== 起動：最初のフィード → 描画 → デモの応援が届き続ける ===== */
 [['C',2],['A',3],['B',1],['E',2]].forEach(([id,s])=>addFeed(randName(),id+'チーム',STAMPS[s]));
