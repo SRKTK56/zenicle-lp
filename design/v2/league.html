@@ -238,6 +238,34 @@
   .sheet .send{width:100%;padding:16px;font-size:1.0625rem;margin-top:14px}
   .sheet .fine{font-size:.75rem;color:var(--ink-subtle);text-align:center;margin:10px 0 0;line-height:1.6}
 
+
+  .tabs-note{margin-left:auto;align-self:center;font-size:.875rem;color:var(--ink-muted)}
+
+  /* ---------- リーグの写真を全面の背景に（Season.coverImageUrl → Program.coverImageUrl の順で使う想定） ----------
+     夜の球場に合わせて紺を重ね、白いカードを浮かせる。カードの外の文字だけ白に切り替える。?bg=none で写真なし */
+  .photo-bg{position:fixed;inset:0;z-index:-1;background:var(--night) var(--photo) center 30%/cover no-repeat}
+  .photo-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,21,48,.35) 0%,rgba(11,21,48,.62) 34%,rgba(11,21,48,.8) 70%,rgba(11,21,48,.88) 100%)}
+  body.photo{background:var(--night)}
+  body.photo .strip{background:none;border-bottom-color:rgba(255,255,255,.14)}
+  body.photo .ttl h1{color:#fff;text-shadow:0 2px 18px rgba(0,0,0,.35)}
+  body.photo .ttl .lead,body.photo .kpis dt,body.photo .kpis dd small{color:rgba(255,255,255,.8)}
+  body.photo .kpis dd{color:#fff}
+  body.photo .kpis .cd dd{color:#FF7DAA}
+  body.photo .lockup{border-left-color:rgba(255,255,255,.28)}
+  body.photo .lockup .by{color:rgba(255,255,255,.8)}
+  body.photo .tabs{border-bottom-color:rgba(255,255,255,.16)}
+  body.photo .tab{color:rgba(255,255,255,.62)}
+  body.photo .tab[aria-selected=true]{color:#fff}
+  body.photo .tab .soon,body.photo .tabs-note{color:rgba(255,255,255,.72)}
+  body.photo .row{border-color:transparent;box-shadow:0 10px 30px rgba(0,0,0,.28)}
+  body.photo .goods-head h2{color:#fff}
+  body.photo .goods-lead,body.photo .goods .fine{color:rgba(255,255,255,.78)}
+  body.photo .demo-note{color:rgba(255,255,255,.66)}
+  body.photo .demo-note a{color:inherit}
+  body.photo header.top{background:rgba(11,21,48,.72);border-bottom-color:rgba(255,255,255,.1)}
+  body.photo .league-name{color:rgba(255,255,255,.82);border-left-color:rgba(255,255,255,.22)}
+  body.photo .ticker{background:rgba(255,255,255,.08);border-top-color:rgba(255,255,255,.12);color:#fff}
+  body.photo .dock{background:rgba(11,21,48,.82);border-top-color:rgba(255,255,255,.1)}
   /* ---------- 送った瞬間の演出 ---------- */
   .fly{position:fixed;z-index:80;width:84px;height:84px;pointer-events:none;object-fit:contain}
   .spark{position:fixed;z-index:79;width:10px;height:10px;border-radius:3px;pointer-events:none}
@@ -250,6 +278,16 @@
 </style>
 </head>
 <body>
+<div class="photo-bg" aria-hidden="true"></div>
+<script>
+/* 背景写真：?bg=<画像URL> で差し替え、?bg=none で写真なし。既定はデモ用のフリー素材 */
+(function(){
+  var q=new URLSearchParams(location.search).get('bg'),src=q===null?'img/bg-ballpark.jpg':q;
+  if(src==='none'||!/^(https:\/\/|img\/)/.test(src))return;
+  document.body.classList.add('photo');
+  document.body.style.setProperty('--photo','url("'+encodeURI(src)+'")');
+})();
+</script>
 
 <header class="top">
   <div class="wrap">
@@ -284,7 +322,7 @@
     <div class="tabs" role="tablist">
       <button class="tab" role="tab" aria-selected="true" aria-controls="pTeams" id="tTeams">チーム</button>
       <button class="tab" role="tab" aria-selected="false" aria-controls="pPlayers" id="tPlayers">選手<span class="soon">SOON</span></button>
-      <span class="note" style="margin-left:auto;align-self:center;font-size:.875rem;color:var(--ink-muted)">▲▼は前日比</span>
+      <span class="note tabs-note">▲▼は前日比</span>
     </div>
 
     <section id="pTeams" role="tabpanel" aria-labelledby="tTeams">
@@ -349,7 +387,7 @@
   </aside>
 </main>
 
-<p class="demo-note">このページはデザインのモックです。チーム名・数値・応援はすべてデモで、決済は発生しません。<br>冠スポンサー名・リーグ名・大会名は【要確認】です。</p>
+<p class="demo-note">このページはデザインのモックです。チーム名・数値・応援はすべてデモで、決済は発生しません。<br>冠スポンサー名・リーグ名・大会名は【要確認】です。<br>背景写真：SAID ABRAHAM CRUZ（<a href="https://unsplash.com/photos/bxrPS-HASoU" target="_blank" rel="noopener">Unsplash</a>）。<code>?bg=画像のURL</code> で差し替え、<code>?bg=none</code> で写真なし。</p>
 <footer><div class="wrap">© ゼニくる ／ 株式会社DAO</div></footer>
 
 <div class="dock"><button class="btn btn-heat" data-open>応援コンテンツで応援する</button></div>
