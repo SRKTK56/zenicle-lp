@@ -72,7 +72,7 @@
   .rank-head .note{font-size:.875rem;color:var(--ink-muted)}
   ol.board{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
   .row{position:relative;display:grid;grid-template-columns:48px 40px minmax(0,1fr) auto auto;align-items:center;gap:12px;
-    background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:10px 14px 16px 8px;box-shadow:var(--shadow-card);will-change:transform;overflow:hidden}
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:10px 14px 16px 8px;box-shadow:var(--shadow-card);will-change:transform}
   .rk{text-align:center;line-height:1}
   .rk .n{font-family:var(--font-num);font-weight:800;font-style:italic;font-size:2.2rem}
   .row:nth-child(-n+3) .rk .n{background:var(--heat-grad-diag);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
@@ -91,7 +91,8 @@
   .bar i{position:absolute;inset:0;background:var(--heat-grad);clip-path:inset(0 calc(100% - var(--p,0)*1%) 0 0 round 5px);transition:clip-path var(--dur-slow) var(--ease-out)}
 
   /* ---------- 1位の行＝このページの主役。巨大な「1」が行からはみ出す ---------- */
-  .row.top{grid-template-columns:120px 60px minmax(0,1fr) auto auto;padding:22px 22px 30px 0;border:0;background:var(--heat-grad-btn);color:#fff;box-shadow:var(--shadow-heat)}
+  .row.top{grid-template-columns:120px 60px minmax(0,1fr) auto auto;padding:22px 22px 30px 0;border:0;background:var(--heat-grad-btn);color:#fff;box-shadow:var(--shadow-heat);overflow:hidden}
+  .row.top .upflag{top:10px;background:#fff;color:var(--heat-text)}
   .row.top::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 120% at 85% 0%,rgba(255,255,255,.22),transparent 60%);pointer-events:none}
   .row.top .rk{align-self:stretch;display:flex;flex-direction:column;justify-content:center;margin:-22px 0 -30px}
   .row.top .rk .n{font-size:8.5rem;line-height:.78;-webkit-text-fill-color:#fff;background:none;margin-left:-10px;text-shadow:0 6px 24px rgba(120,0,40,.25)}
@@ -207,6 +208,31 @@
   .stamp[aria-pressed=true]{border-color:var(--heat-3);background:var(--blush);transform:translateY(-3px)}
   .stamp[aria-pressed=true] img{transform:scale(1.12) rotate(-6deg)}
   @media (max-width:420px){.stamp .nm{font-size:.75rem}}
+  /* 応援コンテンツの種類（公式／チームオリジナル／選手カード） */
+  .cats{display:flex;gap:4px;margin:14px 0 0;padding:4px;background:var(--canvas);border-radius:var(--r-pill);border:1px solid var(--line)}
+  .cats button{flex:1;appearance:none;border:0;background:none;border-radius:var(--r-pill);padding:8px 6px;font:inherit;font-weight:900;font-size:.875rem;color:var(--ink-muted);cursor:pointer;white-space:nowrap}
+  .cats button[aria-selected=true]{background:#fff;color:var(--ink);box-shadow:0 2px 10px rgba(11,21,48,.1)}
+  .stamps.cols3{grid-template-columns:repeat(3,1fr)}
+  .stamp.card img{aspect-ratio:5/7;max-width:96px}
+  .stamp .tag{font-size:.75rem;font-weight:700;color:var(--heat-text)}
+  .card-note{font-size:.8125rem;color:var(--ink-muted);margin:10px 0 0;line-height:1.6}
+
+  /* ---------- チームオリジナルの応援コンテンツ（一覧） ---------- */
+  .goods{margin:30px 0 0}
+  .goods-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .goods-head h2{margin:0;font-size:1.375rem;font-weight:900}
+  .goods-head .chip{background:var(--blush);color:var(--heat-text)}
+  .goods-lead{margin:8px 0 0;font-size:.9375rem;line-height:1.8;color:var(--ink-muted)}
+  .goods .teampick{padding-top:12px}
+  .goods-row{display:flex;gap:12px;overflow-x:auto;padding:6px 2px 14px;scroll-snap-type:x mandatory;scrollbar-width:thin}
+  .gitem{flex:none;width:150px;scroll-snap-align:start;appearance:none;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:var(--r-card);padding:12px;cursor:pointer;font:inherit;box-shadow:var(--shadow-card);transition:transform var(--dur-fast) var(--ease-pop),box-shadow var(--dur-fast)}
+  .gitem:hover{transform:translateY(-4px);box-shadow:var(--shadow-lift)}
+  .gitem img{display:block;width:100%;aspect-ratio:1;object-fit:contain;margin-bottom:8px}
+  .gitem.card img{aspect-ratio:5/7}
+  .gitem .k{font-size:.75rem;font-weight:700;color:var(--heat-text)}
+  .gitem .nm{font-weight:900;font-size:.9375rem;margin-top:2px}
+  .gitem .pr{font-family:var(--font-num);font-weight:800;font-size:1.125rem;margin-top:2px}
+  .goods .fine{font-size:.8125rem;color:var(--ink-muted);line-height:1.7;margin:4px 0 0}
   .gain{display:flex;justify-content:space-between;align-items:center;margin:16px 0 0;padding:14px 16px;border-radius:16px;background:var(--peach);font-size:.9375rem}
   .gain b{font-family:var(--font-num);font-weight:800;font-size:1.4rem}
   .sheet .send{width:100%;padding:16px;font-size:1.0625rem;margin-top:14px}
@@ -273,6 +299,14 @@
           <span class="chip">転売できません</span>
         </div>
       </div>
+
+      <section class="goods" aria-labelledby="gTitle">
+        <div class="goods-head"><h2 id="gTitle">チームオリジナルの応援コンテンツ</h2><span class="chip">イメージ</span></div>
+        <p class="goods-lead">公式スタンプのほかに、各チームがオリジナルのスタンプや選手のデジタルカードを販売できます。どれを購入しても、応援ポイントとして順位に加算されます。</p>
+        <div class="teampick" id="gTeams"></div>
+        <div class="goods-row" id="goodsRow"></div>
+        <p class="fine">選手の肖像は、球団を通じて許諾を得たものだけを使います（このデモはシルエットで、実在の選手ではありません）。中身を選んで買う形で、ランダム販売（ガチャ）はありません。転売もできません。</p>
+      </section>
     </section>
 
     <section id="pPlayers" role="tabpanel" aria-labelledby="tPlayers" hidden>
@@ -318,16 +352,18 @@
 <p class="demo-note">このページはデザインのモックです。チーム名・数値・応援はすべてデモで、決済は発生しません。<br>冠スポンサー名・リーグ名・大会名は【要確認】です。</p>
 <footer><div class="wrap">© ゼニくる ／ 株式会社DAO</div></footer>
 
-<div class="dock"><button class="btn btn-heat" data-open>スタンプで応援する</button></div>
+<div class="dock"><button class="btn btn-heat" data-open>応援コンテンツで応援する</button></div>
 
 <!-- スタンプを送るシート -->
 <div class="scrim" id="scrim"></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shTitle">
   <div class="grab"></div>
-  <h2 id="shTitle">スタンプを送って応援</h2>
+  <h2 id="shTitle">応援コンテンツを選んで応援</h2>
   <div class="to">送り先のチーム</div>
   <div class="teampick" id="teampick"></div>
+  <div class="cats" id="cats" role="tablist" aria-label="応援コンテンツの種類"></div>
   <div class="stamps" id="stamps"></div>
+  <p class="card-note" id="cardNote" hidden>選手の肖像は、球団を通じて許諾を得たものだけを使います（このデモはシルエットです）。</p>
   <div class="gain"><span><span id="gTeam">Aチーム</span>に加わる応援ポイント</span><b class="heat-text" id="gPts">+1,000</b></div>
   <button class="btn btn-heat send" id="send">¥1,000 で送る</button>
   <p class="fine">デモのため決済は発生しません。実際の画面では、ここから決済に進みます。</p>
@@ -416,25 +452,74 @@ const NAMES=['ゆう','さくら','こうた','みお','けん','ひなた','そ
 const randName=()=>NAMES[Math.floor(Math.random()*NAMES.length)]+'さん';
 function addFeed(who,team,stamp,mine){
   const li=document.createElement('li');if(mine)li.className='mine';
-  li.innerHTML=`<img src="${stamp.img}" alt=""><div><b>${who}</b>が <b>${team}</b>に「${stamp.name}」を送りました<span class="t">JUST NOW</span></div>`;
+  li.innerHTML=`<img src="${stamp.img}" alt=""><div><b>${who}</b>が <b>${team}</b>を「${stamp.name}」で応援しました<span class="t">JUST NOW</span></div>`;
   const f=$('#feed');f.prepend(li);while(f.children.length>5)f.lastChild.remove();
-  $('#ticker').innerHTML=`<img src="${stamp.img}" alt=""><span class="in"><b>${who}</b>が <b>${team}</b>に「${stamp.name}」</span>`;
+  $('#ticker').innerHTML=`<img src="${stamp.img}" alt=""><span class="in"><b>${who}</b>が <b>${team}</b>を「${stamp.name}」で応援</span>`;
 }
 
+/* ===== チームオリジナルの応援コンテンツ（デモ用に SVG をその場で描く。実在の選手・図柄ではない） ===== */
+const svgURI=svg=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+const JA="font-family='Hiragino Sans,Noto Sans JP,sans-serif' font-weight='900'";
+const GRAD="<defs><linearGradient id='h' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#FF8A1F'/><stop offset='.5' stop-color='#FD434E'/><stop offset='1' stop-color='#F2186C'/></linearGradient></defs>";
+const emblem=(id,x,y,r=20)=>`<circle cx='${x}' cy='${y}' r='${r}' fill='#0B1530' stroke='#fff' stroke-width='4'/><text x='${x}' y='${y+r*.36}' text-anchor='middle' font-family='Barlow Condensed,Arial Narrow,sans-serif' font-weight='800' font-size='${r*1.05}' fill='#fff'>${id}</text>`;
+const TEAM_STAMPS=[
+  {key:'nice',name:'ナイス！',price:300,draw:id=>`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160'>${GRAD}<path d='M18 26h124a12 12 0 0 1 12 12v66a12 12 0 0 1-12 12H70l-30 26 6-26H18A12 12 0 0 1 6 104V38a12 12 0 0 1 12-12z' fill='#fff' stroke='url(#h)' stroke-width='8' stroke-linejoin='round'/><text x='80' y='84' text-anchor='middle' ${JA} font-size='34' fill='url(#h)'>ナイス！</text>${emblem(id,136,128)}</svg>`},
+  {key:'win',name:'勝つぞ！',price:800,draw:id=>{const pts=[...Array(24)].map((_,i)=>{const a=Math.PI*2*i/24,r=i%2?58:76;return `${80+Math.cos(a)*r},${78+Math.sin(a)*r}`}).join(' ');return `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160'>${GRAD}<polygon points='${pts}' fill='url(#h)'/><text x='80' y='90' text-anchor='middle' ${JA} font-size='25' fill='#fff' transform='rotate(-8 80 80)'>勝つぞ！</text>${emblem(id,132,130)}</svg>`}},
+  {key:'thx',name:'ありがとう',price:1500,draw:id=>`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160'>${GRAD}<circle cx='80' cy='78' r='64' fill='url(#h)'/><circle cx='80' cy='78' r='52' fill='#0B1530'/><text x='80' y='70' text-anchor='middle' ${JA} font-size='17' fill='#fff'>応援</text><text x='80' y='96' text-anchor='middle' ${JA} font-size='17' fill='#fff'>ありがとう</text>${emblem(id,128,132)}</svg>`},
+];
+const CARDS=[{no:10,limited:false,price:1000},{no:18,limited:false,price:1000},{no:7,limited:true,price:3000}];
+const cardSVG=(id,c)=>`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 280'>${GRAD}<linearGradient id='n' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#24345E'/><stop offset='1' stop-color='#0B1530'/></linearGradient>
+  <rect x='4' y='4' width='192' height='272' rx='16' fill='${c.limited?'url(#h)':'#0B1530'}'/>
+  <rect x='14' y='14' width='172' height='196' rx='10' fill='url(#n)'/>
+  <circle cx='100' cy='108' r='34' fill='rgba(255,255,255,.22)'/><path d='M40 210c4-44 30-62 60-62s56 18 60 62z' fill='rgba(255,255,255,.22)'/>
+  <text x='26' y='70' font-family='Barlow Condensed,Arial Narrow,sans-serif' font-style='italic' font-weight='800' font-size='58' fill='#fff'>${c.no}</text>
+  ${c.limited?`<rect x='112' y='24' width='66' height='22' rx='11' fill='#fff'/><text x='145' y='40' text-anchor='middle' font-family='Arial,sans-serif' font-weight='800' font-size='12' fill='#C4124F'>LIMITED</text>`:''}
+  <text x='100' y='238' text-anchor='middle' ${JA} font-size='17' fill='#fff'>${id}チーム #${c.no}</text>
+  <text x='100' y='260' text-anchor='middle' font-family='Arial,sans-serif' font-weight='800' font-size='11' letter-spacing='3' fill='rgba(255,255,255,.75)'>PLAYER CARD</text>
+  </svg>`;
+const _cache={};
+function itemsFor(cat,teamId){
+  const k=cat+teamId; if(_cache[k])return _cache[k];
+  if(cat==='official')return STAMPS;
+  if(cat==='team')return _cache[k]=TEAM_STAMPS.map(t=>({id:`t-${teamId}-${t.key}`,name:t.name,price:t.price,img:svgURI(t.draw(teamId)),cat}));
+  return _cache[k]=CARDS.map(c=>({id:`c-${teamId}-${c.no}`,name:`#${c.no} ${c.limited?'限定カード':'選手カード'}`,price:c.price,img:svgURI(cardSVG(teamId,c)),cat}));
+}
+const CATS=[['official','公式スタンプ'],['team','チームオリジナル'],['card','選手カード']];
+
 /* ===== シート ===== */
-let selTeam='A',selStamp=STAMPS[1];
+let selTeam='A',selCat='official',selStamp=STAMPS[1];
 const tp=$('#teampick'),st=$('#stamps');
 function drawSheet(){
+  const items=itemsFor(selCat,selTeam);
+  if(!items.some(x=>x.id===selStamp.id))selStamp=items[selCat==='official'?1:0];
   tp.innerHTML=teams.map(t=>`<button aria-pressed="${t.id===selTeam}" data-t="${t.id}">${t.name}</button>`).join('');
-  st.innerHTML=STAMPS.map(s=>`<button class="stamp" aria-pressed="${s.id===selStamp.id}" data-s="${s.id}"><img src="${s.img}" alt=""><span class="nm">${s.name}</span><span class="pr num">¥${fmt(s.price)}</span></button>`).join('');
-  $('#gTeam').textContent=selTeam+'チーム';$('#gPts').textContent='+'+fmt(selStamp.price);$('#send').textContent=`¥${fmt(selStamp.price)} で送る`;
+  $('#cats').innerHTML=CATS.map(([k,l])=>`<button role="tab" aria-selected="${k===selCat}" data-cat="${k}">${k==='team'?selTeam+'チームの':''}${l.replace('チームオリジナル','オリジナル')}</button>`).join('');
+  st.className='stamps'+(selCat==='official'?'':' cols3');
+  st.innerHTML=items.map(s=>`<button class="stamp${s.cat==='card'?' card':''}" aria-pressed="${s.id===selStamp.id}" data-s="${s.id}"><img src="${s.img}" alt=""><span class="nm">${s.name}</span><span class="pr num">¥${fmt(s.price)}</span></button>`).join('');
+  $('#cardNote').hidden=selCat!=='card';
+  $('#gTeam').textContent=selTeam+'チーム';$('#gPts').textContent='+'+fmt(selStamp.price);$('#send').textContent=`¥${fmt(selStamp.price)} で応援する`;
 }
-function openSheet(id){if(id)selTeam=id;drawSheet();$('#scrim').classList.add('on');$('#sheet').classList.add('on');setTimeout(()=>$('#send').focus(),300)}
+function openSheet(id,cat,itemId){
+  if(id)selTeam=id; if(cat)selCat=cat;
+  if(itemId){const it=itemsFor(selCat,selTeam).find(x=>x.id===itemId);if(it)selStamp=it}
+  drawSheet();$('#scrim').classList.add('on');$('#sheet').classList.add('on');setTimeout(()=>$('#send').focus(),300)
+}
 function closeSheet(){$('#scrim').classList.remove('on');$('#sheet').classList.remove('on')}
+
+/* ===== 一覧（ランキングの下） ===== */
+let gTeam='A';
+function drawGoods(){
+  $('#gTeams').innerHTML=teams.map(t=>`<button aria-pressed="${t.id===gTeam}" data-gt="${t.id}">${t.name}</button>`).join('');
+  const list=[...itemsFor('team',gTeam),...itemsFor('card',gTeam)];
+  $('#goodsRow').innerHTML=list.map(x=>`<button class="gitem${x.cat==='card'?' card':''}" data-buy="${x.cat}|${x.id}"><img src="${x.img}" alt=""><div class="k">${x.cat==='card'?'選手デジタルカード':'オリジナルスタンプ'}</div><div class="nm">${x.name}</div><div class="pr">¥${fmt(x.price)}</div></button>`).join('');
+}
 document.addEventListener('click',e=>{
   const o=e.target.closest('[data-open]');if(o){openSheet(o.dataset.open||null);return}
+  const by=e.target.closest('[data-buy]');if(by){const [c,i]=by.dataset.buy.split('|');openSheet(gTeam,c,i);return}
+  const g=e.target.closest('[data-gt]');if(g){gTeam=g.dataset.gt;drawGoods();return}
+  const c=e.target.closest('[data-cat]');if(c){selCat=c.dataset.cat;drawSheet();return}
   const t=e.target.closest('[data-t]');if(t){selTeam=t.dataset.t;drawSheet();return}
-  const s=e.target.closest('[data-s]');if(s){selStamp=STAMPS.find(x=>x.id==s.dataset.s);drawSheet();return}
+  const s=e.target.closest('[data-s]');if(s){selStamp=itemsFor(selCat,selTeam).find(x=>x.id===s.dataset.s);drawSheet();return}
 });
 $('#scrim').onclick=closeSheet;
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
@@ -489,13 +574,17 @@ setInterval(()=>{const ms=deadline-Date.now();$('#cdD2').textContent=Math.floor(
 /* ===== 起動：最初のフィード → 描画 → デモの応援が届き続ける ===== */
 [['C',2],['A',3],['B',1],['E',2]].forEach(([id,s])=>addFeed(randName(),id+'チーム',STAMPS[s]));
 render({animate:false});
+drawGoods();
 if(new URLSearchParams(location.search).get('live')!=='0'){
   setInterval(()=>{
     if(document.hidden||$('#sheet').classList.contains('on'))return;
     // 下位ほど少し多めに届く＝順位が動きやすい
     const pool=teams.flatMap((t,i)=>Array(i+1).fill(t.id));
-    const s=STAMPS[[0,0,0,1,1,1,2,2,3,4][Math.floor(Math.random()*10)]];
-    support(pool[Math.floor(Math.random()*pool.length)],s);
+    const id=pool[Math.floor(Math.random()*pool.length)],r=Math.random();
+    // 7割は公式スタンプ、2割はチームオリジナル、1割は選手カード
+    const list=r<.7?STAMPS:itemsFor(r<.9?'team':'card',id);
+    const s=r<.7?STAMPS[[0,0,0,1,1,1,2,2,3,4][Math.floor(Math.random()*10)]]:list[Math.floor(Math.random()*list.length)];
+    support(id,s);
   },5200);
 }
 </script>
