@@ -376,6 +376,29 @@ LP の `:root`（`index.html`）と、アプリ `globals.css` の用途別トー
 - **LP 側の対応は不要（2026-09-29 確認）**: ヒーローの数値は `/public/stats` 由来で、累計額・応援者数は `Donation.status = CONFIRMED` の全件集計なので**非公開にしても減らない**。`teamCount` は `status: 'PUBLISHED'` で数えるので 1 減り、`/public/team-explore` のカードも 1 枚減る。**表示は自動で整合する**
 - 関連: §3.7（運営の承認フロー・#56）／§3.11（Discord 通知）
 
+### 3.14 運営者（OPERATOR）がチームを新設し、管理者・メンバーを設定できる（2026-10-01 依頼）
+
+**背景**: REGIONLINK の加藤さん（RXDAO の OPERATOR）から「新規チームの作成画面が出ない」と問い合わせ（Discord「打ち合わせ」2026-10-01）。
+OPERATOR で招待したのは、TENANT_ADMIN だと Stripe Connect・精算の画面まで開けるため（9/29 判断）。**お金まわりは開かせずに、チームの立ち上げだけは任せたい**。
+
+**現状（2026-10-01 origin/main で確認）**
+
+| 操作 | API | 画面 `/ops/teams` |
+|---|---|---|
+| チームの新設 `POST /programs/:programId/teams` | OPERATOR **許可済み** | 「チームを追加」は `canModify`（TENANT_ADMIN / PLATFORM_ADMIN）のときだけ表示 → **OPERATOR には出ない** |
+| メンバーの一覧・追加・ロール変更・削除 `/ops/teams/:teamId/members(/:memberId)` | PLATFORM_ADMIN / TENANT_ADMIN のみ | `openMembers` も `canModify` で止まる |
+| チーム一覧 | OPERATOR は `TeamOperatorAssignment` の担当チームだけ | 担当 0 件 → 「表示対象のチームはありません」 |
+| 担当の割り当て `POST /ops/teams/:teamId/operators` | PLATFORM_ADMIN / TENANT_ADMIN のみ | — |
+
+**依頼**
+1. **OPERATOR にも「チームを追加」を出す**（API は許可済みなので画面の条件だけ）
+2. **OPERATOR がチームを作ったら、作った本人を `TeamOperatorAssignment` に自動で登録**する（作った直後に一覧から消えないように）
+3. **メンバーの一覧・追加（招待）・ロール変更（メンバー／管理者）・削除を、OPERATOR にも開く。ただし担当チームに限る**（担当外の `teamId` は 403）
+4. 変えないもの: **チームの削除、Stripe Connect、精算・残高、テナント設定、担当の割り当ては従来どおり TENANT_ADMIN 以上**
+5. OPERATOR が作ったチームも、公開には従来どおりの審査（§3.7・現在 off）と §3.11 の Discord 通知に乗る（新しい経路を作らない）
+
+**受け入れ基準**: 加藤さんのアカウント（RXDAO・OPERATOR）で、REGIONLINK のプログラムにチームを作り、チーム管理者をメールで招待し、そのチームが一覧に出たまま編集できること。Stripe・精算のメニューは引き続き開けないこと。
+
 ## 4. チームページ `/t/[teamId]` — モック `team.html`
 
 - 実装の正: `design/team.html`（実 API で描画。`?team=<id>` で任意チーム、`&edit=1` で編集モード＝ドロワー編集・空欄枠・承認フローの状態表示）
