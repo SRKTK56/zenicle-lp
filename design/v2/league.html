@@ -155,12 +155,27 @@
     .strip-in{padding-top:12px;padding-bottom:12px}
   }
 
-  /* ---------- 仕組みの一文 ---------- */
-  .how{margin:26px 0 0;padding:20px 22px;border-radius:var(--r-card);background:var(--peach);font-size:1rem;line-height:1.9}
-  .how b{font-weight:900}
-  .how .step{font-family:var(--font-num);font-weight:800;color:var(--heat-text-orange);margin-right:2px}
-  .how .safe{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-  .how .safe .chip{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  /* ---------- 応援のしかた（3ステップ・左から右への流れ） ---------- */
+  .how{margin:26px 0 0;padding:20px 22px 18px;border-radius:var(--r-card);background:var(--peach)}
+  .how h2{margin:0 0 12px;font-size:1.125rem;font-weight:900}
+  .steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+  .steps li{position:relative;display:flex;gap:10px;align-items:flex-start;padding-right:30px}
+  .steps li:not(:last-child)::after{content:"";position:absolute;right:11px;top:12px;width:9px;height:9px;border-top:2.5px solid var(--heat-2);border-right:2.5px solid var(--heat-2);transform:rotate(45deg)}
+  .steps .no{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--heat-grad-btn);color:#fff;font-family:var(--font-num);font-weight:800;font-size:1.1rem}
+  .steps b{display:block;font-weight:900;font-size:1rem;line-height:1.4;margin-top:4px}
+  .steps p{margin:4px 0 0;font-size:.875rem;line-height:1.7;color:var(--ink-muted);word-break:auto-phrase}
+  .how-after{margin:14px 0 0;padding-top:12px;border-top:1px solid rgba(11,21,48,.08);font-size:.875rem;color:var(--ink-muted)}
+  .how-after a{color:var(--heat-text);font-weight:700}
+  @media (max-width:640px){
+    .steps{grid-template-columns:1fr;gap:22px}
+    .steps li{padding-right:0}
+    .steps li:not(:last-child)::after{right:auto;left:11px;top:auto;bottom:-15px;transform:rotate(135deg)}
+  }
+  /* ---------- 購入について（注記はここにまとめる） ---------- */
+  .buy-notes{margin-top:34px}
+  .buy-notes h2{margin:0 0 8px;font-size:1rem;font-weight:900}
+  .buy-notes ul{margin:0;padding-left:1.2em;font-size:.875rem;line-height:1.8;color:var(--ink-muted)}
+  body.photo .buy-notes h2{color:#fff} body.photo .buy-notes ul{color:rgba(255,255,255,.8)}
 
   /* ---------- 選手タブ（設計のみ） ---------- */
   .players{border:2px dashed var(--line-strong);border-radius:var(--r-card);padding:28px 22px;background:var(--surface)}
@@ -320,7 +335,7 @@
   .toast.on{opacity:1;transform:translate(-50%,0)}
   .toast em{font-style:normal;background:var(--heat-grad-diag);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 
-  .demo-note{font-size:.75rem;color:var(--ink-subtle);text-align:center;padding:28px 16px 40px;line-height:1.7}
+  .demo-note{font-size:.75rem;color:var(--ink-subtle);text-align:center;padding:22px 16px 40px;line-height:1.7}
   footer{background:var(--night);color:rgba(255,255,255,.6);font-size:.875rem;padding:28px 0;margin-top:40px}
 </style>
 </head>
@@ -375,15 +390,15 @@
     <section id="pTeams" role="tabpanel" aria-labelledby="tTeams">
             <ol class="board" id="board" aria-live="polite"></ol>
 
-      <div class="how">
-        <span class="step">1</span><b>チームを選ぶ</b> → <span class="step">2</span><b>応援スタンプを買って送る</b> → <span class="step">3</span><b>応援ポイントが順位に加算</b>。<br>
-        中間発表と最終発表で順位が確定し、上位チームを表彰します。
-        <div class="safe">
-          <span class="chip">寄付ではなく、デジタルコンテンツの購入</span>
-          <span class="chip">独自通貨なし</span>
-          <span class="chip">転売できません</span>
-        </div>
-      </div>
+      <section class="how" aria-labelledby="howTitle">
+        <h2 id="howTitle">応援のしかた</h2>
+        <ol class="steps">
+          <li><span class="no">1</span><div><b>チームを選ぶ</b><p>応援したいチームの「応援」ボタンを押します。</p></div></li>
+          <li><span class="no">2</span><div><b>応援コンテンツを買う</b><p>スタンプや選手カードを選んで購入します（¥300から）。</p></div></li>
+          <li><span class="no">3</span><div><b>順位が動く</b><p>購入した金額が、そのチームの応援ポイントとして加算されます。</p></div></li>
+        </ol>
+        <p class="how-after">中間発表と最終発表で順位が確定し、上位のチームが表彰されます（<a href="#awTitle">賞とプレゼント</a>）。</p>
+      </section>
 
       <section class="awards" aria-labelledby="awTitle">
         <div class="aw-head"><h2 id="awTitle">賞とプレゼント</h2><span class="by">提供 <svg class="sp-logo" viewBox="0 0 200 48" role="img" aria-label="ソラミズ飲料（架空の企業）"><defs><linearGradient id="spg3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2BC0E4"/><stop offset="1" stop-color="#1565C0"/></linearGradient></defs><path d="M24 4C24 4 8 22 8 31a16 16 0 0 0 32 0C40 22 24 4 24 4z" fill="url(#spg3)"/><path d="M13 32c4-3 7-3 11 0s7 3 11 0" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><text x="50" y="27" font-family="Hiragino Sans,Noto Sans JP,sans-serif" font-weight="900" font-size="20" fill="#0D3B6E">ソラミズ飲料</text><text x="51" y="41" font-family="Arial,sans-serif" font-weight="700" font-size="8.5" letter-spacing="2.6" fill="#1E88C8">SORAMIZU DRINKS</text></svg></span></div>
@@ -459,6 +474,14 @@
   </aside>
 </main>
 
+<section class="buy-notes wrap" aria-labelledby="bnTitle">
+  <h2 id="bnTitle">購入について</h2>
+  <ul>
+    <li>応援コンテンツの購入は寄付ではなく、デジタルコンテンツの購入です。購入したスタンプやカードは、マイページのコレクションに残ります。</li>
+    <li>応援ポイントは順位を決めるための点数です。お金や商品とは交換できず、ゼニくる独自の通貨もありません。</li>
+    <li>購入したコンテンツは、ほかの人に譲ったり転売したりできません。中身を選んで買う形で、ランダムに出る販売（ガチャ）はありません。</li>
+  </ul>
+</section>
 <p class="demo-note">このページはデザインのモックです。チーム名・数値・応援はすべてデモで、決済は発生しません。<br>リーグ名・大会名・冠スポンサー・チーム・エンブレムはすべて架空です。<br>背景写真：SAID ABRAHAM CRUZ（<a href="https://unsplash.com/photos/bxrPS-HASoU" target="_blank" rel="noopener">Unsplash</a>）。<code>?bg=画像のURL</code> で差し替え、<code>?bg=none</code> で写真なし。</p>
 <footer><div class="wrap">© ゼニくる ／ 株式会社DAO</div></footer>
 
@@ -476,7 +499,7 @@
   <p class="card-note" id="cardNote" hidden>選手の肖像は、球団を通じて許諾を得たものだけを使います（このデモはシルエットです）。</p>
   <div class="gain"><span><span id="gTeam">Aチーム</span>に加わる応援ポイント</span><b class="heat-text" id="gPts">+1,000</b></div>
   <button class="btn btn-heat send" id="send">¥1,000 で送る</button>
-  <p class="fine">デモのため決済は発生しません。実際の画面では、ここから決済に進みます。</p>
+  <p class="fine">寄付ではなく、デジタルコンテンツの購入です（転売不可・ガチャなし）。デモのため決済は発生しません。</p>
 </div>
 <div class="toast" id="toast"></div>
 
