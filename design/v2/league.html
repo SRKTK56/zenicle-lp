@@ -417,7 +417,7 @@
         <ol class="steps">
           <li><span class="no">1</span><div><b>チームを選ぶ</b><p>応援したいチームの「応援」ボタンを押します。</p></div></li>
           <li><span class="no">2</span><div><b>応援コンテンツを買う</b><p>スタンプや選手カードを選んで購入します（¥300から）。</p></div></li>
-          <li><span class="no">3</span><div><b>順位が動く</b><p>購入した金額が、そのチームの応援ポイントとして加算されます。</p></div></li>
+          <li><span class="no">3</span><div><b>順位が動く</b><p>購入した金額が、そのチームのエールポイントとして加算されます。</p></div></li>
         </ol>
         <p class="how-after">中間発表と最終発表で順位が確定し、上位のチームが表彰されます（<a href="#awTitle">賞とプレゼント</a>）。</p>
       </section>
@@ -449,7 +449,7 @@
 
       <section class="goods" aria-labelledby="gTitle">
         <div class="goods-head"><h2 id="gTitle">チームオリジナルの応援コンテンツ</h2><span class="chip">イメージ</span></div>
-        <p class="goods-lead">公式スタンプのほかに、各チームがオリジナルのスタンプや選手のデジタルカードを販売できます。どれを購入しても、応援ポイントとして順位に加算されます。</p>
+        <p class="goods-lead">公式スタンプのほかに、各チームがオリジナルのスタンプや選手のデジタルカードを販売できます。どれを購入しても、エールポイントとして順位に加算されます。</p>
         <div class="teampick" id="gTeams"></div>
         <div class="goods-row" id="goodsRow"></div>
         <p class="fine">選手の肖像は、球団を通じて許諾を得たものだけを使います（このデモはシルエットで、実在の選手ではありません）。中身を選んで買う形で、ランダム販売（ガチャ）はありません。転売もできません。</p>
@@ -500,7 +500,7 @@
   <h2 id="bnTitle">購入について</h2>
   <ul>
     <li>応援コンテンツの購入は寄付ではなく、デジタルコンテンツの購入です。購入したスタンプやカードは、マイページのコレクションに残ります。</li>
-    <li>応援ポイントは順位を決めるための点数です。お金や商品とは交換できず、ゼニくる独自の通貨もありません。</li>
+    <li>エールポイントは順位を決めるための点数です。スタンプやカードの購入額も、金額を自由に決めて送るエールも、送った金額がそのままエールポイントになります。お金や商品とは交換できず、ゼニくる独自の通貨もありません。</li>
     <li>購入したコンテンツは、ほかの人に譲ったり転売したりできません。中身を選んで買う形で、ランダムに出る販売（ガチャ）はありません。</li>
   </ul>
 </section>
@@ -520,7 +520,7 @@
   <div class="cats" id="cats" role="tablist" aria-label="応援コンテンツの種類"></div>
   <div class="stamps" id="stamps"></div>
   <p class="card-note" id="cardNote" hidden>選手の肖像は、球団を通じて許諾を得たものだけを使います（このデモはシルエットです）。</p>
-  <div class="gain"><span><span id="gTeam">Aチーム</span>に加わる応援ポイント</span><b class="heat-text" id="gPts">+1,000</b></div>
+  <div class="gain"><span><span id="gTeam">Aチーム</span>に加わるエールポイント</span><b class="heat-text" id="gPts">+1,000</b></div>
   <button class="btn btn-heat send" id="send">¥1,000 で送る</button>
   <p class="fine">寄付ではなく、デジタルコンテンツの購入です（転売不可・ガチャなし）。</p>
   </div>
@@ -549,7 +549,7 @@ const STAMPS=[
   {id:4,name:'ヒーロー',price:5000,img:'../stamps/512/lv4_super_fan.png'},
   {id:5,name:'王冠',price:10000,img:'../stamps/512/lv5_legend.png'},
 ];
-// 応援ポイント＝購入額（1円＝1pt）。重み付けは RankingPolicy で後から変えられる前提【要確認】
+// エールポイント＝購入額（1円＝1pt）。重み付けは RankingPolicy で後から変えられる前提【要確認】
 /* ===== 架空のチーム（名前・色・エンブレム）。実在のチームではない ===== */
 const ANIMAL={
   fox:c=>`<polygon points='14,13 26,25 38,25 50,13 48,36 32,52 16,36' fill='#fff'/><circle cx='25.5' cy='35' r='2.6' fill='${c}'/><circle cx='38.5' cy='35' r='2.6' fill='${c}'/><circle cx='32' cy='46' r='2.4' fill='${c}'/>`,
