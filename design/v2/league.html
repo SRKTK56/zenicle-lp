@@ -86,7 +86,22 @@
   .emb svg{display:block;width:100%;height:100%}
   .who{min-width:0}
   .who .nm{font-weight:900;font-size:1.0625rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .who .sub{font-size:.875rem;color:var(--ink-muted);margin-top:1px}
+  .who .sub .pp{white-space:nowrap}
+  .who .sub{font-size:.875rem;color:var(--ink-muted);margin-top:1px;display:flex;align-items:center;gap:10px;flex-wrap:nowrap}
+  /* 毎日1回の無料いいね（1日1チーム・日本時間0時にリセット） */
+  .like{appearance:none;display:inline-flex;align-items:center;gap:3px;border:1.5px solid var(--line-strong);background:#fff;color:var(--ink-muted);border-radius:var(--r-pill);padding:1px 9px 1px 7px;font:inherit;font-size:.8125rem;font-weight:700;cursor:pointer;line-height:1.6;transition:transform var(--dur-fast) var(--ease-pop)}
+  .like .hrt{font-size:.95rem;line-height:1}
+  .like:hover{border-color:var(--heat-3);color:var(--heat-text)}
+  .like[aria-pressed=true]{background:var(--heat-3);border-color:var(--heat-3);color:#fff}
+  .like.spent:not([aria-pressed=true]){opacity:.45}
+  .like:active{transform:scale(.92)}
+  .row.top .like{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.5);color:#fff}
+  .row.top .like[aria-pressed=true]{background:#fff;color:var(--heat-text)}
+  .daily{align-self:center;margin-left:auto;margin-right:14px;font-size:.875rem;font-weight:700;color:var(--heat-text);background:var(--blush);border-radius:var(--r-pill);padding:3px 12px;white-space:nowrap}
+  .daily b{font-weight:900}
+  body.photo .daily{background:rgba(255,255,255,.14);color:#fff}
+  @media (max-width:560px){.tabs-note{display:none}.daily{margin-right:0;font-size:.75rem;padding:3px 10px}.daily .long{display:none}.tab{margin-right:8px}}
+  .tab{white-space:nowrap}
   .score{text-align:right;line-height:1;white-space:nowrap}
   .score .v{font-family:var(--font-num);font-weight:800;font-size:1.7rem}
   .score .u{font-size:.75rem;font-family:var(--font-num);font-weight:600;color:var(--ink-subtle);margin-left:2px}
@@ -301,7 +316,7 @@
   .sheet .fine{font-size:.75rem;color:var(--ink-subtle);text-align:center;margin:10px 0 0;line-height:1.6}
 
 
-  .tabs-note{margin-left:auto;align-self:center;font-size:.875rem;color:var(--ink-muted)}
+  .tabs-note{align-self:center;font-size:.875rem;color:var(--ink-muted)}
 
   /* ---------- リーグの写真を全面の背景に（Season.coverImageUrl → Program.coverImageUrl の順で使う想定） ----------
      夜の球場に合わせて紺を重ね、白いカードを浮かせる。カードの外の文字だけ白に切り替える。?bg=none で写真なし */
@@ -406,6 +421,7 @@
     <div class="tabs" role="tablist">
       <button class="tab" role="tab" aria-selected="true" aria-controls="pTeams" id="tTeams">チーム</button>
       <button class="tab" role="tab" aria-selected="false" aria-controls="pPlayers" id="tPlayers">選手<span class="soon">SOON</span></button>
+      <span class="daily" id="daily" aria-live="polite">♡ 今日の<span class="long">無料</span>いいね：<b>あと1回</b></span>
       <span class="note tabs-note">▲▼は前日比</span>
     </div>
 
@@ -576,7 +592,7 @@ const emblemSVG=(id,x=0,y=0,size=64,ring=0)=>{const m=TEAM_META[id];return `<svg
 const teamName=id=>TEAM_META[id].name;
 const teams=[
   ['A',12540,214],['B',8230,151],['C',5610,97],['D',4980,88],['E',3420,63],['F',2760,51],['G',1900,34],['H',1150,22]
-].map(([k,score,people],i)=>({id:k,...TEAM_META[k],score,people,prev:[1,3,2,4,6,5,7,8][i]}));
+].map(([k,score,people],i)=>({id:k,...TEAM_META[k],score,people,likes:[132,96,71,58,44,39,25,14][i],prev:[1,3,2,4,6,5,7,8][i]}));
 let stampsTotal=642;
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $=s=>document.querySelector(s);
@@ -596,7 +612,7 @@ const board=$('#board');
 function rowHTML(t){
   return `<div class="rk"><span class="n num"></span><span class="d num"></span></div>
     <div class="emb">${emblemSVG(t.id)}</div>
-    <div class="who"><span class="crown">いま1位</span><div class="nm">${t.name}</div><div class="sub"><span class="ppl num"></span>人が応援</div></div>
+    <div class="who"><span class="crown">いま1位</span><div class="nm">${t.name}</div><div class="sub"><span class="pp"><span class="ppl num"></span>人が応援</span><button class="like" type="button" data-like="${t.id}" aria-pressed="false" aria-label="${t.name}に今日のいいね（無料）"><span class="hrt">♡</span><span class="lc num"></span></button></div></div>
     <div class="score"><span class="v num">0</span><span class="u">pt</span></div>
     <button class="btn btn-ghost go" data-open="${t.id}" aria-label="${t.name}を応援">応援</button>
     <div class="bar"><i></i></div>`;
@@ -618,6 +634,7 @@ function render({animate=true,justUp=null}={}){
     d.textContent=diff>0?`▲${diff}`:diff<0?`▼${-diff}`:'―';
     countTo(el.querySelector('.score .v'),t.score);
     el.querySelector('.ppl').textContent=fmt(t.people);
+    el.querySelector('.lc').textContent=fmt(t.likes);
     el.querySelector('.bar i').style.setProperty('--p',Math.max(3,t.score/max*100).toFixed(1));
     const was=oldRank.get(t.id);
     if(t.id===justUp&&was&&r<was){
@@ -638,6 +655,23 @@ function render({animate=true,justUp=null}={}){
 }
 
 /* ===== 応援を1件反映する（自分・デモ共通） ===== */
+/* ===== 毎日1回の無料いいね。ログインした人の分だけ LIKE_PT をエールポイントに加算（モックはログイン済みとみなす） ===== */
+const LIKE_PT=10;
+const todayJST=()=>new Date(Date.now()+9*3600e3).toISOString().slice(0,10);
+let liked=null; // 今日いいねしたチームの id
+try{const v=JSON.parse(localStorage.getItem('zenicle_demo_daily_like')||'null');if(v&&v.date===todayJST())liked=v.team}catch(e){}
+function saveLike(){try{localStorage.setItem('zenicle_demo_daily_like',JSON.stringify({date:todayJST(),team:liked}))}catch(e){}}
+function drawLikes(){
+  document.querySelectorAll('[data-like]').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.like===liked);b.classList.toggle('spent',!!liked)});
+  $('#daily').innerHTML=liked?`♡ 今日のいいね：<b>${teamName(liked)}</b><span class="long">（明日0時にまた押せます）</span>`:'♡ 今日の<span class="long">無料</span>いいね：<b>あと1回</b>';
+}
+function toggleLike(id){
+  const t=teams.find(x=>x.id===id);
+  if(liked&&liked!==id){toast(`今日のいいねは <em>${teamName(liked)}</em> に使いました。取り消すと押し直せます`);return}
+  if(liked===id){t.likes--;t.score-=LIKE_PT;liked=null;render({animate:true});toast('今日のいいねを取り消しました');}
+  else{t.likes++;t.score+=LIKE_PT;liked=id;render({justUp:id});hitFx(t.el,{price:LIKE_PT});toast(`<em>♡ +${LIKE_PT}pt</em>　${teamName(id)}に今日のいいね（無料）`);}
+  saveLike();drawLikes();
+}
 function support(teamId,stamp,{mine=false}={}){
   const t=teams.find(x=>x.id===teamId);
   t.score+=stamp.price;t.people+=mine?1:(Math.random()<.6?1:0);stampsTotal++;
@@ -725,6 +759,7 @@ function drawGoods(){
 }
 document.addEventListener('click',e=>{
   const o=e.target.closest('[data-open]');if(o){openSheet(o.dataset.open||null);return}
+  const lk=e.target.closest('[data-like]');if(lk){toggleLike(lk.dataset.like);return}
   const by=e.target.closest('[data-buy]');if(by){const [c,i]=by.dataset.buy.split('|');openSheet(gTeam,c,i);return}
   const g=e.target.closest('[data-gt]');if(g){gTeam=g.dataset.gt;drawGoods();return}
   const c=e.target.closest('[data-cat]');if(c){selCat=c.dataset.cat;drawSheet();return}
@@ -798,8 +833,10 @@ setInterval(()=>{const ms=deadline-Date.now();$('#cdD2').textContent=Math.floor(
 
 /* ===== 起動：最初のフィード → 描画 → デモの応援が届き続ける ===== */
 [['C',2],['A',3],['B',1],['E',2]].forEach(([id,s])=>addFeed(randName(),teamName(id),STAMPS[s]));
+if(liked){const t=teams.find(x=>x.id===liked);if(t){t.likes++;t.score+=LIKE_PT}}
 render({animate:false});
 drawGoods();
+drawLikes();
 if(new URLSearchParams(location.search).get('live')!=='0'){
   setInterval(()=>{
     if(document.hidden||$('#sheet').classList.contains('on'))return;
