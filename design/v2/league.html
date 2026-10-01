@@ -27,6 +27,9 @@
   header.top .wrap{display:flex;align-items:center;gap:14px;height:60px}
   .logo{display:flex;align-items:center;gap:8px;font-weight:900;font-size:1.125rem;text-decoration:none;color:var(--ink)}
   .logo img{height:28px;width:auto}
+  .demo-chip{margin-left:auto;background:var(--blush);color:var(--heat-text);font-size:.75rem}
+  body.photo .demo-chip{background:rgba(255,255,255,.14);color:#fff}
+  @media (max-width:560px){.demo-chip{display:none}}
   .league-name{font-weight:700;font-size:.875rem;color:var(--ink-muted);border-left:1px solid var(--line-strong);padding-left:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
   /* ---------- タイトル帯：1段に畳み、主役はランキングに譲る ---------- */
@@ -40,7 +43,8 @@
   /* 冠スポンサー：タイトルと一続きで読ませる（テレビ中継の冠と同じ位置） */
   .lockup{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);padding:4px 4px 4px 14px;border-left:2px solid var(--line-strong)}
   .lockup .by{font-family:var(--font-num);font-weight:600;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted);white-space:nowrap}
-  .lockup .logo-mini{display:grid;place-items:center;height:44px;min-width:170px;padding:0 12px;border:2px dashed var(--line-strong);border-radius:10px;background:#fff;font-size:.875rem;font-weight:700;color:var(--ink-muted);white-space:nowrap}
+  .lockup .logo-mini{display:grid;place-items:center;height:48px;padding:4px 14px;border-radius:12px;background:#fff;box-shadow:0 4px 14px rgba(11,21,48,.12)}
+  .lockup .sp-logo{height:38px;width:auto;display:block}
   .lockup img{height:40px;width:auto;display:block} /* 本番はロゴ画像。高さ40pxに揃える */
   .lockup:hover .logo-mini{border-color:var(--heat-2)}
   .ttl .lead{margin:0;font-size:.875rem;color:var(--ink-muted);flex-basis:100%}
@@ -78,7 +82,8 @@
   .row:nth-child(-n+3) .rk .n{background:var(--heat-grad-diag);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
   .rk .d{display:block;font-family:var(--font-num);font-weight:600;font-size:.8rem;margin-top:2px;color:var(--ink-subtle);white-space:nowrap}
   .rk .d.up{color:var(--heat-text)} .rk .d.down{color:var(--ink-muted)}
-  .emb{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:#fff;font-family:var(--font-num);font-weight:800;font-size:1.2rem}
+  .emb{width:40px;height:40px;border-radius:50%;display:block}
+  .emb svg{display:block;width:100%;height:100%}
   .who{min-width:0}
   .who .nm{font-weight:900;font-size:1.0625rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .who .sub{font-size:.875rem;color:var(--ink-muted);margin-top:1px}
@@ -98,7 +103,7 @@
   .row.top .rk .n{font-size:8.5rem;line-height:.78;-webkit-text-fill-color:#fff;background:none;margin-left:-10px;text-shadow:0 6px 24px rgba(120,0,40,.25)}
   .row.top .rk .d{color:rgba(255,255,255,.9);position:absolute;left:14px;top:12px}
   .row.top .rk .d.same{display:none}
-  .row.top .emb{width:60px;height:60px;font-size:1.8rem;background:#fff;color:var(--heat-text)}
+  .row.top .emb{width:64px;height:64px;border-radius:50%;box-shadow:0 0 0 4px #fff}
   .row.top .who .nm{font-size:1.6rem;white-space:normal}
   .row.top .who .sub{color:rgba(255,255,255,.88)}
   .row.top .who .crown{display:inline-block;font-size:.875rem;font-weight:900;background:rgba(255,255,255,.2);border-radius:var(--r-pill);padding:2px 10px;margin-bottom:6px}
@@ -115,7 +120,7 @@
   @keyframes upflag{0%{transform:translateY(8px) scale(.6);opacity:0}12%{transform:none;opacity:1}80%{opacity:1}100%{opacity:0;transform:translateY(-6px)}}
   @media (max-width:560px){
     .row{grid-template-columns:38px 34px minmax(0,1fr) auto;gap:9px;padding:9px 10px 15px 4px}
-    .rk .n{font-size:1.9rem} .emb{width:34px;height:34px;font-size:1rem}
+    .rk .n{font-size:1.9rem} .emb{width:34px;height:34px}
     .who .nm{font-size:1rem}
     .score .v{font-size:1.35rem}
     .row .go{grid-column:4;padding:5px 12px;font-size:.8125rem;justify-self:end}
@@ -125,15 +130,26 @@
     .row.top{grid-template-columns:78px 44px minmax(0,1fr) auto;padding:16px 14px 22px 0}
     .row.top .rk{margin:-16px 0 -22px}
     .row.top .rk .n{font-size:5.6rem;margin-left:-6px}
-    .row.top .emb{width:44px;height:44px;font-size:1.3rem}
+    .row.top .emb{width:46px;height:46px}
     .row.top .who .nm{font-size:1.2rem}
     .row.top .score .v{font-size:2.1rem}
     .row.top .go{padding:8px 14px;font-size:.875rem}
     .row.top .who .crown{display:none}
+    /* スマホの1位：1段目＝順位・エンブレム・名前、2段目＝スコアと応援ボタン（名前を折らない） */
+    .row.top{grid-template-columns:62px 46px minmax(0,1fr);grid-template-rows:auto auto;row-gap:8px;padding:16px 14px 20px 0}
+    .row.top .rk{grid-row:1/3;grid-column:1}
+    .row.top .emb{grid-row:1;grid-column:2}
+    .row.top .who{grid-row:1;grid-column:3}
+    .row.top .who .nm{font-size:1.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .row.top .score{grid-row:2;grid-column:2/4;justify-self:start;text-align:left}
+    .row.top .go{grid-row:2;grid-column:3;justify-self:end;align-self:center}
+    .row.top .rk .n{font-size:5rem}
+    .ttl h1{font-size:1.45rem}
     .row.top .who .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .ttl .lead{display:none}
     .lockup{border-left:0;padding-left:0;flex-basis:100%}
-    .lockup .logo-mini{height:36px;min-width:0;flex:1}
+    .lockup .logo-mini{height:40px;padding:3px 12px}
+    .lockup .sp-logo{height:32px}
     .strip-in{padding-top:12px;padding-bottom:12px}
   }
 
@@ -172,7 +188,8 @@
   .feed .t{display:block;color:var(--ink-subtle);font-size:.75rem;font-family:var(--font-num);font-weight:600}
   .feed li.mine{background:var(--blush);margin:0 -10px;padding:9px 10px;border-radius:12px}
   @keyframes feedin{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
-  .sponsor .logo-slot{height:84px;border:2px dashed var(--line-strong);border-radius:14px;display:grid;place-items:center;color:var(--ink-muted);font-weight:700;font-size:.875rem;background:var(--canvas)}
+  .sponsor .logo-slot{height:84px;border-radius:14px;display:grid;place-items:center;background:var(--canvas)}
+  .sponsor .logo-slot .sp-logo{height:52px;width:auto}
   .sponsor p{font-size:.875rem;line-height:1.8;color:var(--ink-muted);margin:12px 0 0}
   .sponsor .proof{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
   .sponsor .proof div{background:var(--blush);border-radius:14px;padding:12px}
@@ -292,7 +309,7 @@
 <header class="top">
   <div class="wrap">
     <a class="logo" href="#"><img src="../../logo.png" alt="ゼニくる"></a>
-    <span class="league-name">【要確認: リーグ名】 × ゼニくる</span>
+    <span class="league-name">南風ベースボールリーグ × ゼニくる</span><span class="chip demo-chip">デモ・架空のリーグ</span>
   </div>
 </header>
 
@@ -300,10 +317,10 @@
   <div class="wrap strip-in" style="padding-left:20px;padding-right:20px">
     <div class="ttl">
       <span class="chip live"><i></i>開催中 ・ <span id="phaseLabel">2か月目</span></span>
-      <h1 id="h1">〇〇杯 <span class="heat-text">応援ランキング</span></h1>
+      <h1 id="h1">ソラミズ飲料杯 <span class="heat-text">応援ランキング</span></h1>
       <a class="lockup" href="#sponsor" aria-label="協賛企業の詳細へ">
         <span class="by">presented by</span>
-        <span class="logo-mini">【要確認: 冠スポンサーのロゴ】</span>
+        <span class="logo-mini"><svg class="sp-logo" viewBox="0 0 200 48" role="img" aria-label="ソラミズ飲料（架空の企業）"><defs><linearGradient id="spg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2BC0E4"/><stop offset="1" stop-color="#1565C0"/></linearGradient></defs><path d="M24 4C24 4 8 22 8 31a16 16 0 0 0 32 0C40 22 24 4 24 4z" fill="url(#spg)"/><path d="M13 32c4-3 7-3 11 0s7 3 11 0" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><text x="50" y="27" font-family="Hiragino Sans,Noto Sans JP,sans-serif" font-weight="900" font-size="20" fill="#0D3B6E">ソラミズ飲料</text><text x="51" y="41" font-family="Arial,sans-serif" font-weight="700" font-size="8.5" letter-spacing="2.6" fill="#1E88C8">SORAMIZU DRINKS</text></svg></span>
       </a>
       <p class="lead">試合結果とは別の、もうひとつの順位表。スタンプを送るたびに順位が動きます。</p>
     </div>
@@ -377,8 +394,8 @@
 
     <div class="card panel sponsor" id="sponsor">
       <h3>この企画の協賛</h3>
-      <div class="logo-slot">【要確認: 冠スポンサーのロゴ】</div>
-      <p>【要確認: 協賛企業からのひとこと。例「地域のチームを、ファンと一緒に応援します」】</p>
+      <div class="logo-slot"><svg class="sp-logo" viewBox="0 0 200 48" role="img" aria-label="ソラミズ飲料（架空の企業）"><defs><linearGradient id="spg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2BC0E4"/><stop offset="1" stop-color="#1565C0"/></linearGradient></defs><path d="M24 4C24 4 8 22 8 31a16 16 0 0 0 32 0C40 22 24 4 24 4z" fill="url(#spg2)"/><path d="M13 32c4-3 7-3 11 0s7 3 11 0" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><text x="50" y="27" font-family="Hiragino Sans,Noto Sans JP,sans-serif" font-weight="900" font-size="20" fill="#0D3B6E">ソラミズ飲料</text><text x="51" y="41" font-family="Arial,sans-serif" font-weight="700" font-size="8.5" letter-spacing="2.6" fill="#1E88C8">SORAMIZU DRINKS</text></svg></div>
+      <p>「南風リーグのファンのみなさんと一緒に、地元のチームを応援します。」<br><b>ソラミズ飲料株式会社</b>（架空の企業です）</p>
       <div class="proof">
         <div><div class="v num" id="spPeople">0</div><div class="k">人が参加</div></div>
         <div><div class="v num" id="spStamps">0</div><div class="k">件の応援</div></div>
@@ -387,7 +404,7 @@
   </aside>
 </main>
 
-<p class="demo-note">このページはデザインのモックです。チーム名・数値・応援はすべてデモで、決済は発生しません。<br>冠スポンサー名・リーグ名・大会名は【要確認】です。<br>背景写真：SAID ABRAHAM CRUZ（<a href="https://unsplash.com/photos/bxrPS-HASoU" target="_blank" rel="noopener">Unsplash</a>）。<code>?bg=画像のURL</code> で差し替え、<code>?bg=none</code> で写真なし。</p>
+<p class="demo-note">このページはデザインのモックです。チーム名・数値・応援はすべてデモで、決済は発生しません。<br>リーグ名・大会名・冠スポンサー・チーム・エンブレムはすべて架空です。<br>背景写真：SAID ABRAHAM CRUZ（<a href="https://unsplash.com/photos/bxrPS-HASoU" target="_blank" rel="noopener">Unsplash</a>）。<code>?bg=画像のURL</code> で差し替え、<code>?bg=none</code> で写真なし。</p>
 <footer><div class="wrap">© ゼニくる ／ 株式会社DAO</div></footer>
 
 <div class="dock"><button class="btn btn-heat" data-open>応援コンテンツで応援する</button></div>
@@ -418,9 +435,33 @@ const STAMPS=[
   {id:5,name:'王冠',price:10000,img:'../stamps/512/lv5_legend.png'},
 ];
 // 応援ポイント＝購入額（1円＝1pt）。重み付けは RankingPolicy で後から変えられる前提【要確認】
+/* ===== 架空のチーム（名前・色・エンブレム）。実在のチームではない ===== */
+const ANIMAL={
+  fox:c=>`<polygon points='14,13 26,25 38,25 50,13 48,36 32,52 16,36' fill='#fff'/><circle cx='25.5' cy='35' r='2.6' fill='${c}'/><circle cx='38.5' cy='35' r='2.6' fill='${c}'/><circle cx='32' cy='46' r='2.4' fill='${c}'/>`,
+  osprey:c=>`<path d='M14 46Q32 34 52 47Q34 55 14 46Z' fill='#fff'/><circle cx='30' cy='29' r='13' fill='#fff'/><polygon points='18,21 9,15 21,17' fill='#fff'/><polygon points='41,25 54,31 41,35' fill='#FFC94A'/><circle cx='34' cy='26' r='2.6' fill='${c}'/>`,
+  deer:c=>`<path d='M26 25L21 11M22.5 17L15 13M38 25L43 11M41.5 17L49 13' stroke='#fff' stroke-width='3.2' stroke-linecap='round' fill='none'/><ellipse cx='20' cy='31' rx='6.5' ry='3.2' fill='#fff' transform='rotate(-20 20 31)'/><ellipse cx='44' cy='31' rx='6.5' ry='3.2' fill='#fff' transform='rotate(20 44 31)'/><ellipse cx='32' cy='38' rx='10.5' ry='14' fill='#fff'/><circle cx='28' cy='35' r='2.2' fill='${c}'/><circle cx='36' cy='35' r='2.2' fill='${c}'/><ellipse cx='32' cy='47' rx='3' ry='2.2' fill='${c}'/>`,
+  owl:c=>`<polygon points='16,24 19,10 27,20' fill='#fff'/><polygon points='48,24 45,10 37,20' fill='#fff'/><ellipse cx='32' cy='35' rx='17' ry='18' fill='#fff'/><circle cx='25.5' cy='32' r='6.5' fill='${c}'/><circle cx='38.5' cy='32' r='6.5' fill='${c}'/><circle cx='25.5' cy='32' r='2.6' fill='#fff'/><circle cx='38.5' cy='32' r='2.6' fill='#fff'/><polygon points='29.5,39 34.5,39 32,44' fill='${c}'/>`,
+  bear:c=>`<circle cx='20' cy='22' r='7' fill='#fff'/><circle cx='44' cy='22' r='7' fill='#fff'/><circle cx='20' cy='22' r='3.2' fill='${c}'/><circle cx='44' cy='22' r='3.2' fill='${c}'/><circle cx='32' cy='36' r='16' fill='#fff'/><circle cx='26.5' cy='33' r='2.3' fill='${c}'/><circle cx='37.5' cy='33' r='2.3' fill='${c}'/><ellipse cx='32' cy='41' rx='3.4' ry='2.5' fill='${c}'/>`,
+  turtle:c=>`<circle cx='50' cy='33' r='5.5' fill='#fff'/><ellipse cx='19' cy='45' rx='4.5' ry='3' fill='#fff'/><ellipse cx='43' cy='45' rx='4.5' ry='3' fill='#fff'/><ellipse cx='19' cy='26' rx='4.5' ry='3' fill='#fff'/><ellipse cx='43' cy='26' rx='4.5' ry='3' fill='#fff'/><ellipse cx='31' cy='36' rx='16' ry='13' fill='#fff'/><path d='M31 25L37 30L35 38L27 38L25 30Z M31 25V23 M37 30L45 28 M35 38L40 46 M27 38L22 46 M25 30L17 28' stroke='${c}' stroke-width='1.8' fill='none' stroke-linejoin='round'/><circle cx='51.5' cy='31.5' r='1.3' fill='${c}'/>`,
+  wolf:c=>`<polygon points='15,9 26,24 38,24 49,9 51,33 41,45 32,54 23,45 13,33' fill='#fff'/><polygon points='22,33 29,31 28,35' fill='${c}'/><polygon points='42,33 35,31 36,35' fill='${c}'/><circle cx='32' cy='47' r='2.5' fill='${c}'/>`,
+  rabbit:c=>`<ellipse cx='26' cy='17' rx='5' ry='13' fill='#fff'/><ellipse cx='38' cy='17' rx='5' ry='13' fill='#fff'/><ellipse cx='26' cy='18' rx='2' ry='9' fill='${c}'/><ellipse cx='38' cy='18' rx='2' ry='9' fill='${c}'/><circle cx='32' cy='40' r='14' fill='#fff'/><circle cx='27' cy='38' r='2.1' fill='${c}'/><circle cx='37' cy='38' r='2.1' fill='${c}'/><circle cx='32' cy='44' r='1.9' fill='${c}'/>`,
+};
+const TEAM_META={
+  A:{name:'あかつきフォクシーズ',color:'#E8632B',animal:'fox'},
+  B:{name:'しおかぜオスプレイズ',color:'#2F6FD6',animal:'osprey'},
+  C:{name:'もりのディアーズ',color:'#2E9B5E',animal:'deer'},
+  D:{name:'ほしぞらオウルズ',color:'#6B4FC8',animal:'owl'},
+  E:{name:'いわおベアーズ',color:'#8B5A3C',animal:'bear'},
+  F:{name:'はやせタートルズ',color:'#1597BB',animal:'turtle'},
+  G:{name:'こがねウルブズ',color:'#56607A',animal:'wolf'},
+  H:{name:'たかねラビッツ',color:'#D6457A',animal:'rabbit'},
+};
+// エンブレム（64×64）。x,y,size を渡すと別の SVG の中に入れ子で置ける
+const emblemSVG=(id,x=0,y=0,size=64,ring=0)=>{const m=TEAM_META[id];return `<svg x='${x}' y='${y}' width='${size}' height='${size}' viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'>${ring?`<circle cx='32' cy='32' r='32' fill='#fff'/>`:''}<circle cx='32' cy='32' r='${ring?28.5:32}' fill='${m.color}'/><circle cx='32' cy='32' r='${ring?25.5:29}' fill='none' stroke='rgba(255,255,255,.35)' stroke-width='1.5'/>${ANIMAL[m.animal](m.color)}</svg>`};
+const teamName=id=>TEAM_META[id].name;
 const teams=[
   ['A',12540,214],['B',8230,151],['C',5610,97],['D',4980,88],['E',3420,63],['F',2760,51],['G',1900,34],['H',1150,22]
-].map(([k,score,people],i)=>({id:k,name:k+'チーム',score,people,prev:[1,3,2,4,6,5,7,8][i]}));
+].map(([k,score,people],i)=>({id:k,...TEAM_META[k],score,people,prev:[1,3,2,4,6,5,7,8][i]}));
 let stampsTotal=642;
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $=s=>document.querySelector(s);
@@ -439,7 +480,7 @@ function countTo(el,to,dur=900){
 const board=$('#board');
 function rowHTML(t){
   return `<div class="rk"><span class="n num"></span><span class="d num"></span></div>
-    <div class="emb">${t.id}</div>
+    <div class="emb">${emblemSVG(t.id)}</div>
     <div class="who"><span class="crown">いま1位</span><div class="nm">${t.name}</div><div class="sub"><span class="ppl num"></span>人が応援</div></div>
     <div class="score"><span class="v num">0</span><span class="u">pt</span></div>
     <button class="btn btn-ghost go" data-open="${t.id}" aria-label="${t.name}を応援">応援</button>
@@ -499,7 +540,7 @@ function addFeed(who,team,stamp,mine){
 const svgURI=svg=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
 const JA="font-family='Hiragino Sans,Noto Sans JP,sans-serif' font-weight='900'";
 const GRAD="<defs><linearGradient id='h' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#FF8A1F'/><stop offset='.5' stop-color='#FD434E'/><stop offset='1' stop-color='#F2186C'/></linearGradient></defs>";
-const emblem=(id,x,y,r=20)=>`<circle cx='${x}' cy='${y}' r='${r}' fill='#0B1530' stroke='#fff' stroke-width='4'/><text x='${x}' y='${y+r*.36}' text-anchor='middle' font-family='Barlow Condensed,Arial Narrow,sans-serif' font-weight='800' font-size='${r*1.05}' fill='#fff'>${id}</text>`;
+const emblem=(id,x,y,r=20)=>emblemSVG(id,x-r-2,y-r-2,(r+2)*2,1);
 const TEAM_STAMPS=[
   {key:'nice',name:'ナイス！',price:300,draw:id=>`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160'>${GRAD}<path d='M18 26h124a12 12 0 0 1 12 12v66a12 12 0 0 1-12 12H70l-30 26 6-26H18A12 12 0 0 1 6 104V38a12 12 0 0 1 12-12z' fill='#fff' stroke='url(#h)' stroke-width='8' stroke-linejoin='round'/><text x='80' y='84' text-anchor='middle' ${JA} font-size='34' fill='url(#h)'>ナイス！</text>${emblem(id,136,128)}</svg>`},
   {key:'win',name:'勝つぞ！',price:800,draw:id=>{const pts=[...Array(24)].map((_,i)=>{const a=Math.PI*2*i/24,r=i%2?58:76;return `${80+Math.cos(a)*r},${78+Math.sin(a)*r}`}).join(' ');return `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160'>${GRAD}<polygon points='${pts}' fill='url(#h)'/><text x='80' y='90' text-anchor='middle' ${JA} font-size='25' fill='#fff' transform='rotate(-8 80 80)'>勝つぞ！</text>${emblem(id,132,130)}</svg>`}},
@@ -512,8 +553,8 @@ const cardSVG=(id,c)=>`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 
   <circle cx='100' cy='108' r='34' fill='rgba(255,255,255,.22)'/><path d='M40 210c4-44 30-62 60-62s56 18 60 62z' fill='rgba(255,255,255,.22)'/>
   <text x='26' y='70' font-family='Barlow Condensed,Arial Narrow,sans-serif' font-style='italic' font-weight='800' font-size='58' fill='#fff'>${c.no}</text>
   ${c.limited?`<rect x='112' y='24' width='66' height='22' rx='11' fill='#fff'/><text x='145' y='40' text-anchor='middle' font-family='Arial,sans-serif' font-weight='800' font-size='12' fill='#C4124F'>LIMITED</text>`:''}
-  <text x='100' y='238' text-anchor='middle' ${JA} font-size='17' fill='#fff'>${id}チーム #${c.no}</text>
-  <text x='100' y='260' text-anchor='middle' font-family='Arial,sans-serif' font-weight='800' font-size='11' letter-spacing='3' fill='rgba(255,255,255,.75)'>PLAYER CARD</text>
+  ${emblemSVG(id,20,222,30,1)}<text x='58' y='242' ${JA} font-size='13' fill='#fff'>${teamName(id)}</text>
+  <text x='58' y='262' font-family='Arial,sans-serif' font-weight='800' font-size='10' letter-spacing='3' fill='rgba(255,255,255,.75)'>PLAYER CARD #${c.no}</text>
   </svg>`;
 const _cache={};
 function itemsFor(cat,teamId){
@@ -531,11 +572,11 @@ function drawSheet(){
   const items=itemsFor(selCat,selTeam);
   if(!items.some(x=>x.id===selStamp.id))selStamp=items[selCat==='official'?1:0];
   tp.innerHTML=teams.map(t=>`<button aria-pressed="${t.id===selTeam}" data-t="${t.id}">${t.name}</button>`).join('');
-  $('#cats').innerHTML=CATS.map(([k,l])=>`<button role="tab" aria-selected="${k===selCat}" data-cat="${k}">${k==='team'?selTeam+'チームの':''}${l.replace('チームオリジナル','オリジナル')}</button>`).join('');
+  $('#cats').innerHTML=CATS.map(([k,l])=>`<button role="tab" aria-selected="${k===selCat}" data-cat="${k}">${l}</button>`).join('');
   st.className='stamps'+(selCat==='official'?'':' cols3');
   st.innerHTML=items.map(s=>`<button class="stamp${s.cat==='card'?' card':''}" aria-pressed="${s.id===selStamp.id}" data-s="${s.id}"><img src="${s.img}" alt=""><span class="nm">${s.name}</span><span class="pr num">¥${fmt(s.price)}</span></button>`).join('');
   $('#cardNote').hidden=selCat!=='card';
-  $('#gTeam').textContent=selTeam+'チーム';$('#gPts').textContent='+'+fmt(selStamp.price);$('#send').textContent=`¥${fmt(selStamp.price)} で応援する`;
+  $('#gTeam').textContent=teamName(selTeam);$('#gPts').textContent='+'+fmt(selStamp.price);$('#send').textContent=`¥${fmt(selStamp.price)} で応援する`;
 }
 function openSheet(id,cat,itemId){
   if(id)selTeam=id; if(cat)selCat=cat;
@@ -584,7 +625,7 @@ $('#send').onclick=()=>{
     function land(){
       support(team,stamp,{mine:true});
       const r=teams.findIndex(t=>t.id===team)+1;
-      toast(`<em>+${fmt(stamp.price)}pt</em>　${team}チームはいま ${r}位`);
+      toast(`<em>+${fmt(stamp.price)}pt</em>　${teamName(team)}はいま ${r}位`);
     }
   },reduce?0:380);
 };
@@ -610,7 +651,7 @@ const deadline=Date.now()+(12*24+4)*3600e3;
 setInterval(()=>{const ms=deadline-Date.now();$('#cdD2').textContent=Math.floor(ms/864e5);$('#cdH2').textContent=String(Math.floor(ms/36e5)%24).padStart(2,'0')},60e3);
 
 /* ===== 起動：最初のフィード → 描画 → デモの応援が届き続ける ===== */
-[['C',2],['A',3],['B',1],['E',2]].forEach(([id,s])=>addFeed(randName(),id+'チーム',STAMPS[s]));
+[['C',2],['A',3],['B',1],['E',2]].forEach(([id,s])=>addFeed(randName(),teamName(id),STAMPS[s]));
 render({animate:false});
 drawGoods();
 if(new URLSearchParams(location.search).get('live')!=='0'){
