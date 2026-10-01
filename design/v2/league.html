@@ -104,7 +104,7 @@
   .row.top .rk .d{color:rgba(255,255,255,.9);position:absolute;left:14px;top:12px}
   .row.top .rk .d.same{display:none}
   .row.top .emb{width:64px;height:64px;border-radius:50%;box-shadow:0 0 0 4px #fff}
-  .row.top .who .nm{font-size:1.6rem;white-space:normal}
+  .row.top .who .nm{font-size:1.45rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .row.top .who .sub{color:rgba(255,255,255,.88)}
   .row.top .who .crown{display:inline-block;font-size:.875rem;font-weight:900;background:rgba(255,255,255,.2);border-radius:var(--r-pill);padding:2px 10px;margin-bottom:6px}
   .row .who .crown{display:none} .row.top .who .crown{display:inline-block}
@@ -113,8 +113,14 @@
   .row.top .go{background:#fff;color:var(--heat-text);border:0;padding:12px 22px;font-size:1rem}
   .row.top .bar{background:rgba(255,255,255,.22);left:0;right:0;bottom:0;height:6px;border-radius:0}
   .row.top .bar i{background:#fff;clip-path:none}
-  .row.flash{animation:flash 1.2s var(--ease-out)}
-  @keyframes flash{0%{box-shadow:0 0 0 0 rgba(242,24,108,.55),var(--shadow-lift)}100%{box-shadow:0 0 0 14px rgba(242,24,108,0),var(--shadow-card)}}
+  /* 応援された瞬間：+pt が浮かぶ／スタンプがポンと出る（hitFx） */
+  .score{position:relative}
+  .plus{position:absolute;right:100%;top:50%;margin:-.7em 10px 0 0;font-weight:800;font-size:1.15rem;color:var(--heat-text);white-space:nowrap;pointer-events:none}
+  .row.top .plus{color:#fff;font-size:1.5rem}
+  /* スタンプはエンブレムの上にシールのように押される */
+  .hit-stamp{position:absolute;left:74px;top:-16px;width:62px;height:62px;object-fit:contain;pointer-events:none;z-index:2;filter:drop-shadow(0 4px 8px rgba(11,21,48,.25))}
+  .row.top .hit-stamp{left:146px;top:-10px;width:76px;height:76px}
+  @media (max-width:560px){.hit-stamp{left:58px;width:42px;height:42px}.row.top .hit-stamp{left:90px;width:50px;height:50px}}
   .upflag{position:absolute;right:14px;top:-12px;background:var(--heat-grad-btn);color:#fff;font-weight:900;font-size:.875rem;padding:4px 12px;border-radius:var(--r-pill);
     box-shadow:var(--shadow-heat);animation:upflag 2.4s var(--ease-pop) forwards;z-index:3}
   @keyframes upflag{0%{transform:translateY(8px) scale(.6);opacity:0}12%{transform:none;opacity:1}80%{opacity:1}100%{opacity:0;transform:translateY(-6px)}}
@@ -504,15 +510,18 @@ function render({animate=true,justUp=null}={}){
     countTo(el.querySelector('.score .v'),t.score);
     el.querySelector('.ppl').textContent=fmt(t.people);
     el.querySelector('.bar i').style.setProperty('--p',Math.max(3,t.score/max*100).toFixed(1));
-    if(animate&&!reduce){
-      const dy=before.get(t.id)-el.getBoundingClientRect().top;
-      if(dy) el.animate([{transform:`translateY(${dy}px)`},{transform:'none'}],{duration:700,easing:'cubic-bezier(.22,1,.36,1)'});
-    }
     const was=oldRank.get(t.id);
     if(t.id===justUp&&was&&r<was){
       const f=document.createElement('span');f.className='upflag';f.textContent=`▲ ${r}位に浮上！`;el.appendChild(f);setTimeout(()=>f.remove(),2500);
     }
   });
+  // 並べ替えが全部終わってから位置を測る。途中で測ると「末尾に一時移動した位置」を拾い、全カードが上から飛んでくる
+  if(animate&&!reduce){
+    teams.forEach(t=>{
+      const dy=before.get(t.id)-t.el.getBoundingClientRect().top;
+      if(Math.abs(dy)>1) t.el.animate([{transform:`translateY(${dy}px)`},{transform:'none'}],{duration:700,easing:'cubic-bezier(.22,1,.36,1)'});
+    });
+  }
   // タイトル帯と協賛欄の集計
   const total=teams.reduce((s,t)=>s+t.score,0),people=teams.reduce((s,t)=>s+t.people,0);
   countTo($('#stTotal'),total);countTo($('#stPeople'),people);countTo($('#stStamps'),stampsTotal);
@@ -524,8 +533,31 @@ function support(teamId,stamp,{mine=false}={}){
   const t=teams.find(x=>x.id===teamId);
   t.score+=stamp.price;t.people+=mine?1:(Math.random()<.6?1:0);stampsTotal++;
   render({justUp:teamId});
-  t.el.classList.remove('flash');void t.el.offsetWidth;t.el.classList.add('flash');
+  hitFx(t.el,stamp);
   addFeed(mine?'あなた':randName(),t.name,stamp,mine);
+}
+/* ===== 応援された瞬間の演出。?fx=pop|plus|stamp|combo（既定 combo）で見比べる ===== */
+const FX=(new URLSearchParams(location.search).get('fx')||'combo');
+function hitFx(el,stamp){
+  if(reduce)return;
+  const pop=()=>el.animate([{transform:'scale(1)'},{transform:'scale(1.035)',offset:.35},{transform:'scale(1)'}],
+    {duration:560,easing:'cubic-bezier(.34,1.56,.64,1)',composite:'add'});
+  const plus=()=>{
+    const sc=el.querySelector('.score');
+    const p=document.createElement('span');p.className='plus num';p.textContent='+'+fmt(stamp.price);sc.appendChild(p);
+    p.animate([{transform:'translateY(8px)',opacity:0},{transform:'translateY(-4px)',opacity:1,offset:.15},{transform:'translateY(-14px)',opacity:1,offset:.65},{transform:'translateY(-30px)',opacity:0}],
+      {duration:1600,easing:'cubic-bezier(.22,1,.36,1)'}).onfinish=()=>p.remove();
+    sc.querySelector('.v').animate([{transform:'scale(1)'},{transform:'scale(1.12)',offset:.3},{transform:'scale(1)'}],{duration:500,easing:'cubic-bezier(.34,1.56,.64,1)'});
+  };
+  const stampFx=()=>{
+    const i=document.createElement('img');i.className='hit-stamp';i.src=stamp.img;i.alt='';el.appendChild(i);
+    i.animate([{transform:'scale(0) rotate(-20deg)',opacity:0},{transform:'scale(1.15) rotate(6deg)',opacity:1,offset:.25},{transform:'scale(1) rotate(0)',opacity:1,offset:.7},{transform:'scale(.9)',opacity:0}],
+      {duration:1400,easing:'cubic-bezier(.22,1,.36,1)'}).onfinish=()=>i.remove();
+  };
+  if(FX==='pop')pop();
+  else if(FX==='plus')plus();
+  else if(FX==='stamp')stampFx();
+  else {pop();plus();}
 }
 const NAMES=['ゆう','さくら','こうた','みお','けん','ひなた','そら','あおい','りく','はる'];
 const randName=()=>NAMES[Math.floor(Math.random()*NAMES.length)]+'さん';
