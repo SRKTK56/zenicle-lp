@@ -612,7 +612,7 @@ function drawSheet(){
 }
 function openSheet(id,cat,itemId){
   if(id)selTeam=id; if(cat)selCat=cat;
-  if(itemId){const it=itemsFor(selCat,selTeam).find(x=>x.id===itemId);if(it)selStamp=it}
+  if(itemId){const it=itemsFor(selCat,selTeam).find(x=>String(x.id)===String(itemId));if(it)selStamp=it}
   drawSheet();$('#scrim').classList.add('on');$('#sheet').classList.add('on');setTimeout(()=>$('#send').focus(),300)
 }
 function closeSheet(){$('#scrim').classList.remove('on');$('#sheet').classList.remove('on')}
@@ -630,7 +630,7 @@ document.addEventListener('click',e=>{
   const g=e.target.closest('[data-gt]');if(g){gTeam=g.dataset.gt;drawGoods();return}
   const c=e.target.closest('[data-cat]');if(c){selCat=c.dataset.cat;drawSheet();return}
   const t=e.target.closest('[data-t]');if(t){selTeam=t.dataset.t;drawSheet();return}
-  const s=e.target.closest('[data-s]');if(s){selStamp=itemsFor(selCat,selTeam).find(x=>x.id===s.dataset.s);drawSheet();return}
+  const s=e.target.closest('[data-s]');if(s){const it=itemsFor(selCat,selTeam).find(x=>String(x.id)===s.dataset.s);if(it)selStamp=it;drawSheet();return}
 });
 $('#scrim').onclick=closeSheet;
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
