@@ -15,7 +15,7 @@
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Barlow+Condensed:ital,wght@0,600;0,800;1,800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="tokens.css?v=20261001b">
 <style>
   /* ---------- レイアウト ---------- */
   .wrap{max-width:1180px;margin:0 auto;padding:0 20px}
@@ -328,6 +328,28 @@
   body.photo .league-name{color:rgba(255,255,255,.82);border-left-color:rgba(255,255,255,.22)}
   body.photo .ticker{background:rgba(255,255,255,.08);border-top-color:rgba(255,255,255,.12);color:#fff}
   body.photo .dock{background:rgba(11,21,48,.82);border-top-color:rgba(255,255,255,.1)}
+  /* ---------- 支払う画面（シートの2段目） ---------- */
+  #payView h2{margin:4px 0 12px;font-size:1.25rem;font-weight:900}
+  .back{appearance:none;border:0;background:none;font:inherit;font-size:.875rem;font-weight:700;color:var(--ink-muted);cursor:pointer;padding:4px 0}
+  .order{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px;border-radius:16px;background:var(--canvas);border:1px solid var(--line)}
+  .order img{width:56px;height:56px;object-fit:contain}
+  .order .nm{font-weight:900}
+  .order .tm{font-size:.875rem;color:var(--ink-muted)}
+  .order b{font-family:var(--font-num);font-weight:800;font-size:1.4rem}
+  .pay-opts{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+  .pay-btn{appearance:none;display:grid;grid-template-columns:28px 1fr;align-items:center;column-gap:10px;text-align:left;border-radius:16px;padding:12px 16px;font:inherit;font-weight:900;font-size:1rem;cursor:pointer;transition:transform var(--dur-fast) var(--ease-pop)}
+  .pay-btn small{grid-column:2;font-size:.8125rem;font-weight:500;opacity:.8}
+  .pay-btn .pi{grid-row:1/3;font-size:1.3rem;text-align:center}
+  .pay-btn:active{transform:scale(.98)}
+  .pay-btn.wallet{background:#000;color:#fff;border:0}
+  .pay-btn.saved{background:#fff;color:var(--ink);border:1.5px solid var(--line-strong)}
+  .pay-link{appearance:none;border:0;background:none;font:inherit;font-size:.875rem;font-weight:700;color:var(--ink-muted);text-decoration:underline;cursor:pointer;align-self:center}
+  .pay-state{display:flex;align-items:center;justify-content:center;gap:12px;padding:26px 0 10px;font-size:1rem}
+  .spin{width:24px;height:24px;border-radius:50%;border:3px solid var(--line-strong);border-top-color:var(--heat-3);animation:spin .8s linear infinite}
+  .pay-state.done .spin{animation:none;border-color:#2E9B5E;background:#2E9B5E;position:relative}
+  .pay-state.done .spin::after{content:"";position:absolute;left:6px;top:2px;width:6px;height:11px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg)}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
   /* ---------- 送った瞬間の演出 ---------- */
   .fly{position:fixed;z-index:80;width:84px;height:84px;pointer-events:none;object-fit:contain}
   .spark{position:fixed;z-index:79;width:10px;height:10px;border-radius:3px;pointer-events:none}
@@ -491,6 +513,7 @@
 <div class="scrim" id="scrim"></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shTitle">
   <div class="grab"></div>
+  <div id="pickView">
   <h2 id="shTitle">応援コンテンツを選んで応援</h2>
   <div class="to">送り先のチーム</div>
   <div class="teampick" id="teampick"></div>
@@ -499,7 +522,21 @@
   <p class="card-note" id="cardNote" hidden>選手の肖像は、球団を通じて許諾を得たものだけを使います（このデモはシルエットです）。</p>
   <div class="gain"><span><span id="gTeam">Aチーム</span>に加わる応援ポイント</span><b class="heat-text" id="gPts">+1,000</b></div>
   <button class="btn btn-heat send" id="send">¥1,000 で送る</button>
-  <p class="fine">寄付ではなく、デジタルコンテンツの購入です（転売不可・ガチャなし）。デモのため決済は発生しません。</p>
+  <p class="fine">寄付ではなく、デジタルコンテンツの購入です（転売不可・ガチャなし）。</p>
+  </div>
+  <!-- 支払う画面：実際は Stripe の決済（Express Checkout ＋ Payment Element）をこの中に埋め込む。ページを離れない -->
+  <div id="payView" hidden>
+    <button class="back" id="payBack" type="button">← 選び直す</button>
+    <h2>お支払い</h2>
+    <div class="order"><img id="payImg" alt=""><div><div class="nm" id="payName"></div><div class="tm" id="payTeam"></div></div><b class="num" id="payPrice"></b></div>
+    <div class="pay-opts" id="payOpts">
+      <button class="pay-btn wallet" data-pay type="button"><span class="pi">◉</span>ワンタップで支払う<small>Apple Pay・Google Pay（顔認証・指紋）</small></button>
+      <button class="pay-btn saved" data-pay type="button"><span class="pi">▭</span>保存したカードで支払う<small>•••• 4242（前回の支払い方法）</small></button>
+      <button class="pay-link" data-pay type="button">別のカードで支払う</button>
+    </div>
+    <div class="pay-state" id="payState" hidden><span class="spin" aria-hidden="true"></span><b id="payMsg">認証しています…</b></div>
+    <p class="fine">デモのため実際の決済は発生しません。実際には Stripe の決済画面がこのシートの中に表示され、ページを離れずに支払えます。2回目からは保存した支払い方法で、入力なしで支払えます。</p>
+  </div>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -675,7 +712,7 @@ function drawSheet(){
 function openSheet(id,cat,itemId){
   if(id)selTeam=id; if(cat)selCat=cat;
   if(itemId){const it=itemsFor(selCat,selTeam).find(x=>String(x.id)===String(itemId));if(it)selStamp=it}
-  drawSheet();$('#scrim').classList.add('on');$('#sheet').classList.add('on');setTimeout(()=>$('#send').focus(),300)
+  showPick();drawSheet();$('#scrim').classList.add('on');$('#sheet').classList.add('on');setTimeout(()=>$('#send').focus(),300)
 }
 function closeSheet(){$('#scrim').classList.remove('on');$('#sheet').classList.remove('on')}
 
@@ -698,9 +735,23 @@ $('#scrim').onclick=closeSheet;
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
 
 /* ===== 送った瞬間：スタンプが飛んで行に着地し、火花が散る ===== */
+/* 「応援する」→ 支払う画面へ。支払いが終わってから演出に進む（実際の決済の順番どおり） */
+let pending=null;
+function showPick(){$('#pickView').hidden=false;$('#payView').hidden=true;$('#payOpts').hidden=false;$('#payState').hidden=true;$('#payState').classList.remove('done')}
 $('#send').onclick=()=>{
-  const from=st.querySelector('[aria-pressed=true] img').getBoundingClientRect();
-  const team=selTeam,stamp=selStamp;
+  pending={team:selTeam,stamp:selStamp};
+  $('#payImg').src=selStamp.img;$('#payName').textContent=selStamp.name;$('#payTeam').textContent=teamName(selTeam)+'へ';$('#payPrice').textContent='¥'+fmt(selStamp.price);
+  $('#pickView').hidden=true;$('#payView').hidden=false;
+};
+$('#payBack').onclick=showPick;
+document.querySelectorAll('[data-pay]').forEach(b=>b.onclick=()=>{
+  $('#payOpts').hidden=true;$('#payState').hidden=false;$('#payMsg').textContent='認証しています…';
+  setTimeout(()=>{$('#payState').classList.add('done');$('#payMsg').textContent='お支払いが完了しました';
+    setTimeout(()=>finishSend(),reduce?0:650)},reduce?0:900);
+});
+function finishSend(){
+  const from=$('#payImg').getBoundingClientRect();
+  const {team,stamp}=pending;
   closeSheet();
   const row=teams.find(t=>t.id===team).el;
   row.scrollIntoView({block:'center',behavior:reduce?'auto':'smooth'});
@@ -722,7 +773,7 @@ $('#send').onclick=()=>{
       toast(`<em>+${fmt(stamp.price)}pt</em>　${teamName(team)}はいま ${r}位`);
     }
   },reduce?0:380);
-};
+}
 function burst(x,y){
   const cols=['#FF8A1F','#FD434E','#F2186C','#FFC857'];
   for(let i=0;i<18;i++){

@@ -57,6 +57,7 @@
 
 /* ---------- 共通の部品（モック用。アプリでは ui/ に置き換える） ---------- */
 *{box-sizing:border-box}
+[hidden]{display:none!important} /* display を指定した部品でも hidden で必ず隠す */
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--font-ja);-webkit-font-smoothing:antialiased}
 .num{font-family:var(--font-num);font-variant-numeric:tabular-nums;letter-spacing:.01em}
