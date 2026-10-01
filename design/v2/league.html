@@ -113,14 +113,10 @@
   .row.top .go{background:#fff;color:var(--heat-text);border:0;padding:12px 22px;font-size:1rem}
   .row.top .bar{background:rgba(255,255,255,.22);left:0;right:0;bottom:0;height:6px;border-radius:0}
   .row.top .bar i{background:#fff;clip-path:none}
-  /* 応援された瞬間：+pt が浮かぶ／スタンプがポンと出る（hitFx） */
+  /* 応援された瞬間：+pt が浮かぶ（hitFx） */
   .score{position:relative}
   .plus{position:absolute;right:100%;top:50%;margin:-.7em 10px 0 0;font-weight:800;font-size:1.15rem;color:var(--heat-text);white-space:nowrap;pointer-events:none}
   .row.top .plus{color:#fff;font-size:1.5rem}
-  /* スタンプはエンブレムの上にシールのように押される */
-  .hit-stamp{position:absolute;left:74px;top:-16px;width:62px;height:62px;object-fit:contain;pointer-events:none;z-index:2;filter:drop-shadow(0 4px 8px rgba(11,21,48,.25))}
-  .row.top .hit-stamp{left:146px;top:-10px;width:76px;height:76px}
-  @media (max-width:560px){.hit-stamp{left:58px;width:42px;height:42px}.row.top .hit-stamp{left:90px;width:50px;height:50px}}
   .upflag{position:absolute;right:14px;top:-12px;background:var(--heat-grad-btn);color:#fff;font-weight:900;font-size:.875rem;padding:4px 12px;border-radius:var(--r-pill);
     box-shadow:var(--shadow-heat);animation:upflag 2.4s var(--ease-pop) forwards;z-index:3}
   @keyframes upflag{0%{transform:translateY(8px) scale(.6);opacity:0}12%{transform:none;opacity:1}80%{opacity:1}100%{opacity:0;transform:translateY(-6px)}}
@@ -536,28 +532,18 @@ function support(teamId,stamp,{mine=false}={}){
   hitFx(t.el,stamp);
   addFeed(mine?'あなた':randName(),t.name,stamp,mine);
 }
-/* ===== 応援された瞬間の演出。?fx=pop|plus|stamp|combo（既定 combo）で見比べる ===== */
-const FX=(new URLSearchParams(location.search).get('fx')||'combo');
+/* ===== 応援された瞬間の演出（2026-10-01 決定）：カードが一瞬少しアップになり、スコアの左に「+pt」が浮かぶ ===== */
 function hitFx(el,stamp){
   if(reduce)return;
-  const pop=()=>el.animate([{transform:'scale(1)'},{transform:'scale(1.035)',offset:.35},{transform:'scale(1)'}],
+  // カードのポップ。並べ替えの移動（translateY）と重ねられるよう composite:'add'
+  el.animate([{transform:'scale(1)'},{transform:'scale(1.035)',offset:.35},{transform:'scale(1)'}],
     {duration:560,easing:'cubic-bezier(.34,1.56,.64,1)',composite:'add'});
-  const plus=()=>{
-    const sc=el.querySelector('.score');
-    const p=document.createElement('span');p.className='plus num';p.textContent='+'+fmt(stamp.price);sc.appendChild(p);
-    p.animate([{transform:'translateY(8px)',opacity:0},{transform:'translateY(-4px)',opacity:1,offset:.15},{transform:'translateY(-14px)',opacity:1,offset:.65},{transform:'translateY(-30px)',opacity:0}],
-      {duration:1600,easing:'cubic-bezier(.22,1,.36,1)'}).onfinish=()=>p.remove();
-    sc.querySelector('.v').animate([{transform:'scale(1)'},{transform:'scale(1.12)',offset:.3},{transform:'scale(1)'}],{duration:500,easing:'cubic-bezier(.34,1.56,.64,1)'});
-  };
-  const stampFx=()=>{
-    const i=document.createElement('img');i.className='hit-stamp';i.src=stamp.img;i.alt='';el.appendChild(i);
-    i.animate([{transform:'scale(0) rotate(-20deg)',opacity:0},{transform:'scale(1.15) rotate(6deg)',opacity:1,offset:.25},{transform:'scale(1) rotate(0)',opacity:1,offset:.7},{transform:'scale(.9)',opacity:0}],
-      {duration:1400,easing:'cubic-bezier(.22,1,.36,1)'}).onfinish=()=>i.remove();
-  };
-  if(FX==='pop')pop();
-  else if(FX==='plus')plus();
-  else if(FX==='stamp')stampFx();
-  else {pop();plus();}
+  // +pt が浮かんで消え、スコアの数字が跳ねる
+  const sc=el.querySelector('.score');
+  const p=document.createElement('span');p.className='plus num';p.textContent='+'+fmt(stamp.price);sc.appendChild(p);
+  p.animate([{transform:'translateY(8px)',opacity:0},{transform:'translateY(-4px)',opacity:1,offset:.15},{transform:'translateY(-14px)',opacity:1,offset:.65},{transform:'translateY(-30px)',opacity:0}],
+    {duration:1600,easing:'cubic-bezier(.22,1,.36,1)'}).onfinish=()=>p.remove();
+  sc.querySelector('.v').animate([{transform:'scale(1)'},{transform:'scale(1.12)',offset:.3},{transform:'scale(1)'}],{duration:500,easing:'cubic-bezier(.34,1.56,.64,1)'});
 }
 const NAMES=['ゆう','さくら','こうた','みお','けん','ひなた','そら','あおい','りく','はる'];
 const randName=()=>NAMES[Math.floor(Math.random()*NAMES.length)]+'さん';
