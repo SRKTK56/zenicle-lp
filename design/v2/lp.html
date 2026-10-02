@@ -36,7 +36,7 @@
   .hero{position:relative;color:#fff;overflow:hidden;background:var(--night)}
   .hero::before{content:"";position:absolute;inset:0;background:url(img/bg-ballpark.jpg) center 35%/cover no-repeat;opacity:.55}
   .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,rgba(11,21,48,.92) 0%,rgba(11,21,48,.7) 45%,rgba(11,21,48,.45) 100%)}
-  .hero .wrap{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:40px;align-items:center;padding-top:56px;padding-bottom:56px}
+  .hero .wrap{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:40px;align-items:center;padding-top:56px;padding-bottom:56px}
   .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:.875rem;font-weight:700;letter-spacing:.08em;color:#FFB35C}
   .eyebrow i{width:8px;height:8px;border-radius:50%;background:var(--heat-3);animation:pulse 1.6s infinite}
   @keyframes pulse{70%{box-shadow:0 0 0 8px rgba(242,24,108,0)}0%{box-shadow:0 0 0 0 rgba(242,24,108,.6)}}
@@ -49,36 +49,17 @@
   .hero .proof b{display:block;font-family:var(--font-num);font-weight:800;font-size:1.7rem;color:#fff;line-height:1.05}
   @media (max-width:900px){.hero .wrap{grid-template-columns:1fr;padding-top:36px;gap:26px}}
 
-  /* ライブの順位カード */
-  .board{background:rgba(255,255,255,.96);color:var(--ink);border-radius:var(--r-card);padding:18px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
-  .board .bh{display:flex;justify-content:space-between;align-items:center;gap:10px}
-  .board .bh .live{display:inline-flex;align-items:center;gap:6px;font-size:.8125rem;font-weight:900;color:var(--heat-text)}
-  .board .bh .live i{width:7px;height:7px;border-radius:50%;background:var(--heat-3)}
-  .board .bh .demo{font-size:.75rem;font-weight:700;background:var(--blush);color:var(--heat-text);border-radius:var(--r-pill);padding:2px 9px}
-  .board h2{margin:6px 0 2px;font-size:1.125rem;font-weight:900;line-height:1.35}
-  .board .sub{font-size:.8125rem;color:var(--ink-muted)}
-  .rows{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
-  .rows li{will-change:transform;position:relative;display:grid;grid-template-columns:34px 38px minmax(0,1fr) auto;gap:10px;align-items:center;border-radius:14px;padding:8px 12px 8px 6px;background:var(--canvas);border:1px solid var(--line)}
-  .rows li:first-child{background:var(--heat-grad-btn);color:#fff;border:0}
-  .rows .rk{font-family:var(--font-num);font-style:italic;font-weight:800;font-size:1.7rem;text-align:center;line-height:1}
-  .rows li:not(:first-child) .rk{color:var(--heat-text)}
-  .rows .ic{width:38px;height:38px;border-radius:50%;object-fit:cover;background:var(--ink);display:grid;place-items:center;color:#fff;font-weight:900;font-size:.9rem;overflow:hidden}
-  .rows .ic img{width:100%;height:100%;object-fit:cover}
-  .rows .nm{font-weight:900;font-size:.9375rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .rows .meta{font-size:.75rem;opacity:.8}
-  .rows .pt{font-family:var(--font-num);font-weight:800;font-size:1.25rem;text-align:right;line-height:1}
-  .rows .pt small{font-size:.7rem;opacity:.7;margin-left:2px}
-.rows .plus{position:absolute;right:62px;top:50%;margin-top:-.7em;font-family:var(--font-num);font-weight:800;font-size:1.05rem;color:var(--heat-text);pointer-events:none}
-  .rows li:first-child .plus{color:#fff}
-  .feed li{animation:fin .45s var(--ease-out)}
-  @keyframes fin{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
-  .feed{margin:12px 0 0;padding:10px 0 0;border-top:1px solid var(--line);list-style:none}
-  .feed li{display:flex;gap:8px;align-items:baseline;font-size:.8125rem;line-height:1.5;padding:3px 0}
-  .feed li b{font-weight:900}
-  .feed .t{flex:none;font-family:var(--font-num);font-weight:600;color:var(--ink-subtle);font-size:.75rem;min-width:4.2em}
-  .board .go{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:10px}
-  .board .go .btn{padding:10px 16px;font-size:.875rem}
-  .board .asof{font-size:.75rem;color:var(--ink-subtle)}
+  /* リーグのページの縮小プレビュー（league.html をそのまま埋め込み、枠の幅に合わせて縮める） */
+  .preview{margin:0;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+  .pv-bar{display:flex;align-items:center;gap:6px;padding:9px 12px;background:#EEF0F4;font-size:.75rem;color:var(--ink-muted)}
+  .pv-bar i{width:10px;height:10px;border-radius:50%;background:#D7DAE1}
+  .pv-bar i:nth-child(1){background:#FF6B5F}.pv-bar i:nth-child(2){background:#FDBC2E}.pv-bar i:nth-child(3){background:#2BC840}
+  .pv-bar span{margin-left:8px;flex:1;background:#fff;border-radius:6px;padding:2px 10px;font-family:var(--font-num);font-weight:600;letter-spacing:.02em}
+  .pv-bar b{font-weight:900;color:var(--heat-text);background:var(--blush);border-radius:var(--r-pill);padding:2px 9px;white-space:nowrap}
+  .pv-view{position:relative;aspect-ratio:var(--ar,1280/860);overflow:hidden;background:var(--night)}
+  .pv-view iframe{position:absolute;left:0;top:0;width:var(--w,1280px);height:var(--h,860px);border:0;transform-origin:0 0;transform:scale(var(--s,.4));pointer-events:none}
+  .preview figcaption{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;font-size:.75rem;color:var(--ink-subtle)}
+  .preview figcaption .btn{padding:9px 16px;font-size:.875rem;flex:none}
 
   /* ---------- 共通の見出し ---------- */
   section.band{padding:72px 0}
@@ -187,14 +168,11 @@
       </div>
     </div>
 
-    <div class="board" aria-live="polite">
-      <div class="bh"><span class="live"><i></i>LIVE</span><span class="demo" id="bdDemo">デモ（架空のリーグ）</span></div>
-      <h2 id="bdName">読み込み中…</h2>
-      <div class="sub" id="bdSub"></div>
-      <ol class="rows" id="bdRows"></ol>
-      <ul class="feed" id="bdFeed"></ul>
-      <div class="go"><span class="asof" id="bdAsof"></span><a class="btn btn-heat" id="bdGo" href="https://app.zenicle.jp/">このリーグを見る</a></div>
-    </div>
+    <figure class="preview" aria-label="リーグのページのプレビュー（架空のリーグ）">
+      <div class="pv-bar"><i></i><i></i><i></i><span>app.zenicle.jp/s/…</span><b>デモ（架空のリーグ）</b></div>
+      <div class="pv-view" id="pvView"><iframe src="league.html?tick=2600" title="リーグ応援ランキング（デモ・架空のリーグ）" tabindex="-1" loading="eager"></iframe></div>
+      <figcaption><span>リーグのページの画面（動きを見せるための架空のリーグ）</span><a class="btn btn-heat" href="league.html">デモで応援してみる</a></figcaption>
+    </figure>
   </div>
 </section>
 
@@ -296,62 +274,13 @@ const daysLeft=iso=>Math.max(0,Math.ceil((new Date(iso)-Date.now())/864e5));
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 async function getJSON(u){const r=await fetch(u,{credentials:'omit',signal:AbortSignal.timeout(8000)});if(!r.ok)throw new Error(r.status);const j=await r.json();return j.data??j}
 
-/* ----- ファーストビュー：架空のリーグで「順位が動く」様子を見せる（本番データは下の一覧と実績で） ----- */
-const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-const DEMO_SEASON={name:'ソラミズ飲料杯 応援ランキング',league:'南風ベースボールリーグ',endsAt:new Date(Date.now()+40*864e5).toISOString()};
-const TEAMS=[['あかつきフォクシーズ','#E8632B',12540,214],['しおかぜオスプレイズ','#2F6FD6',11980,151],['もりのディアーズ','#2E9B5E',11610,97],['ほしぞらオウルズ','#6B4FC8',10980,88],['いわおベアーズ','#8B5A3C',10420,63]]
-  .map(([name,color,points,people],i)=>({id:i,name,color,points,people,prev:i}));
-const STAMPS=[['旗ふり',500],['メダル',1000],['メガホン',3000],['ヒーロー',5000],['王冠',10000]];
-const NAMES=['ゆう','さくら','こうた','みお','けん','ひなた','そら','あおい'];
-const SHOW=4;
-function boardHead(){
-  $('#bdName').textContent=DEMO_SEASON.name;
-  $('#bdSub').textContent=`${DEMO_SEASON.league} ・ 最終発表まで あと${daysLeft(DEMO_SEASON.endsAt)}日`;
-  $('#bdAsof').textContent='動きを見せるための架空のリーグです';
-  $('#bdGo').textContent='デモで応援してみる';$('#bdGo').href='league.html';
-}
-function rowEl(t){const li=document.createElement('li');li.dataset.id=t.id;
-  li.innerHTML=`<span class="rk"></span><span class="ic" style="background:${t.color}">${t.name.slice(0,1)}</span><div style="min-width:0"><div class="nm">${t.name}</div><div class="meta"></div></div><span class="pt num"></span>`;return li}
-TEAMS.forEach(t=>t.el=rowEl(t));
-function drawRows(hitId,gain){
-  const box=$('#bdRows');
-  const before=new Map([...box.children].map(el=>[el.dataset.id,el.getBoundingClientRect().top]));
-  TEAMS.sort((a,b)=>b.points-a.points);
-  box.innerHTML='';
-  TEAMS.slice(0,SHOW).forEach((t,i)=>{
-    const el=t.el;box.appendChild(el);
-    el.querySelector('.rk').textContent=i+1;
-    const d=t.prev-i;
-    el.querySelector('.meta').textContent=`${fmt(t.people)}人が応援${d>0?` ・ ▲${d}`:''}`;
-    el.querySelector('.pt').innerHTML=`${fmt(t.points)}<small>pt</small>`;
-  });
-  if(reduce)return;
-  TEAMS.slice(0,SHOW).forEach(t=>{const b=before.get(String(t.id));if(b==null)return;const dy=b-t.el.getBoundingClientRect().top;if(Math.abs(dy)>1)t.el.animate([{transform:`translateY(${dy}px)`},{transform:'none'}],{duration:650,easing:'cubic-bezier(.22,1,.36,1)'})});
-  const hit=TEAMS.find(t=>t.id===hitId);
-  if(hit&&TEAMS.indexOf(hit)<SHOW){
-    hit.el.animate([{transform:'scale(1)'},{transform:'scale(1.035)',offset:.35},{transform:'scale(1)'}],{duration:560,easing:'cubic-bezier(.34,1.56,.64,1)',composite:'add'});
-    const p=document.createElement('span');p.className='plus';p.textContent='+'+fmt(gain);hit.el.appendChild(p);
-    p.animate([{transform:'translateY(6px)',opacity:0},{transform:'translateY(-4px)',opacity:1,offset:.15},{transform:'translateY(-12px)',opacity:1,offset:.65},{transform:'translateY(-26px)',opacity:0}],{duration:1500,easing:'cubic-bezier(.22,1,.36,1)'}).onfinish=()=>p.remove();
-  }
-}
-const feedItems=[];
-function pushFeed(who,team,stamp){
-  feedItems.unshift({who,team,stamp,at:Date.now()});feedItems.length=Math.min(feedItems.length,3);
-  $('#bdFeed').innerHTML=feedItems.map((f,i)=>`<li${i?' style="animation:none"':''}><span class="t">${f.at>Date.now()-6e4?'たったいま':ago(new Date(f.at).toISOString())}</span><span><b>${f.who}</b>が <b>${f.team}</b>を${f.stamp?`「${f.stamp}」で`:'♡ いいねで'}応援</span></li>`).join('');
-}
-function tick(){
-  TEAMS.forEach((t,i)=>t.prev=i);
-  const pool=TEAMS.flatMap((t,i)=>Array(i+1).fill(t));
-  const t=pool[Math.floor(Math.random()*pool.length)];
-  let gain,stamp=null;
-  if(Math.random()<.3){gain=10}else{const s=STAMPS[[0,0,1,1,1,2,2,3,4][Math.floor(Math.random()*9)]];gain=s[1];stamp=s[0]}
-  t.points+=gain;if(Math.random()<.5)t.people++;
-  drawRows(t.id,gain);
-  pushFeed(NAMES[Math.floor(Math.random()*NAMES.length)]+'さん',t.name,stamp);
-}
-boardHead();drawRows();
-pushFeed('そらさん',TEAMS[2].name,'メガホン');pushFeed('みおさん',TEAMS[0].name,null);pushFeed('けんさん',TEAMS[1].name,'王冠');
-if(!reduce)setInterval(()=>{if(!document.hidden)tick()},3200);
+/* ----- ファーストビュー：リーグのページ（league.html）を枠の幅に合わせて縮小表示 ----- */
+const pv=$('#pvView');
+// 枠が狭いとき（スマホ）は、リーグのページのスマホ版（幅390）をそのまま見せる
+const fit=()=>{const mobile=pv.clientWidth<560,W=mobile?390:1280,H=mobile?700:860;
+  pv.style.setProperty('--w',W+'px');pv.style.setProperty('--h',H+'px');pv.style.setProperty('--ar',W+'/'+H);
+  pv.style.setProperty('--s',(pv.clientWidth/W).toFixed(4));};
+fit();new ResizeObserver(fit).observe(pv);
 
 function drawLeagues(list,{demo=false}={}){
   $('#lgList').innerHTML=list.map(x=>{const s=x.season,top=(x.league?.ranking||[])[0];
