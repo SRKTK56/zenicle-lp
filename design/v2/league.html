@@ -468,7 +468,7 @@
         <p class="goods-lead">公式スタンプのほかに、各チームがオリジナルのスタンプや選手のデジタルカードを販売できます。どれを購入しても、エールポイントとして順位に加算されます。</p>
         <div class="teampick" id="gTeams"></div>
         <div class="goods-row" id="goodsRow"></div>
-        <p class="fine">選手の肖像は、球団を通じて許諾を得たものだけを使います（このデモはシルエットで、実在の選手ではありません）。中身を選んで買う形で、ランダム販売（ガチャ）はありません。転売もできません。</p>
+        <p class="fine">選手の肖像は、球団を通じて許諾を得たものだけを使います（このデモのカードは架空の選手のイラストで、実在の選手ではありません）。中身を選んで買う形で、ランダム販売（ガチャ）はありません。転売もできません。</p>
       </section>
     </section>
 
@@ -535,7 +535,7 @@
   <div class="teampick" id="teampick"></div>
   <div class="cats" id="cats" role="tablist" aria-label="応援コンテンツの種類"></div>
   <div class="stamps" id="stamps"></div>
-  <p class="card-note" id="cardNote" hidden>選手の肖像は、球団を通じて許諾を得たものだけを使います（このデモはシルエットです）。</p>
+  <p class="card-note" id="cardNote" hidden>選手の肖像は、球団を通じて許諾を得たものだけを使います（このデモのカードは架空の選手のイラストです）。</p>
   <div class="gain"><span><span id="gTeam">Aチーム</span>に加わるエールポイント</span><b class="heat-text" id="gPts">+1,000</b></div>
   <button class="btn btn-heat send" id="send">¥1,000 で送る</button>
   <p class="fine">寄付ではなく、デジタルコンテンツの購入です（転売不可・ガチャなし）。</p>
@@ -712,6 +712,11 @@ const TEAM_STAMPS=[
   {key:'thx',name:'ありがとう',price:1500,draw:id=>`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160'>${GRAD}<circle cx='80' cy='78' r='64' fill='url(#h)'/><circle cx='80' cy='78' r='52' fill='#0B1530'/><text x='80' y='70' text-anchor='middle' ${JA} font-size='17' fill='#fff'>応援</text><text x='80' y='96' text-anchor='middle' ${JA} font-size='17' fill='#fff'>ありがとう</text>${emblem(id,128,132)}</svg>`},
 ];
 const CARDS=[{no:10,limited:false,price:1000},{no:18,limited:false,price:1000},{no:7,limited:true,price:3000}];
+/* AI で生成したチームオリジナル（あかつき＝A・ほしぞら＝D）。それ以外のチームは SVG の仮の絵のまま
+   選手カードは顔が影になっている あかつき だけを公開デモで使う（ほしぞらのカードは顔が描き込まれているため載せない） */
+const TEAM_IMG={A:{nice:'img/team/a_nice.png',win:'img/team/a_win.png',thx:'img/team/a_thx.png'},D:{nice:'img/team/d_nice.png',win:'img/team/d_win.png',thx:'img/team/d_thx.png'}};
+const CARD_IMG={A:{10:'img/team/a_card10.jpg',18:'img/team/a_card18.jpg',7:'img/team/a_card7.jpg'}};
+
 const cardSVG=(id,c)=>`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 280'>${GRAD}<linearGradient id='n' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#24345E'/><stop offset='1' stop-color='#0B1530'/></linearGradient>
   <rect x='4' y='4' width='192' height='272' rx='16' fill='${c.limited?'url(#h)':'#0B1530'}'/>
   <rect x='14' y='14' width='172' height='196' rx='10' fill='url(#n)'/>
@@ -725,8 +730,8 @@ const _cache={};
 function itemsFor(cat,teamId){
   const k=cat+teamId; if(_cache[k])return _cache[k];
   if(cat==='official')return STAMPS;
-  if(cat==='team')return _cache[k]=TEAM_STAMPS.map(t=>({id:`t-${teamId}-${t.key}`,name:t.name,price:t.price,img:svgURI(t.draw(teamId)),cat}));
-  return _cache[k]=CARDS.map(c=>({id:`c-${teamId}-${c.no}`,name:`#${c.no} ${c.limited?'限定カード':'選手カード'}`,price:c.price,img:svgURI(cardSVG(teamId,c)),cat}));
+  if(cat==='team')return _cache[k]=TEAM_STAMPS.map(t=>({id:`t-${teamId}-${t.key}`,name:t.name,price:t.price,img:TEAM_IMG[teamId]?.[t.key]||svgURI(t.draw(teamId)),cat}));
+  return _cache[k]=CARDS.map(c=>({id:`c-${teamId}-${c.no}`,name:`#${c.no} ${c.limited?'限定カード':'選手カード'}`,price:c.price,img:CARD_IMG[teamId]?.[c.no]||svgURI(cardSVG(teamId,c)),cat}));
 }
 const CATS=[['official','公式スタンプ'],['team','チームオリジナル'],['card','選手カード']];
 

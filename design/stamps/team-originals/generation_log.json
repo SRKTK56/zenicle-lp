@@ -1,0 +1,172 @@
+[
+ {
+  "name": "akatsuki/02_win",
+  "sec": 40,
+  "usage": {
+   "input_tokens": 826,
+   "input_tokens_details": {
+    "image_tokens": 517,
+    "text_tokens": 309
+   },
+   "output_tokens": 4160,
+   "output_tokens_details": {
+    "image_tokens": 4160,
+    "text_tokens": 0
+   },
+   "total_tokens": 4986
+  }
+ },
+ {
+  "name": "akatsuki/03_thanks",
+  "sec": 36,
+  "usage": {
+   "input_tokens": 821,
+   "input_tokens_details": {
+    "image_tokens": 517,
+    "text_tokens": 304
+   },
+   "output_tokens": 4160,
+   "output_tokens_details": {
+    "image_tokens": 4160,
+    "text_tokens": 0
+   },
+   "total_tokens": 4981
+  }
+ },
+ {
+  "name": "akatsuki/10_card",
+  "sec": 48,
+  "usage": {
+   "input_tokens": 578,
+   "input_tokens_details": {
+    "image_tokens": 323,
+    "text_tokens": 255
+   },
+   "output_tokens": 6240,
+   "output_tokens_details": {
+    "image_tokens": 6240,
+    "text_tokens": 0
+   },
+   "total_tokens": 6818
+  }
+ },
+ {
+  "name": "akatsuki/11_card_limited",
+  "sec": 53,
+  "usage": {
+   "input_tokens": 473,
+   "input_tokens_details": {
+    "image_tokens": 323,
+    "text_tokens": 150
+   },
+   "output_tokens": 6240,
+   "output_tokens_details": {
+    "image_tokens": 6240,
+    "text_tokens": 0
+   },
+   "total_tokens": 6713
+  }
+ },
+ {
+  "name": "hoshizora/00_character_sheet",
+  "sec": 50,
+  "usage": {
+   "input_tokens": 607,
+   "input_tokens_details": {
+    "image_tokens": 323,
+    "text_tokens": 284
+   },
+   "output_tokens": 6208,
+   "output_tokens_details": {
+    "image_tokens": 6208,
+    "text_tokens": 0
+   },
+   "total_tokens": 6815
+  }
+ },
+ {
+  "name": "hoshizora/01_nice",
+  "sec": 40,
+  "usage": {
+   "input_tokens": 819,
+   "input_tokens_details": {
+    "image_tokens": 517,
+    "text_tokens": 302
+   },
+   "output_tokens": 4160,
+   "output_tokens_details": {
+    "image_tokens": 4160,
+    "text_tokens": 0
+   },
+   "total_tokens": 4979
+  }
+ },
+ {
+  "name": "hoshizora/02_win",
+  "sec": 39,
+  "usage": {
+   "input_tokens": 825,
+   "input_tokens_details": {
+    "image_tokens": 517,
+    "text_tokens": 308
+   },
+   "output_tokens": 4160,
+   "output_tokens_details": {
+    "image_tokens": 4160,
+    "text_tokens": 0
+   },
+   "total_tokens": 4985
+  }
+ },
+ {
+  "name": "hoshizora/03_thanks",
+  "sec": 37,
+  "usage": {
+   "input_tokens": 819,
+   "input_tokens_details": {
+    "image_tokens": 517,
+    "text_tokens": 302
+   },
+   "output_tokens": 4160,
+   "output_tokens_details": {
+    "image_tokens": 4160,
+    "text_tokens": 0
+   },
+   "total_tokens": 4979
+  }
+ },
+ {
+  "name": "hoshizora/10_card",
+  "sec": 51,
+  "usage": {
+   "input_tokens": 577,
+   "input_tokens_details": {
+    "image_tokens": 323,
+    "text_tokens": 254
+   },
+   "output_tokens": 6240,
+   "output_tokens_details": {
+    "image_tokens": 6240,
+    "text_tokens": 0
+   },
+   "total_tokens": 6817
+  }
+ },
+ {
+  "name": "hoshizora/11_card_limited",
+  "sec": 55,
+  "usage": {
+   "input_tokens": 473,
+   "input_tokens_details": {
+    "image_tokens": 323,
+    "text_tokens": 150
+   },
+   "output_tokens": 6240,
+   "output_tokens_details": {
+    "image_tokens": 6240,
+    "text_tokens": 0
+   },
+   "total_tokens": 6713
+  }
+ }
+]

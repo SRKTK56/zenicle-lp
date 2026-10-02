@@ -44,3 +44,7 @@ const cardSVG=(id,c)=>`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 
   ${emblemSVG(id,20,222,30,1)}<text x='58' y='242' ${JA} font-size='13' fill='#fff'>${teamName(id)}</text>
   <text x='58' y='262' font-family='Arial,sans-serif' font-weight='800' font-size='10' letter-spacing='3' fill='rgba(255,255,255,.75)'>PLAYER CARD #${c.no}</text>
   </svg>`;
+/* AI で生成したチームオリジナル（あかつき＝A・ほしぞら＝D）。それ以外のチームは SVG の仮の絵のまま
+   選手カードは顔が影になっている あかつき だけを公開デモで使う（ほしぞらのカードは顔が描き込まれているため載せない） */
+const TEAM_IMG={A:{nice:'img/team/a_nice.png',win:'img/team/a_win.png',thx:'img/team/a_thx.png'},D:{nice:'img/team/d_nice.png',win:'img/team/d_win.png',thx:'img/team/d_thx.png'}};
+const CARD_IMG={A:{10:'img/team/a_card10.jpg',18:'img/team/a_card18.jpg',7:'img/team/a_card7.jpg'}};

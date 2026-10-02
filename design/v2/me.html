@@ -148,12 +148,12 @@
   <div class="row"><a class="btn btn-ghost" id="dtDl" download>画像を保存</a><button class="btn btn-heat" id="dtClose" type="button">閉じる</button></div>
 </div>
 
-<script src="demo-assets.js?v=20261002"></script>
+<script src="demo-assets.js?v=20261002b"></script>
 <script>
 const $=s=>document.querySelector(s);
 const fmt=n=>Number(n).toLocaleString('ja-JP');
 const OFFICIAL={1:['旗ふり','../stamps/512/lv1_supporter.png'],2:['メダル','../stamps/512/lv2_big_supporter.png'],3:['メガホン','../stamps/512/lv3_fan.png'],4:['ヒーロー','../stamps/512/lv4_super_fan.png'],5:['王冠','../stamps/512/lv5_legend.png']};
-const teamStamp=(id,key)=>{const t=TEAM_STAMPS.find(x=>x.key===key);return {name:t.name,img:svgURI(t.draw(id)),original:true}};
+const teamStamp=(id,key)=>{const t=TEAM_STAMPS.find(x=>x.key===key);return {name:t.name,img:TEAM_IMG[id]?.[key]||svgURI(t.draw(id)),original:true}};
 const off=n=>({name:OFFICIAL[n][0],img:OFFICIAL[n][1],lv:n});
 
 /* ===== 架空の応援の記録（金額は持たせない＝画面に出さない） ===== */
@@ -162,6 +162,7 @@ const SEASONS=[
    teams:[
      {id:'A',rank:1,likes:21,given:[[off(5),[ '10/1']],[off(3),['9/28','9/30']],[teamStamp('A','nice'),['9/27']]]},
      {id:'B',rank:2,likes:9,given:[[off(2),['9/26','9/29','10/1']]]},
+     {id:'D',rank:4,likes:6,given:[[teamStamp('D','win'),['9/30']],[teamStamp('D','nice'),['9/25','10/1']]]},
    ]},
   {name:'第1回 南風カップ 応援ランキング',league:'南風ベースボールリーグ',status:'end',sub:'2026年6月〜8月 ・ 終了',
    teams:[
