@@ -1,0 +1,19 @@
+# AI検索に引用されたいので、主要なAIクローラーは名指しで許可する
+User-agent: *
+Allow: /
+Disallow: /api/
+
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-User
+User-agent: Claude-SearchBot
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Google-Extended
+User-agent: Bingbot
+Allow: /
+Disallow: /api/
+
+Sitemap: https://zenicle.jp/sitemap.xml
